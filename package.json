@@ -1,0 +1,30 @@
+{
+  "name": "youtube-mp3-converter",
+  "version": "1.0.0",
+  "description": "A modern YouTube to MP3 converter with React frontend and Node.js backend",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "clean": "rm -rf backend/dist backend/node_modules frontend/dist frontend/node_modules node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "youtube",
+    "mp3",
+    "converter",
+    "react",
+    "nodejs",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT"
+}

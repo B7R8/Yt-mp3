@@ -1,0 +1,246 @@
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T20:39:20.972Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T20:39:20.976Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-04T20:39:34.891Z"}
+{"code":"ECONNREFUSED","level":"error","message":"Failed to create conversion job:","service":"youtube-converter","stack":"AggregateError: \n    at C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\pg-pool\\index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at ConversionService.createJob (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\src\\services\\conversionService.ts:62:20)\n    at C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\src\\routes\\conversion.ts:13:19","timestamp":"2025-10-04T20:39:34.935Z"}
+{"level":"info","message":"GET /api/health - ::1","service":"youtube-converter","timestamp":"2025-10-04T20:41:51.797Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T20:43:23.372Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T20:43:23.376Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T20:43:23.377Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T20:45:20.140Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T20:45:20.156Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T20:45:20.158Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-04T20:46:35.858Z"}
+{"code":"ENOENT","errno":-4058,"level":"error","message":"Error extracting video title for https://www.youtube.com/watch?v=YLslsZuEaNE: spawn yt-dlp ENOENT","path":"yt-dlp","service":"youtube-converter","spawnargs":["--get-title","--no-playlist","https://www.youtube.com/watch?v=YLslsZuEaNE"],"stack":"Error: spawn yt-dlp ENOENT\n    at Process.ChildProcess._handle.onexit (node:internal/child_process:285:19)\n    at onErrorNT (node:internal/child_process:483:16)\n    at processTicksAndRejections (node:internal/process/task_queues:90:21)","syscall":"spawn yt-dlp","timestamp":"2025-10-04T20:46:35.891Z"}
+{"level":"warn","message":"Failed to extract video title for https://www.youtube.com/watch?v=YLslsZuEaNE: ","service":"youtube-converter","timestamp":"2025-10-04T20:46:35.895Z"}
+{"level":"info","message":"New conversion job created: 90310d5a-059d-4847-9583-44b87f315b58 for URL: https://www.youtube.com/watch?v=YLslsZuEaNE","service":"youtube-converter","timestamp":"2025-10-04T20:46:35.908Z"}
+{"0":"--extract-audio","1":"--audio-format","2":"mp3","3":"--audio-quality","4":"192k","5":"--output","6":"downloads\\90310d5a-059d-4847-9583-44b87f315b58.%(ext)s","7":"https://www.youtube.com/watch?v=YLslsZuEaNE","level":"info","message":"Starting conversion for job 90310d5a-059d-4847-9583-44b87f315b58 with args:","service":"youtube-converter","timestamp":"2025-10-04T20:46:35.916Z"}
+{"code":"ENOENT","errno":-4058,"level":"error","message":"yt-dlp process error for job 90310d5a-059d-4847-9583-44b87f315b58: spawn yt-dlp ENOENT","path":"yt-dlp","service":"youtube-converter","spawnargs":["--extract-audio","--audio-format","mp3","--audio-quality","192k","--output","downloads\\90310d5a-059d-4847-9583-44b87f315b58.%(ext)s","https://www.youtube.com/watch?v=YLslsZuEaNE"],"stack":"Error: spawn yt-dlp ENOENT\n    at Process.ChildProcess._handle.onexit (node:internal/child_process:285:19)\n    at onErrorNT (node:internal/child_process:483:16)\n    at processTicksAndRejections (node:internal/process/task_queues:90:21)","syscall":"spawn yt-dlp","timestamp":"2025-10-04T20:46:35.922Z"}
+{"level":"error","message":"yt-dlp process exited with code -4058:","service":"youtube-converter","timestamp":"2025-10-04T20:46:35.923Z"}
+{"level":"info","message":"GET /api/status/90310d5a-059d-4847-9583-44b87f315b58 - ::1","service":"youtube-converter","timestamp":"2025-10-04T20:46:37.933Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T20:48:10.236Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T20:48:10.251Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T20:48:10.252Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T20:48:13.371Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T20:48:13.384Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T20:48:13.384Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T20:49:05.800Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T20:49:05.809Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T20:49:05.809Z"}
+{"level":"info","message":"Running cleanup job...","service":"youtube-converter","timestamp":"2025-10-04T21:00:00.322Z"}
+{"level":"info","message":"Cleanup completed. Processed 0 old jobs.","service":"youtube-converter","timestamp":"2025-10-04T21:00:00.324Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T21:04:03.326Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T21:04:03.330Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T21:04:03.331Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T21:14:47.937Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T21:14:47.942Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T21:14:47.942Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T21:21:08.576Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T21:21:08.582Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T21:21:08.582Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T21:29:55.655Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T21:29:55.663Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T21:29:55.666Z"}
+{"level":"info","message":"GET /api/health - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:30:06.963Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:30:16.177Z"}
+{"level":"info","message":"New conversion job created: 2b165141-6cb2-4412-b212-fef93a55c98f for URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ","service":"youtube-converter","timestamp":"2025-10-04T21:30:36.627Z"}
+{"0":"--extract-audio","1":"--audio-format","2":"mp3","3":"--audio-quality","4":"192k","5":"--output","6":"downloads\\2b165141-6cb2-4412-b212-fef93a55c98f.%(ext)s","7":"https://www.youtube.com/watch?v=dQw4w9WgXcQ","level":"info","message":"Starting conversion for job 2b165141-6cb2-4412-b212-fef93a55c98f with args:","service":"youtube-converter","timestamp":"2025-10-04T21:30:36.636Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:30:46.705Z"}
+{"level":"info","message":"New conversion job created: 27bbf39c-ef56-4e65-8417-013d0ecf2feb for URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ","service":"youtube-converter","timestamp":"2025-10-04T21:31:02.812Z"}
+{"0":"--extract-audio","1":"--audio-format","2":"mp3","3":"--audio-quality","4":"192k","5":"--output","6":"downloads\\27bbf39c-ef56-4e65-8417-013d0ecf2feb.%(ext)s","7":"https://www.youtube.com/watch?v=dQw4w9WgXcQ","level":"info","message":"Starting conversion for job 27bbf39c-ef56-4e65-8417-013d0ecf2feb with args:","service":"youtube-converter","timestamp":"2025-10-04T21:31:02.816Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T21:31:26.450Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T21:31:26.455Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T21:31:26.455Z"}
+{"level":"info","message":"GET /api/health - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:31:31.600Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:31:37.478Z"}
+{"level":"info","message":"New conversion job created: f7b91b88-0907-48de-a7c4-24b992510aa6 for URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ","service":"youtube-converter","timestamp":"2025-10-04T21:31:50.883Z"}
+{"0":"--extract-audio","1":"--audio-format","2":"mp3","3":"--audio-quality","4":"192k","5":"--output","6":"downloads\\f7b91b88-0907-48de-a7c4-24b992510aa6.%(ext)s","7":"https://www.youtube.com/watch?v=dQw4w9WgXcQ","level":"info","message":"Starting conversion for job f7b91b88-0907-48de-a7c4-24b992510aa6 with args:","service":"youtube-converter","timestamp":"2025-10-04T21:31:50.890Z"}
+{"level":"info","message":"GET /api/status/f7b91b88-0907-48de-a7c4-24b992510aa6 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:32:10.299Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:32:30.179Z"}
+{"level":"info","message":"New conversion job created: b6d86f3e-6a1e-478f-b410-795274a449d8 for URL: https://www.youtube.com/watch?v=YLslsZuEaNE","service":"youtube-converter","timestamp":"2025-10-04T21:32:54.473Z"}
+{"0":"--extract-audio","1":"--audio-format","2":"mp3","3":"--audio-quality","4":"192k","5":"--output","6":"downloads\\b6d86f3e-6a1e-478f-b410-795274a449d8.%(ext)s","7":"https://www.youtube.com/watch?v=YLslsZuEaNE","level":"info","message":"Starting conversion for job b6d86f3e-6a1e-478f-b410-795274a449d8 with args:","service":"youtube-converter","timestamp":"2025-10-04T21:32:54.479Z"}
+{"level":"info","message":"Conversion completed successfully for job f7b91b88-0907-48de-a7c4-24b992510aa6","service":"youtube-converter","timestamp":"2025-10-04T21:32:54.627Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:32:56.802Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:32:58.494Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:00.821Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:02.500Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:04.812Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:06.498Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:08.804Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:10.495Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:12.813Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:14.499Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:16.800Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:18.494Z"}
+{"level":"info","message":"Conversion completed successfully for job b6d86f3e-6a1e-478f-b410-795274a449d8","service":"youtube-converter","timestamp":"2025-10-04T21:33:20.104Z"}
+{"level":"info","message":"GET /api/status/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:20.805Z"}
+{"level":"info","message":"GET /api/download/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:26.837Z"}
+{"level":"info","message":"GET /api/download/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:29.912Z"}
+{"level":"info","message":"GET /api/download/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:29.939Z"}
+{"level":"info","message":"GET /api/download/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:29.945Z"}
+{"level":"info","message":"GET /api/download/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:29.952Z"}
+{"level":"info","message":"GET /api/download/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:29.957Z"}
+{"level":"info","message":"GET /api/download/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:29.964Z"}
+{"level":"info","message":"GET /api/download/b6d86f3e-6a1e-478f-b410-795274a449d8 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:33:29.969Z"}
+{"level":"info","message":"GET /api/health - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:42:12.603Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:43:34.336Z"}
+{"level":"info","message":"New conversion job created: 61cb0d07-aa39-4a87-8b88-46cd1cbd57fc for URL: https://www.youtube.com/watch?v=YLslsZuEaNE","service":"youtube-converter","timestamp":"2025-10-04T21:43:47.351Z"}
+{"0":"--extract-audio","1":"--audio-format","2":"mp3","3":"--audio-quality","4":"192k","5":"--output","6":"downloads\\61cb0d07-aa39-4a87-8b88-46cd1cbd57fc.%(ext)s","7":"https://www.youtube.com/watch?v=YLslsZuEaNE","level":"info","message":"Starting conversion for job 61cb0d07-aa39-4a87-8b88-46cd1cbd57fc with args:","service":"youtube-converter","timestamp":"2025-10-04T21:43:47.356Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:43:49.366Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:43:51.365Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:43:53.366Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:43:55.363Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:43:57.684Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:43:59.363Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:01.673Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:03.369Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:05.676Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:07.367Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:09.684Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:11.374Z"}
+{"level":"info","message":"Conversion completed successfully for job 61cb0d07-aa39-4a87-8b88-46cd1cbd57fc","service":"youtube-converter","timestamp":"2025-10-04T21:44:12.146Z"}
+{"level":"info","message":"GET /api/status/61cb0d07-aa39-4a87-8b88-46cd1cbd57fc - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:13.688Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:38.578Z"}
+{"level":"info","message":"New conversion job created: 54a7a643-559b-41e0-886b-f401a9dc1b99 for URL: https://youtu.be/YyAuFiIv-V4","service":"youtube-converter","timestamp":"2025-10-04T21:44:52.592Z"}
+{"0":"--extract-audio","1":"--audio-format","2":"mp3","3":"--audio-quality","4":"192k","5":"--output","6":"downloads\\54a7a643-559b-41e0-886b-f401a9dc1b99.%(ext)s","7":"https://youtu.be/YyAuFiIv-V4","level":"info","message":"Starting conversion for job 54a7a643-559b-41e0-886b-f401a9dc1b99 with args:","service":"youtube-converter","timestamp":"2025-10-04T21:44:52.597Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:54.914Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:56.609Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:44:58.929Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:00.603Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:02.919Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:04.606Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:06.929Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:08.605Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:10.912Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:12.604Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:14.918Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:16.610Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:18.913Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:20.601Z"}
+{"level":"info","message":"Conversion completed successfully for job 54a7a643-559b-41e0-886b-f401a9dc1b99","service":"youtube-converter","timestamp":"2025-10-04T21:45:20.828Z"}
+{"level":"info","message":"GET /api/status/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:22.917Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:25.985Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:27.381Z"}
+{"code":"ECONNABORTED","level":"error","message":"Download error: Request aborted","service":"youtube-converter","stack":"Error: Request aborted\n    at onaborted (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\express\\lib\\response.js:1062:15)\n    at onfinish (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\express\\lib\\response.js:1098:50)\n    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)\n    at listener (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\on-finished\\index.js:170:15)\n    at onFinish (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\on-finished\\index.js:101:5)\n    at callback (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\ee-first\\index.js:55:10)\n    at Socket.onevent (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\ee-first\\index.js:93:5)\n    at Socket.emit (node:events:531:35)\n    at emitErrorNT (node:internal/streams/destroy:170:8)\n    at emitErrorCloseNT (node:internal/streams/destroy:129:3)","timestamp":"2025-10-04T21:45:27.400Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:29.097Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:29.122Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:29.129Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:29.141Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:29.144Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:29.153Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:29.162Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:29.167Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:45:32.408Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T21:46:10.156Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T21:46:10.165Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T21:46:10.166Z"}
+{"level":"info","message":"GET /api/download/54a7a643-559b-41e0-886b-f401a9dc1b99 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:46:13.484Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-04T21:46:47.114Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-04T21:46:47.118Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-04T21:46:47.119Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:10.000Z"}
+{"level":"info","message":"New conversion job created: 386e4916-39ee-4e7f-9a90-ccff3a070a65 for URL: https://www.youtube.com/watch?v=paWE-GvDO1c","service":"youtube-converter","timestamp":"2025-10-04T21:47:19.327Z"}
+{"0":"--extract-audio","1":"--audio-format","2":"mp3","3":"--audio-quality","4":"192k","5":"--output","6":"downloads\\386e4916-39ee-4e7f-9a90-ccff3a070a65.%(ext)s","7":"https://www.youtube.com/watch?v=paWE-GvDO1c","level":"info","message":"Starting conversion for job 386e4916-39ee-4e7f-9a90-ccff3a070a65 with args:","service":"youtube-converter","timestamp":"2025-10-04T21:47:19.335Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:21.426Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:23.725Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:25.430Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:27.723Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:29.427Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:31.742Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:33.428Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:35.658Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:37.421Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:39.654Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:41.348Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:43.671Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:45.360Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:47.657Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:49.349Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:51.666Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:53.350Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:55.652Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:57.346Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:47:59.654Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:01.341Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:03.650Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:05.345Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:07.659Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:09.347Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:11.654Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:13.344Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:15.660Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:17.354Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:19.666Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:21.357Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:23.659Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:25.352Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:27.662Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:29.422Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:31.736Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:33.427Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:35.736Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:37.343Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:39.667Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:41.350Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:43.662Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:45.351Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:47.664Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:49.353Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:51.661Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:53.347Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:55.662Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:57.348Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:48:59.653Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:01.351Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:03.663Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:05.341Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:07.667Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:09.348Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:11.659Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:13.350Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:15.656Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:17.355Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:19.660Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:21.354Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:23.646Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:25.346Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:27.658Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:29.355Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:31.665Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:33.350Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:35.659Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:37.347Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:39.654Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:41.346Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:43.656Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:45.350Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:47.656Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:49.350Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:51.667Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:53.342Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:55.649Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:57.341Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:49:59.659Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:01.346Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:03.668Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:05.355Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:07.673Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:09.354Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:11.666Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:13.348Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:15.662Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:17.351Z"}
+{"level":"info","message":"Conversion completed successfully for job 386e4916-39ee-4e7f-9a90-ccff3a070a65","service":"youtube-converter","timestamp":"2025-10-04T21:50:19.115Z"}
+{"level":"info","message":"GET /api/status/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:19.668Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:23.240Z"}
+{"code":"ECONNABORTED","level":"error","message":"Download error: Request aborted","service":"youtube-converter","stack":"Error: Request aborted\n    at onaborted (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\express\\lib\\response.js:1062:15)\n    at onfinish (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\express\\lib\\response.js:1098:50)\n    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)\n    at listener (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\on-finished\\index.js:170:15)\n    at onFinish (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\on-finished\\index.js:101:5)\n    at callback (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\ee-first\\index.js:55:10)\n    at Socket.onevent (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\ee-first\\index.js:93:5)\n    at Socket.emit (node:events:531:35)\n    at emitErrorNT (node:internal/streams/destroy:170:8)\n    at emitErrorCloseNT (node:internal/streams/destroy:129:3)","timestamp":"2025-10-04T21:50:23.269Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:26.367Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:26.413Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:26.439Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:26.484Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:26.486Z"}
+{"code":"ECONNABORTED","level":"error","message":"Download error: Request aborted","service":"youtube-converter","stack":"Error: Request aborted\n    at onaborted (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\express\\lib\\response.js:1062:15)\n    at onfinish (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\express\\lib\\response.js:1098:50)\n    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)\n    at listener (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\on-finished\\index.js:170:15)\n    at onFinish (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\on-finished\\index.js:101:5)\n    at callback (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\ee-first\\index.js:55:10)\n    at Socket.onevent (C:\\Users\\SFYN\\Desktop\\YT-to-mp3\\backend\\node_modules\\ee-first\\index.js:93:5)\n    at Socket.emit (node:events:531:35)\n    at emitErrorNT (node:internal/streams/destroy:170:8)\n    at emitErrorCloseNT (node:internal/streams/destroy:129:3)","timestamp":"2025-10-04T21:50:26.675Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:26.687Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:26.698Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:26.700Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:26.713Z"}
+{"level":"info","message":"GET /api/download/386e4916-39ee-4e7f-9a90-ccff3a070a65 - ::1","service":"youtube-converter","timestamp":"2025-10-04T21:50:26.721Z"}

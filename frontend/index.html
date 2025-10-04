@@ -1,0 +1,32 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AudioFlow - YouTube to MP3 Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'brand-red': '#E53935',
+              'dark-bg': '#121212',
+              'dark-surface': '#1E1E1E',
+              'dark-card': '#272727',
+              'dark-text': '#E0E0E0',
+              'dark-text-secondary': '#A0A0A0',
+            },
+          },
+        },
+      }
+    </script>
+</head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
