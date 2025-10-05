@@ -1,5 +1,5 @@
 {
-  "name": "audioflow-youtube-to-mp3-converter",
+  "name": "youtube-mp3-converter-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,11 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.6.2",
-    "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.9.3",
-    "react-toastify": "^11.0.5"
+    "react": "^19.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

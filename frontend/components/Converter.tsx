@@ -1,239 +1,265 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { ConversionStatus, StatusResponse } from '../types';
-import { ConvertIcon } from './icons/ConvertIcon';
-import { showToast, toastMessages } from '../utils/toast';
+import React, { useState } from 'react';
+import { useConverter } from '../hooks/useConverter';
+import { JobStatus, Quality } from '../types';
+import LoadingSpinner from './LoadingSpinner';
+import { DownloadIcon } from './icons/DownloadIcon';
+import { ScissorsIcon } from './icons/ScissorsIcon';
+import { RefreshIcon } from './icons/RefreshIcon';
+import { CloseIcon } from './icons/CloseIcon';
+import HeartIcon from './icons/HeartIcon';
+import AutorenewIcon from './icons/AutorenewIcon';
+import Tooltip from './Tooltip';
+import TrimAudioModal from './TrimAudioModal';
+import SelectQualityModal from './SelectQualityModal';
 
-// API configuration - Use proxy for development
-const API_BASE_URL = '/api';
+interface ConverterProps {
+  showToast: (message: string, type: 'success' | 'error' | 'info') => void;
+}
 
-const Converter: React.FC = () => {
+const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   const [url, setUrl] = useState('');
-  const [status, setStatus] = useState<ConversionStatus>('idle');
-  const [error, setError] = useState('');
-  const [jobId, setJobId] = useState<string | null>(null);
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
-  const [videoTitle, setVideoTitle] = useState<string>('');
-  const [isConverting, setIsConverting] = useState(false);
+  const [quality, setQuality] = useState<Quality>('128K');
+  const [isTrimModalOpen, setIsTrimModalOpen] = useState(false);
+  const [isQualityModalOpen, setIsQualityModalOpen] = useState(false);
+  const { job, isLoading, handleSubmit, resetConverter } = useConverter(showToast);
 
-  const isValidYouTubeUrl = (url: string): boolean => {
-    const regex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
-    return regex.test(url);
-  };
-
-  const handleConvert = useCallback(async () => {
-    if (!isValidYouTubeUrl(url)) {
-      setError('Please enter a valid YouTube URL.');
-      setStatus('error');
-      showToast.error(toastMessages.conversion.invalidUrl);
-      return;
-    }
-    setError('');
-    setStatus('converting');
-    setIsConverting(true);
-    setJobId(null);
-    setDownloadUrl(null);
-    setVideoTitle('');
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/convert`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-          quality: '192k', // Default quality
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to start conversion');
-      }
-
-      setJobId(data.jobId);
-    } catch (error) {
-      console.error('Conversion error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to start conversion';
-      setError(errorMessage);
-      setStatus('error');
-      setIsConverting(false);
-      showToast.error(toastMessages.conversion.failed);
-    }
-  }, [url]);
-
-  // Poll the backend for job status
-  useEffect(() => {
-    if (status !== 'converting' || !jobId) {
-      return;
-    }
-
-    const pollStatus = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/status/${jobId}`);
-        const data: StatusResponse = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error_message || 'Failed to get status');
-        }
-
-        if (data.status === 'completed') {
-          setStatus('success');
-          setDownloadUrl(`${API_BASE_URL}/download/${jobId}`);
-          setVideoTitle(data.video_title || 'Unknown Video');
-          setIsConverting(false);
-          showToast.success(toastMessages.conversion.completed);
-        } else if (data.status === 'failed') {
-          const errorMessage = data.error_message || 'Conversion failed';
-          setError(errorMessage);
-          setStatus('error');
-          setIsConverting(false);
-          showToast.error(toastMessages.conversion.failed);
-        }
-        // If status is 'pending' or 'processing', continue polling
-      } catch (error) {
-        console.error('Status polling error:', error);
-        setError('Failed to check conversion status');
-        setStatus('error');
-        setIsConverting(false);
-        showToast.error(toastMessages.conversion.failed);
-      }
-    };
-
-    const intervalId = setInterval(pollStatus, 2000); // Poll every 2 seconds
-
-    return () => clearInterval(intervalId);
-  }, [status, jobId]);
-
-  const handleDownload = () => {
-    if (!downloadUrl) {
-      showToast.error(toastMessages.download.noFile);
-      return;
-    }
-
-    try {
-      // Trigger download from the backend
-      window.open(downloadUrl, '_blank');
-      showToast.success(toastMessages.download.started);
-    } catch (error) {
-      console.error('Download error:', error);
-      showToast.error(toastMessages.download.failed);
-    }
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSubmit(url);
   };
   
-  const reset = () => {
-      setUrl('');
-      setStatus('idle');
-      setError('');
-      setJobId(null);
-      setDownloadUrl(null);
-      setVideoTitle('');
-      setIsConverting(false);
+  const handleClearUrl = () => {
+    setUrl('');
   }
 
   const renderContent = () => {
-    switch (status) {
-      case 'converting':
-        return (
-          <div className="flex flex-col items-center justify-center h-24">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-red"></div>
-            <p className="mt-4 text-lg">Converting, please wait...</p>
-          </div>
-        );
-      case 'success':
-        return (
-          <div className="flex flex-col items-center justify-center space-y-6">
-            {/* Video Title Display */}
-            <div className="text-center">
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-dark-text mb-2">
-                {videoTitle}
-              </h3>
-              <p className="text-lg text-green-600 font-semibold">Conversion Successful!</p>
+    if (isLoading && !job) {
+      return (
+        <div className="text-center">
+          <LoadingSpinner className="w-12 h-12 mx-auto text-brand-500" />
+          <p className="mt-4 text-lg">Starting conversion...</p>
+        </div>
+      );
+    }
+
+    if (job) {
+      switch (job.status) {
+        case JobStatus.PENDING:
+        case JobStatus.PROCESSING:
+          return (
+            <div className="max-w-md mx-auto">
+              <h3 className="text-lg font-semibold text-center truncate mb-2" title={job.title}>{job.title || 'Processing...'}</h3>
+              <p className="text-center text-brand-500 dark:text-brand-400 mb-4 capitalize">{job.status}...</p>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+                <div
+                  className="bg-brand-500 h-4 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${job.progress || 0}%` }}
+                ></div>
+              </div>
+              <p className="text-center mt-2 font-mono">{job.progress || 0}%</p>
             </div>
-            
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={handleDownload}
-                disabled={!downloadUrl}
-                className="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center space-x-2"
+          );
+        case JobStatus.COMPLETED:
+          return (
+            <div className="text-center">
+              <h3 className="text-lg font-semibold truncate mb-2" title={job.title}>{job.title}</h3>
+              <p className="text-green-500 mb-6 text-lg font-medium">Conversion Complete!</p>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 justify-center items-center">
+                <button
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  
+                  try {
+                    // Detect browser for optimal download method
+                    const userAgent = navigator.userAgent.toLowerCase();
+                    const isChrome = userAgent.includes('chrome');
+                    const isFirefox = userAgent.includes('firefox');
+                    const isEdge = userAgent.includes('edge');
+                    const isSafari = userAgent.includes('safari') && !userAgent.includes('chrome');
+                    
+                    // Create a completely silent download using XMLHttpRequest
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', `/api/download/${job.id}`, true);
+                    xhr.responseType = 'blob';
+                    xhr.setRequestHeader('Accept', 'audio/mpeg');
+                    xhr.setRequestHeader('Cache-Control', 'no-cache');
+                    
+                    // Add browser-specific headers
+                    if (isChrome || isEdge) {
+                      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    }
+                    
+                    xhr.onload = function() {
+                      if (xhr.status === 200) {
+                        const blob = xhr.response;
+                        const url = window.URL.createObjectURL(blob);
+                        
+                        // Create a completely hidden download link
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `${job.title || 'converted'}.mp3`;
+                        link.style.position = 'absolute';
+                        link.style.left = '-9999px';
+                        link.style.top = '-9999px';
+                        link.style.opacity = '0';
+                        link.style.pointerEvents = 'none';
+                        
+                        document.body.appendChild(link);
+                        
+                        // Trigger download silently
+                        const clickEvent = new MouseEvent('click', {
+                          bubbles: true,
+                          cancelable: true,
+                          view: window
+                        });
+                        link.dispatchEvent(clickEvent);
+                        
+                        // Clean up immediately
+                        setTimeout(() => {
+                          if (document.body.contains(link)) {
+                            document.body.removeChild(link);
+                          }
+                          window.URL.revokeObjectURL(url);
+                        }, 100);
+                      }
+                    };
+                    
+                    xhr.onerror = function() {
+                      console.error('Download failed');
+                      // Fallback: try direct window.open for stubborn browsers
+                      try {
+                        window.open(`/api/download/${job.id}`, '_blank');
+                      } catch (fallbackError) {
+                        console.error('Fallback download also failed:', fallbackError);
+                      }
+                    };
+                    
+                    xhr.send();
+                    
+                  } catch (error) {
+                    console.error('Download error:', error);
+                  }
+                }}
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-black rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-xs sm:text-sm md:text-base w-full sm:w-auto"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Download MP3</span>
+                <DownloadIcon className="w-5 h-5" />
+                Download MP3
               </button>
               
               <button
-                onClick={reset}
-                className="bg-gray-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2"
+                onClick={() => window.open('https://buymeacoffee.com/ytconverter', '_blank')}
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-xs sm:text-sm md:text-base w-full sm:w-auto"
+                style={{ backgroundColor: '#ff5f5f' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff4a4a'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ff5f5f'}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>Convert Next</span>
+                <HeartIcon className="w-5 h-5" />
+                Buy Me a Coffee
               </button>
+              
+              <button 
+                onClick={resetConverter} 
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-gray-600 rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-xs sm:text-sm md:text-base w-full sm:w-auto"
+              >
+                <AutorenewIcon className="w-5 h-5" />
+                Convert Next
+              </button>
+              </div>
             </div>
-          </div>
-        );
-      case 'error':
-         return (
-             <div className="flex flex-col items-center justify-center h-24 space-y-4">
-              <p className="text-red-500 text-lg">{error}</p>
-              <button
-                onClick={reset}
-                className="bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors"
-                >
+          );
+        case JobStatus.FAILED:
+          return (
+             <div className="text-center">
+              <h3 className="text-lg font-semibold text-red-500 mb-2">Conversion Failed</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">{job.error || 'An unknown error occurred.'}</p>
+              <button onClick={resetConverter} className="w-full sm:w-auto px-6 py-3 font-semibold text-white bg-brand-600 rounded-lg shadow-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-gray-900 transition-colors">
                 Try Again
-                </button>
-            </div>
-         );
-      case 'idle':
-      default:
-        return (
-          <div className="w-full">
-            <div className="flex flex-col space-y-4">
-              <input
-                type="text"
-                value={url}
-                onChange={(e) => {
-                  setUrl(e.target.value);
-                  // Clear any existing errors when user starts typing
-                  if (error) {
-                    setError('');
-                  }
-                }}
-                placeholder="Paste YouTube video URL here"
-                className="w-full bg-gray-100 dark:bg-dark-surface border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent"
-              />
-              <button
-                onClick={handleConvert}
-                disabled={!url.trim() || isConverting}
-                className="w-full bg-brand-red text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center space-x-2 hover:bg-red-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-lg"
-              >
-                {isConverting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Converting...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Convert to MP3</span>
-                    <ConvertIcon />
-                  </>
-                )}
               </button>
             </div>
-          </div>
-        );
+          );
+      }
     }
+
+    return (
+      <>
+        <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-4">
+          <div className="flex-grow flex w-full bg-white dark:bg-[#1D2528] border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
+            <input
+              id="url-input"
+              type="text"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="Paste YouTube URL here"
+              aria-label="YouTube video URL"
+              className="flex-grow px-3 sm:px-3 md:px-4 lg:px-5 py-3 sm:py-3 md:py-3.5 lg:py-4 bg-transparent border-0 rounded-l-lg focus:outline-none focus:ring-0 text-sm sm:text-base md:text-lg min-w-0"
+              disabled={isLoading}
+            />
+            {url && (
+               <div className="flex items-center bg-transparent pr-1 sm:pr-2">
+                  <button
+                      type="button"
+                      onClick={handleClearUrl}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1"
+                      aria-label="Clear input"
+                    >
+                      <CloseIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
+               </div>
+            )}
+            <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 pl-1 sm:pl-2 md:pl-3 lg:pl-4 pr-1 sm:pr-2 md:pr-3 lg:pr-4 bg-transparent">
+              <div className="h-5 sm:h-6 md:h-7 w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-500 to-transparent mr-1 sm:mr-2"></div>
+              <Tooltip text="Trim Audio">
+                <button 
+                  type="button" 
+                  onClick={() => setIsTrimModalOpen(true)}
+                  className="p-1.5 sm:p-2 md:p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-white transition-colors"
+                >
+                    <ScissorsIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                </button>
+              </Tooltip>
+              <div className="h-5 sm:h-6 w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-500 to-transparent"></div>
+              <Tooltip text="Quality">
+                <button 
+                  type="button"
+                  onClick={() => setIsQualityModalOpen(true)}
+                  className="px-2 sm:px-2.5 md:px-3 py-2 sm:py-2.5 md:py-3 rounded-md font-semibold text-gray-700 dark:text-gray-300 text-sm sm:text-base hover:bg-gray-200 dark:hover:bg-gray-700"
+                >
+                    {quality}
+                </button>
+              </Tooltip>
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="flex items-center justify-center gap-1 sm:gap-2 w-full md:w-auto md:shrink-0 px-5 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-3 md:py-3.5 lg:py-4 font-semibold text-white bg-gray-900 dark:bg-black rounded-lg hover:bg-black dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-[#1D2528] transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-sm sm:text-base md:text-lg"
+            disabled={isLoading}
+          >
+            {isLoading ? <LoadingSpinner className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"/> : 'Convert'}
+            {!isLoading && <RefreshIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />}
+          </button>
+        </form>
+        
+        <TrimAudioModal 
+            isOpen={isTrimModalOpen} 
+            onClose={() => setIsTrimModalOpen(false)} 
+        />
+        <SelectQualityModal 
+            isOpen={isQualityModalOpen} 
+            onClose={() => setIsQualityModalOpen(false)}
+            currentQuality={quality}
+            onSave={setQuality}
+        />
+      </>
+    );
   };
 
   return (
-    <div className="bg-white dark:bg-dark-card shadow-lg rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-700">
-      {renderContent()}
+    <div className="w-full max-w-full sm:max-w-2xl md:max-w-3xl mx-auto bg-gray-100/50 dark:bg-[#2d3748] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-2 sm:p-3 md:p-4 lg:p-6 xl:p-8 transition-all duration-300 flex items-center justify-center overflow-hidden">
+      <div className="w-full">
+        {renderContent()}
+      </div>
     </div>
   );
 };

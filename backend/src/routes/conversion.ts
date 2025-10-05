@@ -75,17 +75,40 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
     const job = await conversionService.getJobStatus(req.params.id);
     const filename = job?.mp3_filename || 'converted.mp3';
 
-    res.download(filePath, filename, (error: any) => {
-      if (error) {
-        logger.error('Download error:', error);
-        if (!res.headersSent) {
-          res.status(500).json({
-            success: false,
-            message: 'Download failed'
-          });
-        }
+    // Set proper headers for direct audio download
+    res.setHeader('Content-Type', 'audio/mpeg');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Download-Options', 'noopen');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
+    
+    // Stream the file directly with proper error handling
+    const fs = require('fs');
+    const fileStream = fs.createReadStream(filePath);
+    
+    // Set content length for proper download
+    const stats = fs.statSync(filePath);
+    res.setHeader('Content-Length', stats.size);
+    
+    fileStream.on('error', (error: any) => {
+      logger.error('File stream error:', error);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: 'File stream error'
+        });
       }
     });
+    
+    fileStream.on('end', () => {
+      logger.info(`File ${filename} sent successfully`);
+    });
+    
+    fileStream.pipe(res);
   } catch (error) {
     logger.error('Download request failed:', error);
     res.status(500).json({

@@ -1,113 +1,93 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { LogoIcon } from './icons/LogoIcon';
+import { MenuIcon } from './icons/MenuIcon';
+import { XIcon } from './icons/XIcon';
+import { Page } from '../App';
 
-const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
-};
+interface HeaderProps {
+  navigateTo: (page: Page) => void;
+}
 
-const Logo: React.FC = () => (
-  <Link to="/" onClick={scrollToTop} className="flex items-center space-x-2">
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-brand-red">
-      <path d="M6.75 12V3.75C6.75 3.55109 6.82902 3.36032 6.96967 3.21967C7.11032 3.07902 7.30109 3 7.5 3H16.5C16.6989 3 16.8897 3.07902 17.0303 3.21967C17.171 3.36032 17.25 3.55109 17.25 3.75V12M6.75 12L3 16.5M6.75 12H17.25M17.25 12L21 16.5M3 16.5V20.25C3 20.4489 3.07902 20.6397 3.21967 20.7803C3.36032 20.921 3.55109 21 3.75 21H20.25C20.4489 21 20.6397 20.921 20.7803 20.7803C20.921 20.6397 21 20.4489 21 20.25V16.5M3 16.5H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-    <span className="text-2xl font-bold text-gray-900 dark:text-white">AudioFlow</span>
-  </Link>
-);
-
-
-const Header: React.FC = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  const handleNavigate = (page: Page) => {
+    navigateTo(page);
+    setIsMenuOpen(false);
+  }
 
   return (
-    <header className="border-b border-gray-200 dark:border-gray-800">
-      <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Logo />
+    <header className="w-full p-4 sm:p-5 md:p-6 bg-white/80 dark:bg-[#1D2528] backdrop-blur-sm sticky top-0 z-20 border-b border-gray-200 dark:border-gray-700">
+      <div className="container mx-auto flex justify-between items-center max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl px-2 sm:px-4">
+        <button onClick={() => handleNavigate('home')} className="flex items-center gap-2 sm:gap-3" aria-label="Go to homepage">
+          <LogoIcon className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" />
+          <span className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">
+            YTConv
+          </span>
+        </button>
         
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/faq" onClick={scrollToTop} className="text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-white transition-colors">FAQs</Link>
-          <Link to="/changelog" onClick={scrollToTop} className="text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-white transition-colors">Changelog</Link>
-          <Link to="/contact" onClick={scrollToTop} className="text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-white transition-colors">Contact</Link>
-          <a 
-            href="https://www.aiploma.com/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-white transition-colors"
-          >
-            Blog
-          </a>
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-6 text-base font-medium text-gray-600 dark:text-gray-300">
+          <button onClick={() => handleNavigate('faqs')} className="hover:text-brand-500 transition-colors">FAQs</button>
+          <button onClick={() => handleNavigate('changelog')} className="hover:text-brand-500 transition-colors">Changelog</button>
+          <button onClick={() => handleNavigate('contact')} className="hover:text-brand-500 transition-colors">Contact</button>
         </nav>
 
         {/* Mobile Menu Button */}
-        <button
-          onClick={toggleMobileMenu}
-          className="md:hidden p-2 rounded-md text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          aria-label="Toggle mobile menu"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {isMobileMenuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
-      </div>
-
-      {/* Mobile Navigation Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-dark-bg">
-          <nav className="px-4 py-4 space-y-3">
-            <Link 
-              to="/faq" 
-              className="block py-2 text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-white transition-colors"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                scrollToTop();
-              }}
-            >
-              FAQs
-            </Link>
-            <Link 
-              to="/changelog" 
-              className="block py-2 text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-white transition-colors"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                scrollToTop();
-              }}
-            >
-              Changelog
-            </Link>
-            <Link 
-              to="/contact" 
-              className="block py-2 text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-white transition-colors"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                scrollToTop();
-              }}
-            >
-              Contact
-            </Link>
-            <a 
-              href="https://www.aiploma.com/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block py-2 text-gray-600 dark:text-dark-text-secondary hover:text-gray-900 dark:hover:text-white transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Blog
-            </a>
-          </nav>
+        <div className="md:hidden">
+          <button 
+            onClick={() => setIsMenuOpen(true)} 
+            aria-label="Open menu"
+            className="p-2 sm:p-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          >
+            <MenuIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+          </button>
         </div>
-      )}
+
+
+        {/* Mobile Menu Dropdown */}
+        {isMenuOpen && (
+          <div 
+            className="fixed top-14 right-2 sm:right-4 z-30 w-48 bg-white dark:bg-[#2d3748] rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 md:hidden overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <nav className="flex flex-col">
+              <button 
+                onClick={() => handleNavigate('home')} 
+                className="text-left px-6 py-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-base font-medium"
+              >
+                Home
+              </button>
+              <button 
+                onClick={() => handleNavigate('faqs')} 
+                className="text-left px-6 py-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-base font-medium"
+              >
+                FAQs
+              </button>
+              <button 
+                onClick={() => handleNavigate('changelog')} 
+                className="text-left px-6 py-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-base font-medium"
+              >
+                Changelog
+              </button>
+              <button 
+                onClick={() => handleNavigate('contact')} 
+                className="text-left px-6 py-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-base font-medium"
+              >
+                Contact
+              </button>
+            </nav>
+          </div>
+        )}
+        
+        {/* Backdrop overlay when menu is open */}
+        {isMenuOpen && (
+          <div 
+            className="fixed inset-0 z-20 md:hidden" 
+            onClick={() => setIsMenuOpen(false)}
+          />
+        )}
+      </div>
     </header>
   );
 };

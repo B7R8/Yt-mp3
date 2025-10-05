@@ -1,5 +1,5 @@
 {
-  "name": "AudioFlow - YouTube to MP3 Converter",
-  "description": "A web application that allows users to convert YouTube videos to MP3 files. It provides options for trimming audio and selecting audio quality, all within a clean and user-friendly interface.",
+  "name": "YT MP3 Converter",
+  "description": "A modern, responsive React frontend for a YouTube to MP3 conversion service. Features real-time progress tracking, a theme toggle for dark and light modes, and toast notifications for a seamless user experience.",
   "requestFramePermissions": []
 }

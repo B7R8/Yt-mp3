@@ -1,6 +1,6 @@
-
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../hooks/useTheme';
+import { Theme } from '../types';
 import { SunIcon } from './icons/SunIcon';
 import { MoonIcon } from './icons/MoonIcon';
 
@@ -10,10 +10,21 @@ const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="fixed bottom-5 right-5 bg-gray-800 dark:bg-gray-200 w-12 h-12 rounded-full flex items-center justify-center text-white dark:text-gray-800 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-red dark:focus:ring-offset-dark-bg"
+      className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-20 p-2.5 sm:p-3 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-lg hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-brand-500 flex items-center justify-center"
       aria-label="Toggle theme"
     >
-      {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+      <div className="relative w-6 h-6">
+         <SunIcon
+            className={`absolute transition-all duration-300 transform ${
+              theme === Theme.LIGHT ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'
+            }`}
+          />
+         <MoonIcon
+            className={`absolute transition-all duration-300 transform ${
+              theme === Theme.DARK ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-0 opacity-0'
+            }`}
+          />
+      </div>
     </button>
   );
 };

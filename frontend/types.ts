@@ -1,29 +1,29 @@
 
-export type Theme = 'light' | 'dark';
-
-export interface ThemeContextType {
-  theme: Theme;
-  toggleTheme: () => void;
+export enum JobStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
 }
 
+export interface Job {
+  id: string;
+  status: JobStatus;
+  progress: number;
+  title?: string;
+  url?: string;
+  error?: string;
+}
 
-export type ConversionStatus = 'idle' | 'converting' | 'success' | 'error';
+export enum Theme {
+  LIGHT = 'light',
+  DARK = 'dark',
+}
 
-export interface ConversionResponse {
-  success: boolean;
-  jobId: string;
-  status: string;
+export interface ToastData {
+  id: number;
   message: string;
+  type: 'success' | 'error' | 'info';
 }
 
-export interface StatusResponse {
-  success: boolean;
-  jobId: string;
-  status: string;
-  message?: string;
-  video_title?: string;
-  mp3_filename?: string;
-  error_message?: string;
-  created_at: string;
-  updated_at: string;
-}
+export type Quality = '64K' | '128K' | '192K' | '256K' | '320K';
