@@ -9,13 +9,37 @@ const handleResponse = async (response: Response) => {
   return response.json();
 };
 
-export const startConversion = async (url: string): Promise<{ id: string }> => {
+export const startConversion = async (
+  url: string,
+  quality?: string,
+  trimEnabled?: boolean,
+  trimStart?: string,
+  trimEnd?: string
+): Promise<{ id: string }> => {
+  const requestBody: {
+    url: string;
+    quality?: string;
+    trim_start?: string;
+    trim_end?: string;
+  } = { url };
+
+  // Add quality if specified (convert 128K to 128k format)
+  if (quality) {
+    requestBody.quality = quality.toLowerCase();
+  }
+
+  // Add trim parameters if enabled
+  if (trimEnabled && trimStart && trimEnd) {
+    requestBody.trim_start = trimStart;
+    requestBody.trim_end = trimEnd;
+  }
+
   const response = await fetch('/api/convert', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ url }),
+    body: JSON.stringify(requestBody),
   });
   const data = await handleResponse(response);
   // Transform backend response to frontend format

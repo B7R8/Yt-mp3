@@ -22,16 +22,136 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   const [quality, setQuality] = useState<Quality>('128K');
   const [isTrimModalOpen, setIsTrimModalOpen] = useState(false);
   const [isQualityModalOpen, setIsQualityModalOpen] = useState(false);
+  const [videoDuration, setVideoDuration] = useState<number | undefined>(undefined);
+  const [isFetchingDuration, setIsFetchingDuration] = useState(false);
+  const [durationError, setDurationError] = useState<string | null>(null);
+  const [trimEnabled, setTrimEnabled] = useState(false);
+  const [trimStart, setTrimStart] = useState('00:00:00');
+  const [trimEnd, setTrimEnd] = useState('00:00:00');
   const { job, isLoading, handleSubmit, resetConverter } = useConverter(showToast);
+
+  // Fetch video duration when URL is entered
+  const fetchVideoDuration = async (videoUrl: string) => {
+    if (!videoUrl || isFetchingDuration) return;
+    
+    const videoId = extractVideoId(videoUrl);
+    if (!videoId) {
+      setDurationError('Invalid YouTube URL');
+      return;
+    }
+    
+    try {
+      setIsFetchingDuration(true);
+      setDurationError(null);
+      
+      // Direct call to backend with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout for longer videos
+      
+      const durationResponse = await fetch(
+        `/api/video-info?url=${encodeURIComponent(videoUrl)}`,
+        { signal: controller.signal }
+      );
+      
+      clearTimeout(timeoutId);
+      
+      if (durationResponse.ok) {
+        const info = await durationResponse.json();
+        if (info.success && info.duration) {
+          setVideoDuration(info.duration);
+          setTrimEnd(secondsToTimeString(info.duration));
+          setDurationError(null);
+        } else {
+          setDurationError('Could not get video duration');
+        }
+      } else {
+        setDurationError('Failed to fetch video info');
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        setDurationError('Request timeout - video might be too long');
+      } else {
+        setDurationError('Failed to fetch duration');
+      }
+      console.error('Failed to fetch video duration:', error);
+    } finally {
+      setIsFetchingDuration(false);
+    }
+  };
+
+  // Extract YouTube video ID from URL
+  const extractVideoId = (url: string): string | null => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+      /^([a-zA-Z0-9_-]{11})$/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    return null;
+  };
+
+  // Convert seconds to HH:mm:ss string
+  const secondsToTimeString = (seconds: number): string => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  // Handle URL change - NO auto-fetch, only when user clicks trim
+  const handleUrlChange = (newUrl: string) => {
+    setUrl(newUrl);
+    // Reset duration when URL changes
+    if (!newUrl || !extractVideoId(newUrl)) {
+      setVideoDuration(undefined);
+      setDurationError(null);
+    }
+  };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleSubmit(url);
+    handleSubmit(url, quality, trimEnabled, trimStart, trimEnd);
   };
   
   const handleClearUrl = () => {
     setUrl('');
-  }
+    setVideoDuration(undefined);
+    setIsFetchingDuration(false);
+    setDurationError(null);
+    setTrimEnabled(false);
+    setTrimStart('00:00:00');
+    setTrimEnd('00:00:00');
+  };
+
+  const handleTrimClick = () => {
+    // If no URL, show message and don't open modal
+    if (!url || !extractVideoId(url)) {
+      showToast('Please insert a valid YouTube video link to enable audio trim feature.', 'info');
+      return;
+    }
+
+    // If URL exists but duration not fetched yet, start fetching
+    if (!videoDuration && !isFetchingDuration && !durationError) {
+      fetchVideoDuration(url);
+    }
+    
+    // Open modal regardless (will show loading state inside)
+    setIsTrimModalOpen(true);
+  };
+
+  const handleTrimSave = (enabled: boolean, start: string, end: string) => {
+    setTrimEnabled(enabled);
+    setTrimStart(start);
+    setTrimEnd(end);
+    if (enabled) {
+      showToast(`Trim set: ${start} to ${end}`, 'info');
+    }
+  };
 
   const renderContent = () => {
     if (isLoading && !job) {
@@ -190,7 +310,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               id="url-input"
               type="text"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => handleUrlChange(e.target.value)}
               placeholder="Paste YouTube URL here"
               aria-label="YouTube video URL"
               className="flex-grow px-3 sm:px-3 md:px-4 lg:px-5 py-3 sm:py-3 md:py-3.5 lg:py-4 bg-transparent border-0 rounded-l-lg focus:outline-none focus:ring-0 text-sm sm:text-base md:text-lg min-w-0"
@@ -213,10 +333,15 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               <Tooltip text="Trim Audio">
                 <button 
                   type="button" 
-                  onClick={() => setIsTrimModalOpen(true)}
-                  className="p-1.5 sm:p-2 md:p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-white transition-colors"
+                  onClick={handleTrimClick}
+                  className={`p-1.5 sm:p-2 md:p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-white transition-colors relative ${isFetchingDuration ? 'animate-pulse' : ''}`}
+                  disabled={isFetchingDuration}
                 >
-                    <ScissorsIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                    {isFetchingDuration ? (
+                      <LoadingSpinner className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                    ) : (
+                      <ScissorsIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                    )}
                 </button>
               </Tooltip>
               <div className="h-5 sm:h-6 w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-500 to-transparent"></div>
@@ -243,7 +368,13 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
         
         <TrimAudioModal 
             isOpen={isTrimModalOpen} 
-            onClose={() => setIsTrimModalOpen(false)} 
+            onClose={() => setIsTrimModalOpen(false)}
+            videoDuration={videoDuration}
+            isFetchingDuration={isFetchingDuration}
+            onSave={handleTrimSave}
+            initialEnabled={trimEnabled}
+            initialStart={trimStart}
+            initialEnd={trimEnd}
         />
         <SelectQualityModal 
             isOpen={isQualityModalOpen} 

@@ -55,7 +55,13 @@ export const useConverter = (showToast: ShowToastFn) => {
     };
   }, [job, pollStatus]);
 
-  const handleSubmit = async (url: string) => {
+  const handleSubmit = async (
+    url: string,
+    quality?: string,
+    trimEnabled?: boolean,
+    trimStart?: string,
+    trimEnd?: string
+  ) => {
     if (!url.trim()) {
       showToast('Please enter a YouTube URL.', 'error');
       return;
@@ -73,8 +79,17 @@ export const useConverter = (showToast: ShowToastFn) => {
     clearPolling();
 
     try {
-      const { id } = await startConversion(url);
-      showToast('Conversion started!', 'info');
+      const { id } = await startConversion(url, quality, trimEnabled, trimStart, trimEnd);
+      
+      let message = 'Conversion started!';
+      if (trimEnabled && trimStart && trimEnd) {
+        message += ` Trimming from ${trimStart} to ${trimEnd}`;
+      }
+      if (quality) {
+        message += ` at ${quality}`;
+      }
+      
+      showToast(message, 'info');
       // Set initial job state and start polling
       setJob({
         id,

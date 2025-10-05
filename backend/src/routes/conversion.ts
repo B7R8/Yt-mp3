@@ -3,9 +3,31 @@ import { ConversionService } from '../services/conversionService';
 import { validateConversionRequest, validateJobId } from '../middleware/validation';
 import { conversionRateLimit, statusRateLimit } from '../middleware/rateLimiter';
 import logger from '../config/logger';
+import { spawn } from 'child_process';
 
 const router = express.Router();
 const conversionService = new ConversionService();
+
+// In-memory cache for video info (TTL: 1 hour)
+interface CachedVideoInfo {
+  title: string;
+  duration: number;
+  durationFormatted: string;
+  timestamp: number;
+}
+
+const videoInfoCache = new Map<string, CachedVideoInfo>();
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+// Clean expired cache entries periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of videoInfoCache.entries()) {
+    if (now - value.timestamp > CACHE_TTL) {
+      videoInfoCache.delete(key);
+    }
+  }
+}, 5 * 60 * 1000); // Every 5 minutes
 
 // POST /api/convert - Start a new conversion
 router.post('/convert', conversionRateLimit, validateConversionRequest, async (req: Request, res: Response) => {
@@ -115,6 +137,164 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
       success: false,
       message: 'Download request failed'
     });
+  }
+});
+
+// GET /api/video-info - Get video information (duration, title) - ULTRA FAST
+router.get('/video-info', statusRateLimit, async (req: Request, res: Response) => {
+  try {
+    const url = req.query.url as string;
+    
+    if (!url) {
+      return res.status(400).json({
+        success: false,
+        message: 'URL parameter is required'
+      });
+    }
+
+    // Extract video ID for caching
+    const videoIdMatch = url.match(/(?:v=|\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    const videoId = videoIdMatch ? videoIdMatch[1] : url;
+
+    // Check cache first - INSTANT response if cached!
+    const cached = videoInfoCache.get(videoId);
+    if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+      logger.info(`Cache hit for video: ${videoId}`);
+      return res.json({
+        success: true,
+        title: cached.title,
+        duration: cached.duration,
+        durationFormatted: cached.durationFormatted,
+        cached: true
+      });
+    }
+
+    // Set aggressive timeout for maximum speed
+    const timeout = setTimeout(() => {
+      logger.warn(`Video info request timeout for: ${url}`);
+      if (!res.headersSent) {
+        res.status(408).json({
+          success: false,
+          message: 'Request timeout - video might be unavailable'
+        });
+      }
+    }, 15000); // 15 second timeout (reduced from 20s)
+
+    // Use yt-dlp with MAXIMUM SPEED optimizations
+    const ytdlp = spawn('python', [
+      '-m', 'yt_dlp',
+      '--skip-download',         // Don't download anything
+      '--no-playlist',           // Single video only
+      '--no-warnings',           // Reduce output
+      '--no-check-certificates', // Skip SSL verification
+      '--no-call-home',          // Don't check for updates
+      '--no-cache-dir',          // Don't use cache
+      '--socket-timeout', '5',   // 5 second socket timeout
+      '--extractor-retries', '1', // Only 1 retry
+      '--fragment-retries', '1',  // Only 1 fragment retry
+      '-J',                       // JSON output (faster parsing)
+      '--flat-playlist',          // Don't extract playlist
+      url
+    ]);
+
+    let output = '';
+    let errorOutput = '';
+
+    ytdlp.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+
+    ytdlp.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+
+    ytdlp.on('close', (code) => {
+      clearTimeout(timeout);
+      
+      if (res.headersSent) return; // Already responded due to timeout
+
+      if (code === 0 && output.trim()) {
+        try {
+          // Parse JSON output (faster than line parsing)
+          const jsonData = JSON.parse(output);
+          
+          const title = jsonData.title || 'Unknown';
+          let durationSeconds = 0;
+          
+          // Handle duration from JSON
+          if (jsonData.duration && typeof jsonData.duration === 'number') {
+            durationSeconds = Math.floor(jsonData.duration);
+          } else if (jsonData.duration_string) {
+            // Fallback: parse duration string
+            const parts = jsonData.duration_string.split(':').map((p: string) => parseInt(p, 10));
+            if (parts.length === 3) {
+              durationSeconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+            } else if (parts.length === 2) {
+              durationSeconds = parts[0] * 60 + parts[1];
+            }
+          }
+
+          // Convert seconds to HH:MM:SS format for display
+          const hours = Math.floor(durationSeconds / 3600);
+          const minutes = Math.floor((durationSeconds % 3600) / 60);
+          const seconds = durationSeconds % 60;
+          const durationFormatted = hours > 0 
+            ? `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+            : `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+          // Cache the result for future requests
+          videoInfoCache.set(videoId, {
+            title,
+            duration: durationSeconds,
+            durationFormatted,
+            timestamp: Date.now()
+          });
+
+          logger.info(`Video info fetched and cached: ${title} (${durationSeconds}s)`);
+          
+          res.json({
+            success: true,
+            title,
+            duration: durationSeconds,
+            durationFormatted,
+            cached: false
+          });
+        } catch (parseError) {
+          logger.error(`Failed to parse JSON output: ${parseError}`);
+          logger.debug(`Raw output: ${output}`);
+          res.status(500).json({
+            success: false,
+            message: 'Failed to parse video information'
+          });
+        }
+      } else {
+        logger.error(`yt-dlp video info failed with code ${code}: ${errorOutput}`);
+        res.status(500).json({
+          success: false,
+          message: 'Failed to fetch video information'
+        });
+      }
+    });
+
+    ytdlp.on('error', (error) => {
+      clearTimeout(timeout);
+      if (res.headersSent) return;
+      
+      logger.error('yt-dlp process error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch video information'
+      });
+    });
+
+  } catch (error) {
+    logger.error('Video info request failed:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch video information'
+      });
+    }
   }
 });
 

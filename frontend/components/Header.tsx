@@ -17,7 +17,7 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
   }
 
   return (
-    <header className="w-full p-4 sm:p-5 md:p-6 bg-white/80 dark:bg-[#1D2528] backdrop-blur-sm sticky top-0 z-20 border-b border-gray-200 dark:border-gray-700">
+    <header className="w-full p-2.5 sm:p-3 md:p-4 bg-gradient-to-b from-gray-100 to-gray-200/50 dark:bg-gradient-to-b dark:from-[#151A1D] dark:to-[#0f1214] backdrop-blur-sm sticky top-0 z-20 border-b border-gray-300 dark:border-gray-800">
       <div className="container mx-auto flex justify-between items-center max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl px-2 sm:px-4">
         <button onClick={() => handleNavigate('home')} className="flex items-center gap-2 sm:gap-3" aria-label="Go to homepage">
           <LogoIcon className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" />

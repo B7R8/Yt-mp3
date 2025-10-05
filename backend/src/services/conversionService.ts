@@ -2,6 +2,7 @@ import { spawn } from 'child_process';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import ffmpeg from 'fluent-ffmpeg';
 import { ConversionJob, ConversionRequest } from '../types';
 import logger from '../config/logger';
 import { db } from '../config/database';
@@ -134,32 +135,33 @@ export class ConversionService {
     }
   }
 
-  private async processConversion(jobId: string, request: ConversionRequest): Promise<void> {
-    try {
-      await this.updateJobStatus(jobId, 'processing');
-      
-      const mp3Filename = `${jobId}.mp3`;
-      const outputPath = path.join(this.downloadsDir, mp3Filename);
-
-      // Use yt-dlp to extract audio and convert to MP3
+  /**
+   * Download audio from YouTube using yt-dlp
+   * Returns path to the downloaded audio file
+   */
+  private async downloadAudio(url: string, outputPath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
       const ytdlpArgs = [
+        '-m', 'yt_dlp',
+        '-f', 'bestaudio',
         '--extract-audio',
         '--audio-format', 'mp3',
-        '--audio-quality', request.quality || '192k',
-        '--output', outputPath.replace('.mp3', '.%(ext)s'),
-        request.url
+        '--output', outputPath,
+        '--no-playlist',
+        url
       ];
 
-      // Add trim options if provided
-      if (request.trim_start && request.trim_end) {
-        ytdlpArgs.push('--postprocessor-args', `ffmpeg:-ss ${request.trim_start} -to ${request.trim_end}`);
-      }
+      logger.info(`Downloading audio with yt-dlp: ${ytdlpArgs.join(' ')}`);
 
-      logger.info(`Starting conversion for job ${jobId} with args:`, ytdlpArgs);
-
-      const ytdlp = spawn('python', ['-m', 'yt_dlp', ...ytdlpArgs]);
+      const ytdlp = spawn('python', ytdlpArgs);
       
       let errorOutput = '';
+      let stdOutput = '';
+
+      ytdlp.stdout.on('data', (data) => {
+        stdOutput += data.toString();
+        logger.debug(`yt-dlp stdout: ${data}`);
+      });
 
       ytdlp.stderr.on('data', (data) => {
         errorOutput += data.toString();
@@ -168,29 +170,162 @@ export class ConversionService {
 
       ytdlp.on('close', async (code) => {
         if (code === 0) {
-          // Check if file was created successfully
+          // Check if file was created
           try {
             await fs.access(outputPath);
-            await this.updateJobStatus(jobId, 'completed', mp3Filename);
-            logger.info(`Conversion completed successfully for job ${jobId}`);
+            logger.info(`Audio downloaded successfully to: ${outputPath}`);
+            resolve(outputPath);
           } catch (error) {
-            logger.error(`Output file not found for job ${jobId}:`, error);
-            await this.updateJobStatus(jobId, 'failed', undefined, 'Output file not created');
+            reject(new Error(`Output file not created: ${outputPath}`));
           }
         } else {
-          logger.error(`yt-dlp process exited with code ${code}:`, errorOutput);
-          await this.updateJobStatus(jobId, 'failed', undefined, `Conversion failed: ${errorOutput}`);
+          reject(new Error(`yt-dlp failed with code ${code}: ${errorOutput}`));
         }
       });
 
-      ytdlp.on('error', async (error) => {
-        logger.error(`yt-dlp process error for job ${jobId}:`, error);
-        await this.updateJobStatus(jobId, 'failed', undefined, `Process error: ${error instanceof Error ? error.message : 'Unknown process error'}`);
+      ytdlp.on('error', (error) => {
+        reject(new Error(`yt-dlp process error: ${error.message}`));
       });
+    });
+  }
+
+  /**
+   * Convert time string (HH:mm:ss) to seconds
+   */
+  private timeToSeconds(timeStr: string): number {
+    const parts = timeStr.split(':').map(p => parseInt(p, 10));
+    if (parts.length === 3) {
+      return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    } else if (parts.length === 2) {
+      return parts[0] * 60 + parts[1];
+    } else {
+      return parts[0];
+    }
+  }
+
+  /**
+   * Process audio with ffmpeg: trim and set bitrate
+   */
+  private async processAudioWithFFmpeg(
+    inputPath: string,
+    outputPath: string,
+    bitrate: number,
+    startTime?: string,
+    endTime?: string
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      logger.info(`Processing audio with FFmpeg: input=${inputPath}, output=${outputPath}, bitrate=${bitrate}k`);
+
+      const command = ffmpeg(inputPath);
+
+      // Set start time if provided
+      if (startTime) {
+        command.setStartTime(startTime);
+        logger.info(`Setting start time: ${startTime}`);
+      }
+
+      // Calculate duration if both start and end times are provided
+      if (startTime && endTime) {
+        const startSeconds = this.timeToSeconds(startTime);
+        const endSeconds = this.timeToSeconds(endTime);
+        const duration = endSeconds - startSeconds;
+        
+        if (duration > 0) {
+          command.setDuration(duration);
+          logger.info(`Setting duration: ${duration} seconds (${startTime} to ${endTime})`);
+        }
+      }
+
+      // Set audio bitrate and format
+      command
+        .audioBitrate(bitrate)
+        .toFormat('mp3')
+        .output(outputPath)
+        .on('start', (commandLine) => {
+          logger.info(`FFmpeg command: ${commandLine}`);
+        })
+        .on('progress', (progress) => {
+          logger.debug(`Processing: ${JSON.stringify(progress)}`);
+        })
+        .on('end', () => {
+          logger.info(`FFmpeg processing completed: ${outputPath}`);
+          resolve();
+        })
+        .on('error', (error, stdout, stderr) => {
+          logger.error(`FFmpeg error: ${error.message}`);
+          logger.error(`FFmpeg stderr: ${stderr}`);
+          reject(new Error(`FFmpeg processing failed: ${error.message}`));
+        })
+        .run();
+    });
+  }
+
+  private async processConversion(jobId: string, request: ConversionRequest): Promise<void> {
+    let tempAudioPath: string | null = null;
+    
+    try {
+      await this.updateJobStatus(jobId, 'processing');
+      
+      const mp3Filename = `${jobId}.mp3`;
+      const tempFilename = `${jobId}_temp.mp3`;
+      const outputPath = path.join(this.downloadsDir, mp3Filename);
+      tempAudioPath = path.join(this.downloadsDir, tempFilename);
+
+      // Step 1: Download audio using yt-dlp
+      logger.info(`[Job ${jobId}] Step 1: Downloading audio from ${request.url}`);
+      await this.downloadAudio(request.url, tempAudioPath);
+
+      // Step 2: Process with FFmpeg (trim + bitrate)
+      const bitrate = request.quality ? parseInt(request.quality.replace('k', '')) : 192;
+      
+      if (request.trim_start && request.trim_end) {
+        logger.info(`[Job ${jobId}] Step 2: Processing with FFmpeg (trim: ${request.trim_start} to ${request.trim_end}, bitrate: ${bitrate}k)`);
+        await this.processAudioWithFFmpeg(
+          tempAudioPath,
+          outputPath,
+          bitrate,
+          request.trim_start,
+          request.trim_end
+        );
+      } else {
+        logger.info(`[Job ${jobId}] Step 2: Processing with FFmpeg (bitrate: ${bitrate}k, no trimming)`);
+        await this.processAudioWithFFmpeg(
+          tempAudioPath,
+          outputPath,
+          bitrate
+        );
+      }
+
+      // Step 3: Cleanup temporary file
+      try {
+        await fs.unlink(tempAudioPath);
+        logger.info(`[Job ${jobId}] Cleaned up temporary file: ${tempAudioPath}`);
+      } catch (error) {
+        logger.warn(`[Job ${jobId}] Failed to cleanup temp file:`, error);
+      }
+
+      // Step 4: Mark as completed
+      await this.updateJobStatus(jobId, 'completed', mp3Filename);
+      logger.info(`[Job ${jobId}] Conversion completed successfully`);
 
     } catch (error) {
-      logger.error(`Conversion process error for job ${jobId}:`, error);
-      await this.updateJobStatus(jobId, 'failed', undefined, error instanceof Error ? error.message : 'Unknown error');
+      logger.error(`[Job ${jobId}] Conversion failed:`, error);
+      
+      // Cleanup temp file on error
+      if (tempAudioPath) {
+        try {
+          await fs.unlink(tempAudioPath);
+        } catch (cleanupError) {
+          logger.warn(`[Job ${jobId}] Failed to cleanup temp file on error:`, cleanupError);
+        }
+      }
+      
+      await this.updateJobStatus(
+        jobId, 
+        'failed', 
+        undefined, 
+        error instanceof Error ? error.message : 'Unknown error'
+      );
     }
   }
 
