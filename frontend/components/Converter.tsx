@@ -184,7 +184,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
 
     return (
       <>
-        <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-4">
+        <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-3 md:gap-4">
           <div className="flex-grow flex w-full bg-white dark:bg-[#1D2528] border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
             <input
               id="url-input"
@@ -256,7 +256,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   };
 
   return (
-    <div className="w-full max-w-full sm:max-w-2xl md:max-w-3xl mx-auto bg-gray-100/50 dark:bg-[#2d3748] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-2 sm:p-3 md:p-4 lg:p-6 xl:p-8 transition-all duration-300 flex items-center justify-center overflow-hidden">
+    <div className="w-full max-w-full md:max-w-2xl lg:max-w-3xl mx-auto bg-gray-100/50 dark:bg-[#2d3748] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-3 sm:p-4 md:p-4 lg:p-6 xl:p-8 transition-all duration-300 flex items-center justify-center overflow-hidden">
       <div className="w-full">
         {renderContent()}
       </div>
