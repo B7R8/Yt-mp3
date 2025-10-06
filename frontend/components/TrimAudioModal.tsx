@@ -127,6 +127,22 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
     }
   };
 
+  // Calculate trimmed duration in seconds
+  const calculateTrimmedDuration = () => {
+    const startSeconds = parseInt(startTime.h) * 3600 + parseInt(startTime.m) * 60 + parseInt(startTime.s);
+    const endSeconds = parseInt(endTime.h) * 3600 + parseInt(endTime.m) * 60 + parseInt(endTime.s);
+    
+    // Handle invalid inputs (NaN values)
+    if (isNaN(startSeconds) || isNaN(endSeconds)) {
+      return 0;
+    }
+    
+    return Math.max(0, endSeconds - startSeconds);
+  };
+
+  // Get trimmed duration for display
+  const trimmedDuration = calculateTrimmedDuration();
+
   const handleSave = () => {
     const startStr = `${startTime.h}:${startTime.m}:${startTime.s}`;
     const endStr = `${endTime.h}:${endTime.m}:${endTime.s}`;
@@ -211,7 +227,7 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8 text-gray-800 dark:text-gray-200">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 text-gray-800 dark:text-gray-200">
               <div className="text-center">
                 <label className="block text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Start Time</label>
                 <TimeInput value={startTime} onChange={setStartTime} disabled={false} />
@@ -221,6 +237,37 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
                 <label className="block text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">End Time</label>
                 <TimeInput value={endTime} onChange={setEndTime} disabled={false} />
               </div>
+            </div>
+
+            {/* Trimmed Duration Display */}
+            <div className={`flex items-center justify-center gap-2 mb-6 sm:mb-8 p-3 rounded-lg border ${
+              trimmedDuration === 0 
+                ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' 
+                : trimmedDuration < 10 
+                ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+                : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+            }`}>
+              <ClockIcon className={`w-4 h-4 ${
+                trimmedDuration === 0 
+                  ? 'text-yellow-600 dark:text-yellow-400' 
+                  : trimmedDuration < 10 
+                  ? 'text-orange-600 dark:text-orange-400'
+                  : 'text-green-600 dark:text-green-400'
+              }`} />
+              <span className={`text-sm font-medium ${
+                trimmedDuration === 0 
+                  ? 'text-yellow-600 dark:text-yellow-400' 
+                  : trimmedDuration < 10 
+                  ? 'text-orange-600 dark:text-orange-400'
+                  : 'text-green-600 dark:text-green-400'
+              }`}>
+                {trimmedDuration === 0 
+                  ? 'Trimmed Audio Duration: 0s (Please set valid start and end times)'
+                  : trimmedDuration < 10 
+                  ? `Trimmed Audio Duration: ${formatDuration(trimmedDuration)} (Very short duration)`
+                  : `Trimmed Audio Duration: ${formatDuration(trimmedDuration)}`
+                }
+              </span>
             </div>
           </>
         )}

@@ -1178,3 +1178,501 @@
 {"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:47:31.953Z"}
 {"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:47:31.958Z"}
 {"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:47:31.959Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:48:45.574Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:48:45.581Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:48:45.582Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:49:03.237Z"}
+{"level":"info","message":"Video info fetched and cached: 1 Minute Timer / 1 Minute Timer With Ticking Sound (64s)","service":"youtube-converter","timestamp":"2025-10-06T03:49:08.271Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:49:31.212Z"}
+{"level":"info","message":"Video info fetched and cached: 3 Hour Timer (10809s)","service":"youtube-converter","timestamp":"2025-10-06T03:49:36.360Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:50:08.497Z"}
+{"level":"info","message":"Video info fetched and cached: 7 Hour Timer (25209s)","service":"youtube-converter","timestamp":"2025-10-06T03:50:13.289Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:50:54.716Z"}
+{"level":"info","message":"Video info fetched and cached: 30 Hour Countdown Timer (108001s)","service":"youtube-converter","timestamp":"2025-10-06T03:50:59.964Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:51:41.444Z"}
+{"level":"info","message":"Video info fetched and cached: 100 Hour Countdown Timer (360001s)","service":"youtube-converter","timestamp":"2025-10-06T03:51:49.213Z"}
+{"level":"info","message":"Running cleanup job...","service":"youtube-converter","timestamp":"2025-10-06T04:00:00.646Z"}
+{"code":"ENOENT","errno":-4058,"level":"warn","message":"Failed to delete file downloads\\7ea62d31-c3eb-4f3a-884a-e911071d0c5e.mp3: ENOENT: no such file or directory, unlink 'C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\7ea62d31-c3eb-4f3a-884a-e911071d0c5e.mp3'","path":"C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\7ea62d31-c3eb-4f3a-884a-e911071d0c5e.mp3","service":"youtube-converter","stack":"Error: ENOENT: no such file or directory, unlink 'C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\7ea62d31-c3eb-4f3a-884a-e911071d0c5e.mp3'\n    at Object.unlink (node:internal/fs/promises:1067:10)\n    at ConversionService.cleanupOldFiles (C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\src\\services\\conversionService.ts:370:13)","syscall":"unlink","timestamp":"2025-10-06T04:00:00.660Z"}
+{"code":"ENOENT","errno":-4058,"level":"warn","message":"Failed to delete file downloads\\1e1c5218-f4f2-440d-942d-2f260668f6c2.mp3: ENOENT: no such file or directory, unlink 'C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\1e1c5218-f4f2-440d-942d-2f260668f6c2.mp3'","path":"C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\1e1c5218-f4f2-440d-942d-2f260668f6c2.mp3","service":"youtube-converter","stack":"Error: ENOENT: no such file or directory, unlink 'C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\1e1c5218-f4f2-440d-942d-2f260668f6c2.mp3'\n    at Object.unlink (node:internal/fs/promises:1067:10)\n    at ConversionService.cleanupOldFiles (C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\src\\services\\conversionService.ts:370:13)","syscall":"unlink","timestamp":"2025-10-06T04:00:00.679Z"}
+{"code":"ENOENT","errno":-4058,"level":"warn","message":"Failed to delete file downloads\\e0101ced-083b-43b8-941a-46726f5e48b0.mp3: ENOENT: no such file or directory, unlink 'C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\e0101ced-083b-43b8-941a-46726f5e48b0.mp3'","path":"C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\e0101ced-083b-43b8-941a-46726f5e48b0.mp3","service":"youtube-converter","stack":"Error: ENOENT: no such file or directory, unlink 'C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\e0101ced-083b-43b8-941a-46726f5e48b0.mp3'\n    at Object.unlink (node:internal/fs/promises:1067:10)\n    at ConversionService.cleanupOldFiles (C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\src\\services\\conversionService.ts:370:13)","syscall":"unlink","timestamp":"2025-10-06T04:00:00.684Z"}
+{"code":"ENOENT","errno":-4058,"level":"warn","message":"Failed to delete file downloads\\0477c894-df46-496d-9a45-5ab0d8afd738.mp3: ENOENT: no such file or directory, unlink 'C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\0477c894-df46-496d-9a45-5ab0d8afd738.mp3'","path":"C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\0477c894-df46-496d-9a45-5ab0d8afd738.mp3","service":"youtube-converter","stack":"Error: ENOENT: no such file or directory, unlink 'C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\0477c894-df46-496d-9a45-5ab0d8afd738.mp3'\n    at Object.unlink (node:internal/fs/promises:1067:10)\n    at ConversionService.cleanupOldFiles (C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\src\\services\\conversionService.ts:370:13)","syscall":"unlink","timestamp":"2025-10-06T04:00:00.689Z"}
+{"code":"ENOENT","errno":-4058,"level":"warn","message":"Failed to delete file downloads\\f182115c-8958-43ef-a4b3-5545209e9c33.mp3: ENOENT: no such file or directory, unlink 'C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\f182115c-8958-43ef-a4b3-5545209e9c33.mp3'","path":"C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\f182115c-8958-43ef-a4b3-5545209e9c33.mp3","service":"youtube-converter","stack":"Error: ENOENT: no such file or directory, unlink 'C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\downloads\\f182115c-8958-43ef-a4b3-5545209e9c33.mp3'\n    at Object.unlink (node:internal/fs/promises:1067:10)\n    at ConversionService.cleanupOldFiles (C:\\Users\\SFYN\\Desktop\\Yt-mp3\\backend\\src\\services\\conversionService.ts:370:13)","syscall":"unlink","timestamp":"2025-10-06T04:00:00.693Z"}
+{"level":"info","message":"Cleanup completed. Processed 5 old jobs.","service":"youtube-converter","timestamp":"2025-10-06T04:00:00.698Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:00:56.087Z"}
+{"level":"info","message":"New conversion job created: a42d0507-a8ef-468a-946b-e9536df21a5c for URL: https://www.youtube.com/watch?v=lpfVhcotsgc","service":"youtube-converter","timestamp":"2025-10-06T04:01:03.671Z"}
+{"level":"info","message":"[Job a42d0507-a8ef-468a-946b-e9536df21a5c] Step 1: Downloading audio from https://www.youtube.com/watch?v=lpfVhcotsgc","service":"youtube-converter","timestamp":"2025-10-06T04:01:03.676Z"}
+{"level":"info","message":"Downloading audio with yt-dlp: -m yt_dlp -f bestaudio --extract-audio --audio-format mp3 --output downloads\\a42d0507-a8ef-468a-946b-e9536df21a5c_temp.mp3 --no-playlist https://www.youtube.com/watch?v=lpfVhcotsgc","service":"youtube-converter","timestamp":"2025-10-06T04:01:03.677Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:03.686Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] Extracting URL: https://www.youtube.com/watch?v=lpfVhcotsgc\n","service":"youtube-converter","timestamp":"2025-10-06T04:01:05.492Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] lpfVhcotsgc: Downloading webpage\n","service":"youtube-converter","timestamp":"2025-10-06T04:01:05.493Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] lpfVhcotsgc: Downloading tv client config\n","service":"youtube-converter","timestamp":"2025-10-06T04:01:06.846Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] lpfVhcotsgc: Downloading tv player API JSON\n","service":"youtube-converter","timestamp":"2025-10-06T04:01:06.966Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] lpfVhcotsgc: Downloading web safari player API JSON\n","service":"youtube-converter","timestamp":"2025-10-06T04:01:07.142Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:07.986Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:11.684Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] lpfVhcotsgc: Downloading m3u8 information\n","service":"youtube-converter","timestamp":"2025-10-06T04:01:11.691Z"}
+{"level":"debug","message":"yt-dlp stdout: [info] lpfVhcotsgc: Downloading 1 format(s): 251\n","service":"youtube-converter","timestamp":"2025-10-06T04:01:11.979Z"}
+{"level":"debug","message":"yt-dlp stdout: [download] Sleeping 1.00 seconds as required by the site...\n","service":"youtube-converter","timestamp":"2025-10-06T04:01:12.008Z"}
+{"level":"debug","message":"yt-dlp stdout: [download] Destination: downloads\\a42d0507-a8ef-468a-946b-e9536df21a5c_temp.webm\n","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.186Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.0% of  155.55MiB at   69.55KiB/s ETA 38:12","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.187Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.0% of  155.55MiB at  197.04KiB/s ETA 13:28","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.187Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.0% of  155.55MiB at  446.46KiB/s ETA 05:56","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.188Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.0% of  155.55MiB at  914.16KiB/s ETA 02:54","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.189Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.0% of  155.55MiB at    1.11MiB/s ETA 02:20","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.199Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.0% of  155.55MiB at    1.15MiB/s ETA 02:15","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.226Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.1% of  155.55MiB at    1.51MiB/s ETA 01:42","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.254Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.2% of  155.55MiB at    2.09MiB/s ETA 01:14","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.292Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.3% of  155.55MiB at    2.68MiB/s ETA 00:57","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.358Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.6% of  155.55MiB at    2.96MiB/s ETA 00:52","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.510Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   1.3% of  155.55MiB at    3.45MiB/s ETA 00:44","service":"youtube-converter","timestamp":"2025-10-06T04:01:13.751Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   2.6% of  155.55MiB at    3.51MiB/s ETA 00:43","service":"youtube-converter","timestamp":"2025-10-06T04:01:14.313Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   4.9% of  155.55MiB at    3.61MiB/s ETA 00:41","service":"youtube-converter","timestamp":"2025-10-06T04:01:15.270Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.3% of  155.55MiB at    3.56MiB/s ETA 00:40","service":"youtube-converter","timestamp":"2025-10-06T04:01:15.911Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.3% of  155.55MiB at  425.17KiB/s ETA 05:52","service":"youtube-converter","timestamp":"2025-10-06T04:01:15.959Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.3% of  155.55MiB at  975.12KiB/s ETA 02:33","service":"youtube-converter","timestamp":"2025-10-06T04:01:15.960Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.3% of  155.55MiB at    1.89MiB/s ETA 01:17","service":"youtube-converter","timestamp":"2025-10-06T04:01:15.962Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.3% of  155.55MiB at    3.22MiB/s ETA 00:45","service":"youtube-converter","timestamp":"2025-10-06T04:01:15.966Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.3% of  155.55MiB at    2.79MiB/s ETA 00:52","service":"youtube-converter","timestamp":"2025-10-06T04:01:15.969Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.3% of  155.55MiB at    4.69MiB/s ETA 00:31","service":"youtube-converter","timestamp":"2025-10-06T04:01:15.970Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:15.986Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.3% of  155.55MiB at    3.83MiB/s ETA 00:38","service":"youtube-converter","timestamp":"2025-10-06T04:01:15.989Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.4% of  155.55MiB at    3.68MiB/s ETA 00:39","service":"youtube-converter","timestamp":"2025-10-06T04:01:16.025Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.6% of  155.55MiB at    2.10MiB/s ETA 01:09","service":"youtube-converter","timestamp":"2025-10-06T04:01:16.194Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.9% of  155.55MiB at    2.73MiB/s ETA 00:53","service":"youtube-converter","timestamp":"2025-10-06T04:01:16.323Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   7.6% of  155.55MiB at    3.45MiB/s ETA 00:41","service":"youtube-converter","timestamp":"2025-10-06T04:01:16.536Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   8.8% of  155.55MiB at    2.89MiB/s ETA 00:49","service":"youtube-converter","timestamp":"2025-10-06T04:01:17.342Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  10.4% of  155.55MiB at    2.49MiB/s ETA 00:56","service":"youtube-converter","timestamp":"2025-10-06T04:01:18.565Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  11.7% of  155.55MiB at    2.58MiB/s ETA 00:53","service":"youtube-converter","timestamp":"2025-10-06T04:01:19.254Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:19.683Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  12.4% of  155.55MiB at    2.44MiB/s ETA 00:55","service":"youtube-converter","timestamp":"2025-10-06T04:01:19.870Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  12.4% of  155.55MiB at  110.76KiB/s ETA 21:01","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.064Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  12.4% of  155.55MiB at  309.63KiB/s ETA 07:30","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.064Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  12.4% of  155.55MiB at  687.37KiB/s ETA 03:23","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.065Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  12.4% of  155.55MiB at    1.36MiB/s ETA 01:40","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.066Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  12.4% of  155.55MiB at    2.40MiB/s ETA 00:56","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.067Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  12.4% of  155.55MiB at    1.25MiB/s ETA 01:49","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.104Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  12.5% of  155.55MiB at    1.54MiB/s ETA 01:28","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.135Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  12.6% of  155.55MiB at    2.28MiB/s ETA 00:59","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.165Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  12.7% of  155.55MiB at    3.10MiB/s ETA 00:43","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.216Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  13.0% of  155.55MiB at    3.60MiB/s ETA 00:37","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.332Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  13.7% of  155.55MiB at    3.63MiB/s ETA 00:37","service":"youtube-converter","timestamp":"2025-10-06T04:01:20.606Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  15.0% of  155.55MiB at    2.75MiB/s ETA 00:48","service":"youtube-converter","timestamp":"2025-10-06T04:01:21.507Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  16.4% of  155.55MiB at    2.61MiB/s ETA 00:49","service":"youtube-converter","timestamp":"2025-10-06T04:01:22.435Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  17.9% of  155.55MiB at    2.38MiB/s ETA 00:53","service":"youtube-converter","timestamp":"2025-10-06T04:01:23.669Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:23.987Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  18.7% of  155.55MiB at    2.47MiB/s ETA 00:51","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.057Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  18.7% of  155.55MiB at  146.94KiB/s ETA 14:42","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.133Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  18.7% of  155.55MiB at  406.32KiB/s ETA 05:18","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.133Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  18.7% of  155.55MiB at  889.46KiB/s ETA 02:25","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.134Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  18.8% of  155.55MiB at    1.74MiB/s ETA 01:12","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.134Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  18.8% of  155.55MiB at    2.07MiB/s ETA 01:01","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.140Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  18.8% of  155.55MiB at    2.06MiB/s ETA 01:01","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.156Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  18.8% of  155.55MiB at    2.18MiB/s ETA 00:57","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.183Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  18.9% of  155.55MiB at    2.04MiB/s ETA 01:01","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.248Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  19.1% of  155.55MiB at    2.15MiB/s ETA 00:58","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.357Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  19.4% of  155.55MiB at    2.16MiB/s ETA 00:58","service":"youtube-converter","timestamp":"2025-10-06T04:01:24.589Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  20.0% of  155.55MiB at    2.00MiB/s ETA 01:02","service":"youtube-converter","timestamp":"2025-10-06T04:01:25.127Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  21.2% of  155.55MiB at    2.37MiB/s ETA 00:51","service":"youtube-converter","timestamp":"2025-10-06T04:01:25.752Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  23.1% of  155.55MiB at    2.25MiB/s ETA 00:53","service":"youtube-converter","timestamp":"2025-10-06T04:01:27.167Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:27.684Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  24.5% of  155.55MiB at    2.33MiB/s ETA 00:50","service":"youtube-converter","timestamp":"2025-10-06T04:01:27.966Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.1% of  155.55MiB at    2.34MiB/s ETA 00:49","service":"youtube-converter","timestamp":"2025-10-06T04:01:28.386Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.1% of  155.55MiB at  Unknown B/s ETA Unknown","service":"youtube-converter","timestamp":"2025-10-06T04:01:28.620Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.1% of  155.55MiB at    1.36MiB/s ETA 01:26  ","service":"youtube-converter","timestamp":"2025-10-06T04:01:28.622Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.1% of  155.55MiB at    1.83MiB/s ETA 01:04","service":"youtube-converter","timestamp":"2025-10-06T04:01:28.623Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.2% of  155.55MiB at    2.59MiB/s ETA 00:45","service":"youtube-converter","timestamp":"2025-10-06T04:01:28.626Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.2% of  155.55MiB at    2.46MiB/s ETA 00:47","service":"youtube-converter","timestamp":"2025-10-06T04:01:28.631Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.2% of  155.55MiB at    3.24MiB/s ETA 00:35","service":"youtube-converter","timestamp":"2025-10-06T04:01:28.637Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.2% of  155.55MiB at    2.39MiB/s ETA 00:48","service":"youtube-converter","timestamp":"2025-10-06T04:01:28.670Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.3% of  155.55MiB at    2.21MiB/s ETA 00:52","service":"youtube-converter","timestamp":"2025-10-06T04:01:28.731Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.5% of  155.55MiB at    2.36MiB/s ETA 00:49","service":"youtube-converter","timestamp":"2025-10-06T04:01:28.830Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  25.8% of  155.55MiB at    2.11MiB/s ETA 00:54","service":"youtube-converter","timestamp":"2025-10-06T04:01:29.091Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  26.4% of  155.55MiB at    2.25MiB/s ETA 00:50","service":"youtube-converter","timestamp":"2025-10-06T04:01:29.506Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  27.7% of  155.55MiB at    2.61MiB/s ETA 00:43","service":"youtube-converter","timestamp":"2025-10-06T04:01:30.151Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  29.7% of  155.55MiB at    2.44MiB/s ETA 00:44","service":"youtube-converter","timestamp":"2025-10-06T04:01:31.531Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:31.985Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.1% of  155.55MiB at    2.41MiB/s ETA 00:44","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.498Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.4% of  155.55MiB at    2.41MiB/s ETA 00:44","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.643Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.4% of  155.55MiB at  191.49KiB/s ETA 09:32","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.775Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.4% of  155.55MiB at  477.84KiB/s ETA 03:49","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.776Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.4% of  155.55MiB at  985.54KiB/s ETA 01:51","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.778Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.4% of  155.55MiB at    1.73MiB/s ETA 01:01","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.779Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.4% of  155.55MiB at    2.73MiB/s ETA 00:39","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.781Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.4% of  155.55MiB at    2.38MiB/s ETA 00:44","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.795Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.5% of  155.55MiB at    2.39MiB/s ETA 00:44","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.821Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.5% of  155.55MiB at    2.33MiB/s ETA 00:45","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.876Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  31.7% of  155.55MiB at    2.19MiB/s ETA 00:48","service":"youtube-converter","timestamp":"2025-10-06T04:01:32.996Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  32.0% of  155.55MiB at    2.68MiB/s ETA 00:39","service":"youtube-converter","timestamp":"2025-10-06T04:01:33.142Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  32.7% of  155.55MiB at    2.61MiB/s ETA 00:40","service":"youtube-converter","timestamp":"2025-10-06T04:01:33.534Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  33.9% of  155.55MiB at    2.42MiB/s ETA 00:42","service":"youtube-converter","timestamp":"2025-10-06T04:01:34.424Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  35.4% of  155.55MiB at    2.38MiB/s ETA 00:42","service":"youtube-converter","timestamp":"2025-10-06T04:01:35.398Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:35.683Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  36.9% of  155.55MiB at    2.34MiB/s ETA 00:41","service":"youtube-converter","timestamp":"2025-10-06T04:01:36.420Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  37.8% of  155.55MiB at    2.35MiB/s ETA 00:41","service":"youtube-converter","timestamp":"2025-10-06T04:01:37.011Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  37.8% of  155.55MiB at  Unknown B/s ETA Unknown","service":"youtube-converter","timestamp":"2025-10-06T04:01:37.133Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  37.8% of  155.55MiB at  Unknown B/s ETA Unknown\r[download]  37.8% of  155.55MiB at    5.46MiB/s ETA 00:17  ","service":"youtube-converter","timestamp":"2025-10-06T04:01:37.135Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  37.8% of  155.55MiB at    7.43MiB/s ETA 00:13","service":"youtube-converter","timestamp":"2025-10-06T04:01:37.135Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  37.8% of  155.55MiB at   11.23MiB/s ETA 00:08","service":"youtube-converter","timestamp":"2025-10-06T04:01:37.136Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  37.8% of  155.55MiB at    5.70MiB/s ETA 00:16","service":"youtube-converter","timestamp":"2025-10-06T04:01:37.144Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  37.9% of  155.55MiB at    2.47MiB/s ETA 00:39","service":"youtube-converter","timestamp":"2025-10-06T04:01:37.183Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  37.9% of  155.55MiB at    2.33MiB/s ETA 00:41","service":"youtube-converter","timestamp":"2025-10-06T04:01:37.240Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  38.1% of  155.55MiB at    2.33MiB/s ETA 00:41","service":"youtube-converter","timestamp":"2025-10-06T04:01:37.347Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  38.4% of  155.55MiB at    1.89MiB/s ETA 00:50","service":"youtube-converter","timestamp":"2025-10-06T04:01:37.662Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  39.1% of  155.55MiB at    2.20MiB/s ETA 00:43","service":"youtube-converter","timestamp":"2025-10-06T04:01:38.040Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  40.4% of  155.55MiB at    2.42MiB/s ETA 00:38","service":"youtube-converter","timestamp":"2025-10-06T04:01:38.788Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  42.1% of  155.55MiB at    2.35MiB/s ETA 00:38","service":"youtube-converter","timestamp":"2025-10-06T04:01:39.970Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:39.987Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  43.5% of  155.55MiB at    2.26MiB/s ETA 00:38","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.079Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  44.1% of  155.55MiB at    2.32MiB/s ETA 00:37","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.372Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  44.1% of  155.55MiB at  216.72KiB/s ETA 06:51","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.503Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  44.1% of  155.55MiB at  589.75KiB/s ETA 02:31\r[download]  44.1% of  155.55MiB at    1.26MiB/s ETA 01:08","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.504Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  44.1% of  155.55MiB at    2.51MiB/s ETA 00:34","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.504Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  44.1% of  155.55MiB at    2.66MiB/s ETA 00:32","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.510Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  44.1% of  155.55MiB at    3.77MiB/s ETA 00:23","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.515Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  44.2% of  155.55MiB at    3.04MiB/s ETA 00:28","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.540Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  44.3% of  155.55MiB at    3.81MiB/s ETA 00:22","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.565Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  44.4% of  155.55MiB at    4.79MiB/s ETA 00:18","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.604Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  44.8% of  155.55MiB at    3.21MiB/s ETA 00:26","service":"youtube-converter","timestamp":"2025-10-06T04:01:41.810Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  45.4% of  155.55MiB at    2.77MiB/s ETA 00:30","service":"youtube-converter","timestamp":"2025-10-06T04:01:42.221Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  46.7% of  155.55MiB at    2.46MiB/s ETA 00:33","service":"youtube-converter","timestamp":"2025-10-06T04:01:43.122Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:43.684Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  48.1% of  155.55MiB at    2.38MiB/s ETA 00:33","service":"youtube-converter","timestamp":"2025-10-06T04:01:44.108Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  49.6% of  155.55MiB at    2.38MiB/s ETA 00:33","service":"youtube-converter","timestamp":"2025-10-06T04:01:45.062Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  50.3% of  155.55MiB at    2.31MiB/s ETA 00:33","service":"youtube-converter","timestamp":"2025-10-06T04:01:45.693Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  50.3% of  155.55MiB at  155.81KiB/s ETA 08:28","service":"youtube-converter","timestamp":"2025-10-06T04:01:45.807Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  50.3% of  155.55MiB at  422.84KiB/s ETA 03:07","service":"youtube-converter","timestamp":"2025-10-06T04:01:45.808Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  50.4% of  155.55MiB at  912.80KiB/s ETA 01:26\r[download]  50.4% of  155.55MiB at    1.75MiB/s ETA 00:44","service":"youtube-converter","timestamp":"2025-10-06T04:01:45.809Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  50.4% of  155.55MiB at    2.22MiB/s ETA 00:34","service":"youtube-converter","timestamp":"2025-10-06T04:01:45.815Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  50.4% of  155.55MiB at    1.76MiB/s ETA 00:43","service":"youtube-converter","timestamp":"2025-10-06T04:01:45.836Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  50.4% of  155.55MiB at    2.25MiB/s ETA 00:34","service":"youtube-converter","timestamp":"2025-10-06T04:01:45.857Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  50.5% of  155.55MiB at    2.28MiB/s ETA 00:33","service":"youtube-converter","timestamp":"2025-10-06T04:01:45.910Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  50.7% of  155.55MiB at    2.27MiB/s ETA 00:33","service":"youtube-converter","timestamp":"2025-10-06T04:01:46.020Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  51.0% of  155.55MiB at    2.00MiB/s ETA 00:38","service":"youtube-converter","timestamp":"2025-10-06T04:01:46.299Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  51.6% of  155.55MiB at    2.25MiB/s ETA 00:33","service":"youtube-converter","timestamp":"2025-10-06T04:01:46.691Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  52.9% of  155.55MiB at    2.49MiB/s ETA 00:29","service":"youtube-converter","timestamp":"2025-10-06T04:01:47.407Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:47.989Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  54.7% of  155.55MiB at    2.39MiB/s ETA 00:29","service":"youtube-converter","timestamp":"2025-10-06T04:01:48.637Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.2% of  155.55MiB at    2.37MiB/s ETA 00:28","service":"youtube-converter","timestamp":"2025-10-06T04:01:49.626Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.6% of  155.55MiB at    2.39MiB/s ETA 00:28","service":"youtube-converter","timestamp":"2025-10-06T04:01:49.857Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.6% of  155.55MiB at  104.11KiB/s ETA 11:04","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.086Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.6% of  155.55MiB at  299.30KiB/s ETA 03:51","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.087Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.6% of  155.55MiB at  678.30KiB/s ETA 01:41","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.087Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.6% of  155.55MiB at    1.36MiB/s ETA 00:49","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.088Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.6% of  155.55MiB at    2.09MiB/s ETA 00:32","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.091Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.6% of  155.55MiB at    4.05MiB/s ETA 00:16","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.092Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.7% of  155.55MiB at    3.17MiB/s ETA 00:21","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.116Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.7% of  155.55MiB at    3.29MiB/s ETA 00:20","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.154Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  56.9% of  155.55MiB at    3.23MiB/s ETA 00:20","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.232Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  57.2% of  155.55MiB at    3.38MiB/s ETA 00:19","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.373Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  57.9% of  155.55MiB at    2.88MiB/s ETA 00:22","service":"youtube-converter","timestamp":"2025-10-06T04:01:50.771Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  59.2% of  155.55MiB at    2.57MiB/s ETA 00:24","service":"youtube-converter","timestamp":"2025-10-06T04:01:51.631Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:51.682Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  60.7% of  155.55MiB at    2.38MiB/s ETA 00:25","service":"youtube-converter","timestamp":"2025-10-06T04:01:52.737Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  62.0% of  155.55MiB at    2.41MiB/s ETA 00:24","service":"youtube-converter","timestamp":"2025-10-06T04:01:53.581Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  63.0% of  155.55MiB at    2.31MiB/s ETA 00:24","service":"youtube-converter","timestamp":"2025-10-06T04:01:54.394Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  63.0% of  155.55MiB at  388.76KiB/s ETA 02:33","service":"youtube-converter","timestamp":"2025-10-06T04:01:54.500Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  63.0% of  155.55MiB at  935.95KiB/s ETA 01:03\r[download]  63.0% of  155.55MiB at    1.88MiB/s ETA 00:30","service":"youtube-converter","timestamp":"2025-10-06T04:01:54.501Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  63.0% of  155.55MiB at    3.44MiB/s ETA 00:16","service":"youtube-converter","timestamp":"2025-10-06T04:01:54.501Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  63.0% of  155.55MiB at    6.17MiB/s ETA 00:09","service":"youtube-converter","timestamp":"2025-10-06T04:01:54.502Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  63.0% of  155.55MiB at    5.54MiB/s ETA 00:10","service":"youtube-converter","timestamp":"2025-10-06T04:01:54.508Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  63.1% of  155.55MiB at    4.05MiB/s ETA 00:14","service":"youtube-converter","timestamp":"2025-10-06T04:01:54.527Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  63.2% of  155.55MiB at    3.32MiB/s ETA 00:17","service":"youtube-converter","timestamp":"2025-10-06T04:01:54.573Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  63.3% of  155.55MiB at    3.21MiB/s ETA 00:17","service":"youtube-converter","timestamp":"2025-10-06T04:01:54.653Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  63.7% of  155.55MiB at    2.81MiB/s ETA 00:20","service":"youtube-converter","timestamp":"2025-10-06T04:01:54.853Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  64.3% of  155.55MiB at    2.93MiB/s ETA 00:18","service":"youtube-converter","timestamp":"2025-10-06T04:01:55.180Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:55.985Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  65.6% of  155.55MiB at    2.26MiB/s ETA 00:23","service":"youtube-converter","timestamp":"2025-10-06T04:01:56.265Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  66.8% of  155.55MiB at    2.20MiB/s ETA 00:23","service":"youtube-converter","timestamp":"2025-10-06T04:01:57.157Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  68.1% of  155.55MiB at    2.39MiB/s ETA 00:20","service":"youtube-converter","timestamp":"2025-10-06T04:01:57.807Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  69.4% of  155.55MiB at    2.43MiB/s ETA 00:19","service":"youtube-converter","timestamp":"2025-10-06T04:01:58.610Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  69.4% of  155.55MiB at   47.26KiB/s ETA 17:11","service":"youtube-converter","timestamp":"2025-10-06T04:01:58.697Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  69.4% of  155.55MiB at  136.99KiB/s ETA 05:55","service":"youtube-converter","timestamp":"2025-10-06T04:01:58.698Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  69.4% of  155.55MiB at  308.57KiB/s ETA 02:37\r[download]  69.4% of  155.55MiB at  640.94KiB/s ETA 01:15","service":"youtube-converter","timestamp":"2025-10-06T04:01:58.699Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  69.5% of  155.55MiB at    1.27MiB/s ETA 00:37","service":"youtube-converter","timestamp":"2025-10-06T04:01:58.700Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  69.5% of  155.55MiB at    2.08MiB/s ETA 00:22","service":"youtube-converter","timestamp":"2025-10-06T04:01:58.706Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  69.5% of  155.55MiB at    2.05MiB/s ETA 00:23","service":"youtube-converter","timestamp":"2025-10-06T04:01:58.738Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  69.6% of  155.55MiB at    2.19MiB/s ETA 00:21","service":"youtube-converter","timestamp":"2025-10-06T04:01:58.789Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  69.8% of  155.55MiB at    2.05MiB/s ETA 00:22","service":"youtube-converter","timestamp":"2025-10-06T04:01:58.919Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  70.1% of  155.55MiB at    2.36MiB/s ETA 00:19","service":"youtube-converter","timestamp":"2025-10-06T04:01:59.099Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  70.7% of  155.55MiB at    2.19MiB/s ETA 00:20","service":"youtube-converter","timestamp":"2025-10-06T04:01:59.589Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:01:59.683Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  72.0% of  155.55MiB at    2.16MiB/s ETA 00:20","service":"youtube-converter","timestamp":"2025-10-06T04:02:00.527Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  73.4% of  155.55MiB at    2.09MiB/s ETA 00:19","service":"youtube-converter","timestamp":"2025-10-06T04:02:01.609Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  74.6% of  155.55MiB at    2.26MiB/s ETA 00:17","service":"youtube-converter","timestamp":"2025-10-06T04:02:02.268Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  75.8% of  155.55MiB at    2.21MiB/s ETA 00:17","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.189Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  75.8% of  155.55MiB at   80.83KiB/s ETA 07:56","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.406Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  75.8% of  155.55MiB at  233.71KiB/s ETA 02:44","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.406Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  75.8% of  155.55MiB at  529.97KiB/s ETA 01:12\r[download]  75.8% of  155.55MiB at    1.08MiB/s ETA 00:34","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.407Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  75.9% of  155.55MiB at    1.25MiB/s ETA 00:29","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.417Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  75.9% of  155.55MiB at    1.76MiB/s ETA 00:21","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.428Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  75.9% of  155.55MiB at    1.81MiB/s ETA 00:20","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.462Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  76.0% of  155.55MiB at    2.06MiB/s ETA 00:18","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.514Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  76.2% of  155.55MiB at    2.14MiB/s ETA 00:17","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.627Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  76.5% of  155.55MiB at    2.15MiB/s ETA 00:17","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.858Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:03.984Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  77.1% of  155.55MiB at    2.89MiB/s ETA 00:12","service":"youtube-converter","timestamp":"2025-10-06T04:02:04.085Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  78.4% of  155.55MiB at    2.77MiB/s ETA 00:12","service":"youtube-converter","timestamp":"2025-10-06T04:02:04.838Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  80.1% of  155.55MiB at    2.50MiB/s ETA 00:12","service":"youtube-converter","timestamp":"2025-10-06T04:02:06.055Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  81.5% of  155.55MiB at    2.49MiB/s ETA 00:11","service":"youtube-converter","timestamp":"2025-10-06T04:02:06.944Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  82.0% of  155.55MiB at    2.47MiB/s ETA 00:11","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.291Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  82.0% of  155.55MiB at  147.52KiB/s ETA 03:14","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.425Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  82.0% of  155.55MiB at  410.99KiB/s ETA 01:09","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.426Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  82.0% of  155.55MiB at  903.83KiB/s ETA 00:31\r[download]  82.0% of  155.55MiB at    1.81MiB/s ETA 00:15","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.426Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  82.0% of  155.55MiB at    2.39MiB/s ETA 00:11","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.431Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  82.1% of  155.55MiB at    2.39MiB/s ETA 00:11","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.444Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  82.1% of  155.55MiB at    2.31MiB/s ETA 00:12","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.473Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  82.2% of  155.55MiB at    2.02MiB/s ETA 00:13","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.542Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  82.3% of  155.55MiB at    2.48MiB/s ETA 00:11","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.620Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.684Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  82.7% of  155.55MiB at    2.98MiB/s ETA 00:09","service":"youtube-converter","timestamp":"2025-10-06T04:02:07.753Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  83.3% of  155.55MiB at    2.83MiB/s ETA 00:09","service":"youtube-converter","timestamp":"2025-10-06T04:02:08.124Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  84.6% of  155.55MiB at    2.38MiB/s ETA 00:10","service":"youtube-converter","timestamp":"2025-10-06T04:02:09.100Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  85.9% of  155.55MiB at    2.33MiB/s ETA 00:09","service":"youtube-converter","timestamp":"2025-10-06T04:02:10.015Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  87.4% of  155.55MiB at    2.33MiB/s ETA 00:08","service":"youtube-converter","timestamp":"2025-10-06T04:02:10.977Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:11.006Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  88.3% of  155.55MiB at    2.30MiB/s ETA 00:07","service":"youtube-converter","timestamp":"2025-10-06T04:02:11.687Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  88.3% of  155.55MiB at  106.08KiB/s ETA 02:55","service":"youtube-converter","timestamp":"2025-10-06T04:02:11.892Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  88.3% of  155.55MiB at  290.62KiB/s ETA 01:04\r[download]  88.3% of  155.55MiB at  643.76KiB/s ETA 00:28","service":"youtube-converter","timestamp":"2025-10-06T04:02:11.893Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  88.3% of  155.55MiB at    1.28MiB/s ETA 00:14","service":"youtube-converter","timestamp":"2025-10-06T04:02:11.894Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  88.3% of  155.55MiB at    1.92MiB/s ETA 00:09","service":"youtube-converter","timestamp":"2025-10-06T04:02:11.898Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  88.4% of  155.55MiB at    1.93MiB/s ETA 00:09","service":"youtube-converter","timestamp":"2025-10-06T04:02:11.914Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  88.4% of  155.55MiB at    2.04MiB/s ETA 00:08","service":"youtube-converter","timestamp":"2025-10-06T04:02:11.943Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  88.5% of  155.55MiB at    1.88MiB/s ETA 00:09","service":"youtube-converter","timestamp":"2025-10-06T04:02:12.015Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  88.7% of  155.55MiB at    2.38MiB/s ETA 00:07","service":"youtube-converter","timestamp":"2025-10-06T04:02:12.092Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  89.0% of  155.55MiB at    3.39MiB/s ETA 00:05","service":"youtube-converter","timestamp":"2025-10-06T04:02:12.177Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  89.6% of  155.55MiB at    3.22MiB/s ETA 00:05","service":"youtube-converter","timestamp":"2025-10-06T04:02:12.504Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  90.9% of  155.55MiB at    2.65MiB/s ETA 00:05","service":"youtube-converter","timestamp":"2025-10-06T04:02:13.390Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:14.093Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  92.4% of  155.55MiB at    2.21MiB/s ETA 00:05","service":"youtube-converter","timestamp":"2025-10-06T04:02:14.716Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  93.4% of  155.55MiB at    1.94MiB/s ETA 00:05","service":"youtube-converter","timestamp":"2025-10-06T04:02:15.983Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  94.3% of  155.55MiB at    1.85MiB/s ETA 00:04","service":"youtube-converter","timestamp":"2025-10-06T04:02:16.908Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  94.7% of  155.55MiB at    1.80MiB/s ETA 00:04","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.366Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  94.7% of  155.55MiB at  352.17KiB/s ETA 00:24","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.450Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  94.7% of  155.55MiB at  884.94KiB/s ETA 00:09","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.450Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  94.7% of  155.55MiB at    1.69MiB/s ETA 00:04","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.451Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  94.7% of  155.55MiB at    3.06MiB/s ETA 00:02","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.452Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  94.7% of  155.55MiB at    1.55MiB/s ETA 00:05","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.466Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  94.7% of  155.55MiB at    2.12MiB/s ETA 00:03","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.476Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.477Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  94.7% of  155.55MiB at  701.39KiB/s ETA 00:11","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.629Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  94.8% of  155.55MiB at    1.02MiB/s ETA 00:07","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.692Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  95.0% of  155.55MiB at    1.36MiB/s ETA 00:05","service":"youtube-converter","timestamp":"2025-10-06T04:02:17.813Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  95.3% of  155.55MiB at    1.42MiB/s ETA 00:05","service":"youtube-converter","timestamp":"2025-10-06T04:02:18.150Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  95.9% of  155.55MiB at    1.62MiB/s ETA 00:03","service":"youtube-converter","timestamp":"2025-10-06T04:02:18.680Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  97.2% of  155.55MiB at    2.09MiB/s ETA 00:02","service":"youtube-converter","timestamp":"2025-10-06T04:02:19.303Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  99.1% of  155.55MiB at    2.48MiB/s ETA 00:00","service":"youtube-converter","timestamp":"2025-10-06T04:02:20.236Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download] 100.0% of  155.55MiB at    2.63MiB/s ETA 00:00","service":"youtube-converter","timestamp":"2025-10-06T04:02:20.608Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download] 100% of  155.55MiB in 00:01:07 at 2.30MiB/s   ","service":"youtube-converter","timestamp":"2025-10-06T04:02:20.609Z"}
+{"level":"debug","message":"yt-dlp stdout: \n","service":"youtube-converter","timestamp":"2025-10-06T04:02:20.610Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:20.791Z"}
+{"level":"debug","message":"yt-dlp stdout: [ExtractAudio] Destination: downloads\\a42d0507-a8ef-468a-946b-e9536df21a5c_temp.mp3\n","service":"youtube-converter","timestamp":"2025-10-06T04:02:20.881Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:23.814Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:27.133Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:30.186Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:33.567Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:36.577Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:39.888Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:42.899Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:46.211Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:49.222Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:52.535Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:55.544Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:02:58.856Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:01.865Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:05.180Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:08.192Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:11.503Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:14.515Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:17.827Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:20.837Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:24.148Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:27.159Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:30.473Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:33.485Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:36.800Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:39.812Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:43.124Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:46.137Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:49.450Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:52.461Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:55.778Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:03:58.787Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:02.100Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:05.108Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:08.420Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:11.685Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:15.985Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:19.685Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:23.986Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:27.684Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:31.986Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:35.683Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:39.985Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:43.684Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:47.986Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:51.694Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:55.984Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:04:59.698Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:03.987Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:07.683Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:11.987Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:15.685Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:19.986Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:23.684Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:27.986Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:31.683Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:35.986Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:39.683Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:43.985Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:47.684Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:51.985Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:55.683Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:05:59.988Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:03.720Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:07.987Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:11.684Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:16.032Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:19.682Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:23.986Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:27.684Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:31.987Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:35.683Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:39.990Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:43.687Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:47.987Z"}
+{"level":"info","message":"GET /api/status/a42d0507-a8ef-468a-946b-e9536df21a5c - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:06:51.719Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T04:07:16.141Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T04:07:16.146Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T04:07:16.147Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:07:48.979Z"}
+{"level":"info","message":"Video info fetched and cached: 1 Hour Timer (3609s)","service":"youtube-converter","timestamp":"2025-10-06T04:07:55.447Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:19.386Z"}
+{"level":"info","message":"New conversion job created: 8d987414-226b-4cf8-94c3-1071c8164048 for URL: https://www.youtube.com/watch?v=wN-mZtbX2Pg","service":"youtube-converter","timestamp":"2025-10-06T04:08:27.703Z"}
+{"level":"info","message":"[Job 8d987414-226b-4cf8-94c3-1071c8164048] Step 1: Downloading audio from https://www.youtube.com/watch?v=wN-mZtbX2Pg","service":"youtube-converter","timestamp":"2025-10-06T04:08:27.708Z"}
+{"level":"info","message":"Downloading audio with yt-dlp: -m yt_dlp -f bestaudio --extract-audio --audio-format mp3 --output downloads\\8d987414-226b-4cf8-94c3-1071c8164048_temp.mp3 --no-playlist https://www.youtube.com/watch?v=wN-mZtbX2Pg","service":"youtube-converter","timestamp":"2025-10-06T04:08:27.709Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:28.016Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] Extracting URL: https://www.youtube.com/watch?v=wN-mZtbX2Pg\n","service":"youtube-converter","timestamp":"2025-10-06T04:08:30.293Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] wN-mZtbX2Pg: Downloading webpage\n","service":"youtube-converter","timestamp":"2025-10-06T04:08:30.294Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:31.037Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] wN-mZtbX2Pg: Downloading tv client config\n","service":"youtube-converter","timestamp":"2025-10-06T04:08:31.521Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] wN-mZtbX2Pg: Downloading tv player API JSON\n","service":"youtube-converter","timestamp":"2025-10-06T04:08:31.641Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] wN-mZtbX2Pg: Downloading web safari player API JSON\n","service":"youtube-converter","timestamp":"2025-10-06T04:08:31.785Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:34.351Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] wN-mZtbX2Pg: Downloading m3u8 information\n","service":"youtube-converter","timestamp":"2025-10-06T04:08:36.279Z"}
+{"level":"debug","message":"yt-dlp stdout: [info] wN-mZtbX2Pg: Downloading 1 format(s): 251\n","service":"youtube-converter","timestamp":"2025-10-06T04:08:36.638Z"}
+{"level":"debug","message":"yt-dlp stdout: [download] Sleeping 1.00 seconds as required by the site...\n","service":"youtube-converter","timestamp":"2025-10-06T04:08:36.667Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:37.361Z"}
+{"level":"debug","message":"yt-dlp stdout: [download] Destination: downloads\\8d987414-226b-4cf8-94c3-1071c8164048_temp.webm\n","service":"youtube-converter","timestamp":"2025-10-06T04:08:37.816Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.1% of    1.73MiB at  139.00KiB/s ETA 00:12","service":"youtube-converter","timestamp":"2025-10-06T04:08:37.817Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.2% of    1.73MiB at  355.19KiB/s ETA 00:04\r[download]   0.4% of    1.73MiB at  777.30KiB/s ETA 00:02","service":"youtube-converter","timestamp":"2025-10-06T04:08:37.818Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.8% of    1.73MiB at    1.50MiB/s ETA 00:01","service":"youtube-converter","timestamp":"2025-10-06T04:08:37.819Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   1.8% of    1.73MiB at    1.03MiB/s ETA 00:01","service":"youtube-converter","timestamp":"2025-10-06T04:08:37.838Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   3.6% of    1.73MiB at    1.24MiB/s ETA 00:01","service":"youtube-converter","timestamp":"2025-10-06T04:08:37.858Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   7.2% of    1.73MiB at    1.69MiB/s ETA 00:00","service":"youtube-converter","timestamp":"2025-10-06T04:08:37.883Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  14.4% of    1.73MiB at    2.35MiB/s ETA 00:00","service":"youtube-converter","timestamp":"2025-10-06T04:08:37.915Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  28.9% of    1.73MiB at    3.05MiB/s ETA 00:00","service":"youtube-converter","timestamp":"2025-10-06T04:08:37.973Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  57.8% of    1.73MiB at    3.90MiB/s ETA 00:00","service":"youtube-converter","timestamp":"2025-10-06T04:08:38.065Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download] 100.0% of    1.73MiB at    4.65MiB/s ETA 00:00","service":"youtube-converter","timestamp":"2025-10-06T04:08:38.180Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download] 100% of    1.73MiB in 00:00:00 at 3.36MiB/s   ","service":"youtube-converter","timestamp":"2025-10-06T04:08:38.182Z"}
+{"level":"debug","message":"yt-dlp stdout: \n","service":"youtube-converter","timestamp":"2025-10-06T04:08:38.183Z"}
+{"level":"debug","message":"yt-dlp stdout: [ExtractAudio] Destination: downloads\\8d987414-226b-4cf8-94c3-1071c8164048_temp.mp3\n","service":"youtube-converter","timestamp":"2025-10-06T04:08:38.319Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:40.672Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:43.684Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:47.000Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:50.685Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:54.995Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:08:58.683Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:02.987Z"}
+{"level":"debug","message":"yt-dlp stdout: Deleting original file downloads\\8d987414-226b-4cf8-94c3-1071c8164048_temp.webm (pass -k to keep)\n","service":"youtube-converter","timestamp":"2025-10-06T04:09:04.878Z"}
+{"level":"info","message":"Audio downloaded successfully to: downloads\\8d987414-226b-4cf8-94c3-1071c8164048_temp.mp3","service":"youtube-converter","timestamp":"2025-10-06T04:09:05.053Z"}
+{"level":"info","message":"[Job 8d987414-226b-4cf8-94c3-1071c8164048] Step 2: Processing with FFmpeg (trim: 00:02:00 to 00:03:09, bitrate: 128k)","service":"youtube-converter","timestamp":"2025-10-06T04:09:05.054Z"}
+{"level":"info","message":"Processing audio with FFmpeg: input=downloads\\8d987414-226b-4cf8-94c3-1071c8164048_temp.mp3, output=downloads\\8d987414-226b-4cf8-94c3-1071c8164048.mp3, bitrate=128k","service":"youtube-converter","timestamp":"2025-10-06T04:09:05.056Z"}
+{"level":"info","message":"Setting start time: 00:02:00","service":"youtube-converter","timestamp":"2025-10-06T04:09:05.058Z"}
+{"level":"info","message":"Setting duration: 69 seconds (00:02:00 to 00:03:09)","service":"youtube-converter","timestamp":"2025-10-06T04:09:05.059Z"}
+{"level":"info","message":"FFmpeg command: ffmpeg -ss 00:02:00 -i downloads\\8d987414-226b-4cf8-94c3-1071c8164048_temp.mp3 -y -b:a 128k -t 69 -f mp3 downloads\\8d987414-226b-4cf8-94c3-1071c8164048.mp3","service":"youtube-converter","timestamp":"2025-10-06T04:09:05.325Z"}
+{"level":"debug","message":"Processing: {\"frames\":null,\"currentFps\":null,\"currentKbps\":128.1,\"targetSize\":1079,\"timemark\":\"00:01:09.00\",\"percent\":1.9118827663545792}","service":"youtube-converter","timestamp":"2025-10-06T04:09:05.940Z"}
+{"level":"info","message":"FFmpeg processing completed: downloads\\8d987414-226b-4cf8-94c3-1071c8164048.mp3","service":"youtube-converter","timestamp":"2025-10-06T04:09:05.947Z"}
+{"level":"info","message":"[Job 8d987414-226b-4cf8-94c3-1071c8164048] Cleaned up temporary file: downloads\\8d987414-226b-4cf8-94c3-1071c8164048_temp.mp3","service":"youtube-converter","timestamp":"2025-10-06T04:09:05.950Z"}
+{"level":"info","message":"[Job 8d987414-226b-4cf8-94c3-1071c8164048] Conversion completed successfully","service":"youtube-converter","timestamp":"2025-10-06T04:09:05.965Z"}
+{"level":"info","message":"GET /api/status/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:06.685Z"}
+{"level":"info","message":"GET /api/download/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:20.620Z"}
+{"level":"info","message":"File 8d987414-226b-4cf8-94c3-1071c8164048.mp3 sent successfully","service":"youtube-converter","timestamp":"2025-10-06T04:09:20.649Z"}
+{"level":"info","message":"GET /api/download/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.605Z"}
+{"level":"info","message":"File 8d987414-226b-4cf8-94c3-1071c8164048.mp3 sent successfully","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.611Z"}
+{"level":"info","message":"GET /api/download/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.640Z"}
+{"level":"info","message":"File 8d987414-226b-4cf8-94c3-1071c8164048.mp3 sent successfully","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.646Z"}
+{"level":"info","message":"GET /api/download/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.653Z"}
+{"level":"info","message":"GET /api/download/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.658Z"}
+{"level":"info","message":"File 8d987414-226b-4cf8-94c3-1071c8164048.mp3 sent successfully","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.667Z"}
+{"level":"info","message":"GET /api/download/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.669Z"}
+{"level":"info","message":"GET /api/download/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.672Z"}
+{"level":"info","message":"GET /api/download/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.680Z"}
+{"level":"info","message":"GET /api/download/8d987414-226b-4cf8-94c3-1071c8164048 - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.687Z"}
+{"level":"info","message":"File 8d987414-226b-4cf8-94c3-1071c8164048.mp3 sent successfully","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.691Z"}
+{"level":"info","message":"File 8d987414-226b-4cf8-94c3-1071c8164048.mp3 sent successfully","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.708Z"}
+{"level":"info","message":"File 8d987414-226b-4cf8-94c3-1071c8164048.mp3 sent successfully","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.710Z"}
+{"level":"info","message":"File 8d987414-226b-4cf8-94c3-1071c8164048.mp3 sent successfully","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.714Z"}
+{"level":"info","message":"File 8d987414-226b-4cf8-94c3-1071c8164048.mp3 sent successfully","service":"youtube-converter","timestamp":"2025-10-06T04:09:23.719Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:09:46.267Z"}
+{"level":"info","message":"Video info fetched and cached: 5 Min Focus Timer 🍥 | Cozy Animation + No Talking #timer (312s)","service":"youtube-converter","timestamp":"2025-10-06T04:09:51.251Z"}
+{"level":"info","message":"POST /api/convert - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:17.108Z"}
+{"level":"info","message":"New conversion job created: c2a1efaa-5708-4a30-804f-7266415fcc2b for URL: https://www.youtube.com/watch?v=S7KA5dvIOjs","service":"youtube-converter","timestamp":"2025-10-06T04:10:25.506Z"}
+{"level":"info","message":"[Job c2a1efaa-5708-4a30-804f-7266415fcc2b] Step 1: Downloading audio from https://www.youtube.com/watch?v=S7KA5dvIOjs","service":"youtube-converter","timestamp":"2025-10-06T04:10:25.511Z"}
+{"level":"info","message":"Downloading audio with yt-dlp: -m yt_dlp -f bestaudio --extract-audio --audio-format mp3 --output downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b_temp.mp3 --no-playlist https://www.youtube.com/watch?v=S7KA5dvIOjs","service":"youtube-converter","timestamp":"2025-10-06T04:10:25.514Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:25.524Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] Extracting URL: https://www.youtube.com/watch?v=S7KA5dvIOjs\n","service":"youtube-converter","timestamp":"2025-10-06T04:10:27.521Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] S7KA5dvIOjs: Downloading webpage\n","service":"youtube-converter","timestamp":"2025-10-06T04:10:27.522Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] S7KA5dvIOjs: Downloading tv client config\n","service":"youtube-converter","timestamp":"2025-10-06T04:10:28.559Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] S7KA5dvIOjs: Downloading tv player API JSON\n","service":"youtube-converter","timestamp":"2025-10-06T04:10:28.689Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] S7KA5dvIOjs: Downloading web safari player API JSON\n","service":"youtube-converter","timestamp":"2025-10-06T04:10:28.842Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:28.848Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:31.857Z"}
+{"level":"debug","message":"yt-dlp stdout: [youtube] S7KA5dvIOjs: Downloading m3u8 information\n","service":"youtube-converter","timestamp":"2025-10-06T04:10:33.453Z"}
+{"level":"debug","message":"yt-dlp stdout: [info] S7KA5dvIOjs: Downloading 1 format(s): 251\n","service":"youtube-converter","timestamp":"2025-10-06T04:10:33.829Z"}
+{"level":"debug","message":"yt-dlp stdout: [download] Sleeping 1.00 seconds as required by the site...\n","service":"youtube-converter","timestamp":"2025-10-06T04:10:33.866Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:35.169Z"}
+{"level":"debug","message":"yt-dlp stdout: [download] Destination: downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b_temp.webm\n","service":"youtube-converter","timestamp":"2025-10-06T04:10:35.755Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.1% of    1.88MiB at   14.61KiB/s ETA 02:11","service":"youtube-converter","timestamp":"2025-10-06T04:10:35.756Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.2% of    1.88MiB at   43.20KiB/s ETA 00:44\r[download]   0.4% of    1.88MiB at  100.14KiB/s ETA 00:19","service":"youtube-converter","timestamp":"2025-10-06T04:10:35.757Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   0.8% of    1.88MiB at  212.66KiB/s ETA 00:08","service":"youtube-converter","timestamp":"2025-10-06T04:10:35.758Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   1.6% of    1.88MiB at  362.81KiB/s ETA 00:05","service":"youtube-converter","timestamp":"2025-10-06T04:10:35.773Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   3.3% of    1.88MiB at  399.86KiB/s ETA 00:04","service":"youtube-converter","timestamp":"2025-10-06T04:10:35.845Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]   6.6% of    1.88MiB at  563.27KiB/s ETA 00:03","service":"youtube-converter","timestamp":"2025-10-06T04:10:35.913Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  13.3% of    1.88MiB at  844.91KiB/s ETA 00:01","service":"youtube-converter","timestamp":"2025-10-06T04:10:35.989Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  26.6% of    1.88MiB at    1.19MiB/s ETA 00:01","service":"youtube-converter","timestamp":"2025-10-06T04:10:36.106Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download]  53.2% of    1.88MiB at    1.82MiB/s ETA 00:00","service":"youtube-converter","timestamp":"2025-10-06T04:10:36.235Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download] 100.0% of    1.88MiB at    2.83MiB/s ETA 00:00","service":"youtube-converter","timestamp":"2025-10-06T04:10:36.352Z"}
+{"level":"debug","message":"yt-dlp stdout: \r[download] 100% of    1.88MiB in 00:00:01 at 1.27MiB/s   ","service":"youtube-converter","timestamp":"2025-10-06T04:10:36.353Z"}
+{"level":"debug","message":"yt-dlp stdout: \n","service":"youtube-converter","timestamp":"2025-10-06T04:10:36.354Z"}
+{"level":"debug","message":"yt-dlp stdout: [ExtractAudio] Destination: downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b_temp.mp3\n","service":"youtube-converter","timestamp":"2025-10-06T04:10:36.512Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:38.180Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:41.492Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:44.502Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:47.814Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:50.823Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:54.135Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:10:57.144Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:11:00.456Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:11:03.468Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:11:06.799Z"}
+{"level":"debug","message":"yt-dlp stdout: Deleting original file downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b_temp.webm (pass -k to keep)\n","service":"youtube-converter","timestamp":"2025-10-06T04:11:08.683Z"}
+{"level":"info","message":"Audio downloaded successfully to: downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b_temp.mp3","service":"youtube-converter","timestamp":"2025-10-06T04:11:08.799Z"}
+{"level":"info","message":"[Job c2a1efaa-5708-4a30-804f-7266415fcc2b] Step 2: Processing with FFmpeg (trim: 00:00:40 to 00:05:12, bitrate: 128k)","service":"youtube-converter","timestamp":"2025-10-06T04:11:08.800Z"}
+{"level":"info","message":"Processing audio with FFmpeg: input=downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b_temp.mp3, output=downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b.mp3, bitrate=128k","service":"youtube-converter","timestamp":"2025-10-06T04:11:08.801Z"}
+{"level":"info","message":"Setting start time: 00:00:40","service":"youtube-converter","timestamp":"2025-10-06T04:11:08.804Z"}
+{"level":"info","message":"Setting duration: 272 seconds (00:00:40 to 00:05:12)","service":"youtube-converter","timestamp":"2025-10-06T04:11:08.804Z"}
+{"level":"info","message":"FFmpeg command: ffmpeg -ss 00:00:40 -i downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b_temp.mp3 -y -b:a 128k -t 272 -f mp3 downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b.mp3","service":"youtube-converter","timestamp":"2025-10-06T04:11:08.823Z"}
+{"level":"debug","message":"Processing: {\"frames\":null,\"currentFps\":null,\"currentKbps\":74.7,\"targetSize\":256,\"timemark\":\"00:00:28.05\",\"percent\":8.998232227506518}","service":"youtube-converter","timestamp":"2025-10-06T04:11:09.485Z"}
+{"level":"debug","message":"Processing: {\"frames\":null,\"currentFps\":null,\"currentKbps\":114.8,\"targetSize\":768,\"timemark\":\"00:00:54.81\",\"percent\":17.58264201032557}","service":"youtube-converter","timestamp":"2025-10-06T04:11:09.999Z"}
+{"level":"debug","message":"Processing: {\"frames\":null,\"currentFps\":null,\"currentKbps\":102.5,\"targetSize\":1024,\"timemark\":\"00:01:21.81\",\"percent\":26.244042015412056}","service":"youtube-converter","timestamp":"2025-10-06T04:11:10.515Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:11:10.687Z"}
+{"level":"debug","message":"Processing: {\"frames\":null,\"currentFps\":null,\"currentKbps\":120.2,\"targetSize\":1536,\"timemark\":\"00:01:44.64\",\"percent\":33.56773690860185}","service":"youtube-converter","timestamp":"2025-10-06T04:11:11.037Z"}
+{"level":"debug","message":"Processing: {\"frames\":null,\"currentFps\":null,\"currentKbps\":116,\"targetSize\":1792,\"timemark\":\"00:02:06.50\",\"percent\":40.580262986794104}","service":"youtube-converter","timestamp":"2025-10-06T04:11:11.547Z"}
+{"level":"debug","message":"Processing: {\"frames\":null,\"currentFps\":null,\"currentKbps\":124.6,\"targetSize\":2560,\"timemark\":\"00:02:48.36\",\"percent\":54.00864092060596}","service":"youtube-converter","timestamp":"2025-10-06T04:11:12.061Z"}
+{"level":"debug","message":"Processing: {\"frames\":null,\"currentFps\":null,\"currentKbps\":127.8,\"targetSize\":3328,\"timemark\":\"00:03:33.38\",\"percent\":68.45072344760574}","service":"youtube-converter","timestamp":"2025-10-06T04:11:12.576Z"}
+{"level":"debug","message":"Processing: {\"frames\":null,\"currentFps\":null,\"currentKbps\":124,\"targetSize\":3840,\"timemark\":\"00:04:13.63\",\"percent\":81.36262530704022}","service":"youtube-converter","timestamp":"2025-10-06T04:11:13.092Z"}
+{"level":"debug","message":"Processing: {\"frames\":null,\"currentFps\":null,\"currentKbps\":128,\"targetSize\":4247,\"timemark\":\"00:04:31.72\",\"percent\":87.16576331044817}","service":"youtube-converter","timestamp":"2025-10-06T04:11:13.354Z"}
+{"level":"info","message":"FFmpeg processing completed: downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b.mp3","service":"youtube-converter","timestamp":"2025-10-06T04:11:13.362Z"}
+{"level":"info","message":"[Job c2a1efaa-5708-4a30-804f-7266415fcc2b] Cleaned up temporary file: downloads\\c2a1efaa-5708-4a30-804f-7266415fcc2b_temp.mp3","service":"youtube-converter","timestamp":"2025-10-06T04:11:13.364Z"}
+{"level":"info","message":"[Job c2a1efaa-5708-4a30-804f-7266415fcc2b] Conversion completed successfully","service":"youtube-converter","timestamp":"2025-10-06T04:11:13.379Z"}
+{"level":"info","message":"GET /api/status/c2a1efaa-5708-4a30-804f-7266415fcc2b - ::1","service":"youtube-converter","timestamp":"2025-10-06T04:11:14.987Z"}
