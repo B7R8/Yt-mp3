@@ -1,69 +1,113 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { EnvelopeIcon } from '../components/icons/EnvelopeIcon';
 import { ClockIcon } from '../components/icons/ClockIcon';
 import { LifebuoyIcon } from '../components/icons/LifebuoyIcon';
 
 const Contact: React.FC = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('General Inquiry');
+  const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const validate = () => {
+    const newErrors: { name?: string; email?: string; message?: string } = {};
+    if (!name.trim()) newErrors.name = 'Name is required.';
+    if (!email.trim()) {
+      newErrors.email = 'Email is required.';
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+      if (!emailRegex.test(email)) newErrors.email = 'Please enter a valid email address.';
+    }
+    if (!message.trim()) newErrors.message = 'Message is required.';
+    return newErrors;
+  };
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = validate();
+    setErrors(v);
+    if (Object.keys(v).length === 0) {
+      setShowConfirm(true);
+    }
+  };
+
+  const confirmSend = () => {
+    setShowConfirm(false);
+    // Simulate successful submit
+    setSubmitted(true);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+    // Reset form (optional)
+    setName('');
+    setEmail('');
+    setSubject('General Inquiry');
+    setMessage('');
+  };
   return (
     <div className="max-w-4xl mx-auto py-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">Contact Us</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400">Get in touch with our team.</p>
+        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Contact Us</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Get in touch with the SaveYTB team for support and feedback.</p>
+        {submitted && (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-md bg-green-50 dark:bg-green-900/30 px-3 py-2 text-green-700 dark:text-green-300 text-sm">
+            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.364 7.364a1 1 0 01-1.414 0L3.293 10.5a1 1 0 111.414-1.414l3.05 3.05 6.657-6.657a1 1 0 011.293-.186z" clipRule="evenodd"/></svg>
+            Message sent successfully.
+          </div>
+        )}
       </div>
 
       <div className="grid md:grid-cols-2 gap-12 items-start">
         {/* Left Column: Info */}
         <div className="space-y-8">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Get in Touch</h2>
+            <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">Get in Touch</h2>
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <EnvelopeIcon className="w-6 h-6 text-brand-500" />
+                <EnvelopeIcon className="w-6 h-6 text-red-500" />
                 <div>
                   <h3 className="font-semibold">Email</h3>
-                  <p className="text-gray-600 dark:text-gray-400">support@ytconv.com</p>
+                  <p className="text-gray-600 dark:text-gray-400">support@saveytb.com</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <ClockIcon className="w-6 h-6 text-brand-500" />
+                <ClockIcon className="w-6 h-6 text-red-500" />
                 <div>
                   <h3 className="font-semibold">Response Time</h3>
                   <p className="text-gray-600 dark:text-gray-400">Within 24 hours</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <LifebuoyIcon className="w-6 h-6 text-brand-500" />
+                <LifebuoyIcon className="w-6 h-6 text-red-500" />
                 <div>
                   <h3 className="font-semibold">Support</h3>
-                  <p className="text-gray-600 dark:text-gray-400">24/7 Technical Support</p>
+                  <p className="text-gray-600 dark:text-gray-400">24/7 Technical Support for SaveYTB</p>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="bg-gray-100 dark:bg-gray-800/60 p-6 rounded-lg">
-             <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">Quick Links</h3>
-             <ul className="space-y-2">
-                <li><a href="#" className="text-brand-600 dark:text-brand-400 hover:underline">→ Frequently Asked Questions</a></li>
-                <li><a href="#" className="text-brand-600 dark:text-brand-400 hover:underline">→ Latest Updates</a></li>
-             </ul>
           </div>
         </div>
 
         {/* Right Column: Form */}
         <div className="bg-white dark:bg-gray-800/60 p-6 sm:p-8 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Send us a Message</h2>
-          <form className="space-y-6">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-6">Send us a Message</h2>
+          <form className="space-y-6" onSubmit={onSubmit} noValidate>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-              <input type="text" name="name" id="name" className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm" />
+              <input required value={name} onChange={(e) => setName(e.target.value)} type="text" name="name" id="name" className={`mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-900/50 border rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`} aria-invalid={!!errors.name} aria-describedby={errors.name ? 'name-error' : undefined} />
+              {errors.name && <p id="name-error" className="mt-1 text-xs text-red-600">{errors.name}</p>}
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-              <input type="email" name="email" id="email" className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm" />
+              <input required value={email} onChange={(e) => setEmail(e.target.value)} type="email" name="email" id="email" className={`mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-900/50 border rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`} aria-invalid={!!errors.email} aria-describedby={errors.email ? 'email-error' : undefined} />
+              {errors.email && <p id="email-error" className="mt-1 text-xs text-red-600">{errors.email}</p>}
             </div>
             <div>
               <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Subject</label>
-              <select id="subject" name="subject" className="mt-1 block w-full pl-3 pr-10 py-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm">
+              <select required value={subject} onChange={(e) => setSubject(e.target.value)} id="subject" name="subject" className="mt-1 block w-full pl-3 pr-10 py-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm">
                 <option>General Inquiry</option>
                 <option>Technical Support</option>
                 <option>Feedback</option>
@@ -71,16 +115,40 @@ const Contact: React.FC = () => {
             </div>
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Message</label>
-              <textarea id="message" name="message" rows={4} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm"></textarea>
+              <textarea required value={message} onChange={(e) => setMessage(e.target.value)} id="message" name="message" rows={4} className={`mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-900/50 border rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm ${errors.message ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`} aria-invalid={!!errors.message} aria-describedby={errors.message ? 'message-error' : undefined}></textarea>
+              {errors.message && <p id="message-error" className="mt-1 text-xs text-red-600">{errors.message}</p>}
             </div>
             <div>
-              <button type="submit" className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-brand-500">
+              <button type="submit" className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-red-500">
                 Send Message
               </button>
             </div>
           </form>
         </div>
       </div>
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowConfirm(false)}></div>
+          <div className="relative w-full max-w-sm rounded-xl bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 p-5">
+            <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-2">Confirm Submission</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Send message to SaveYTB support with the provided details?</p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowConfirm(false)} className="px-3 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Cancel</button>
+              <button onClick={confirmSend} className="px-3 py-2 text-sm rounded-md text-white bg-red-600 hover:bg-red-700">Confirm & Send</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showToast && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <div className="flex items-center gap-2 rounded-lg bg-green-600 text-white shadow-lg px-4 py-3 text-sm">
+            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.364 7.364a1 1 0 01-1.414 0L3.293 10.5a1 1 0 111.414-1.414l3.05 3.05 6.657-6.657a1 1 0 011.293-.186z" clipRule="evenodd"/></svg>
+            Message sent successfully.
+          </div>
+        </div>
+      )}
     </div>
   );
 };

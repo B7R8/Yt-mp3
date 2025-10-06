@@ -15,7 +15,7 @@ export const ERROR_MESSAGES = {
   
   // Conversion errors
   CONVERSION_FAILED: "The conversion failed. Please try again with a different video.",
-  AUDIO_EXTRACTION_FAILED: "We couldn't extract audio from this video. Please try a different video.",
+  AUDIO_EXTRACTION_FAILED: "We could not extract audio from this video. Please try a different video.",
   PROCESSING_ERROR: "There was an error processing your video. Please try again.",
   
   // File errors

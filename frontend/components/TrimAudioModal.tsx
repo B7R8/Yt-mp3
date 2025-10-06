@@ -427,7 +427,7 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
       return 0;
     }
     
-    // Ensure end time doesn't exceed video duration
+    // Ensure end time does not exceed video duration
     const maxEndSeconds = videoDuration || endSeconds;
     const validEndSeconds = Math.min(endSeconds, maxEndSeconds);
     
@@ -448,7 +448,7 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
     // Check if start < end
     if (startSeconds >= endSeconds) return false;
     
-    // Check if end doesn't exceed video duration
+    // Check if end does not exceed video duration
     if (videoDuration && endSeconds > videoDuration) return false;
     
     return true;
@@ -557,21 +557,21 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
               trimmedDuration === 0 
                 ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' 
                 : trimmedDuration < 10 
-                ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+                ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
                 : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
             }`}>
               <ClockIcon className={`w-4 h-4 ${
                 trimmedDuration === 0 
                   ? 'text-yellow-600 dark:text-yellow-400' 
                   : trimmedDuration < 10 
-                  ? 'text-orange-600 dark:text-orange-400'
+                  ? 'text-red-600 dark:text-red-400'
                   : 'text-green-600 dark:text-green-400'
               }`} />
               <span className={`text-sm font-medium ${
                 trimmedDuration === 0 
                   ? 'text-yellow-600 dark:text-yellow-400' 
                   : trimmedDuration < 10 
-                  ? 'text-orange-600 dark:text-orange-400'
+                  ? 'text-red-600 dark:text-red-400'
                   : 'text-green-600 dark:text-green-400'
               }`}>
                 {trimmedDuration === 0 
@@ -626,14 +626,14 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
                 {/* Reset Button - Modern Outline Design */}
                 <button 
                   onClick={handleReset}
-                  className="group relative flex-1 px-6 py-3 font-semibold rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 text-sm sm:text-base overflow-hidden text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-orange-400 dark:hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 focus:ring-orange-500 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                  className="group relative flex-1 px-6 py-3 font-semibold rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 text-sm sm:text-base overflow-hidden text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-red-400 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 focus:ring-red-500 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <span className="relative flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Reset All
+                  Reset All
                   </span>
                 </button>
               </div>
@@ -648,7 +648,7 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                  Cancel
+                Cancel
                 </span>
               </button>
             )}

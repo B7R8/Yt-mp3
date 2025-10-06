@@ -26,7 +26,7 @@ const changelogData = [
         version: 'Version 1.0.0',
         date: 'September 20, 2024',
         changes: [
-            { type: 'new', description: 'Initial Release of YTConv with core YouTube to MP3 conversion functionality.' },
+            { type: 'new', description: 'Initial Release of SaveYTB with core YouTube to MP3 conversion functionality - completely free and ad-free.' },
         ]
     }
 ];
@@ -58,7 +58,7 @@ const ChangelogVersionItem: React.FC<{ version: typeof changelogData[0] }> = ({ 
                 aria-expanded={isOpen}
             >
                 <div>
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">{version.version}</h2>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{version.version}</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{version.date}</p>
                 </div>
                 <ChevronDownIcon
@@ -88,8 +88,8 @@ const Changelog: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto py-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">Changelog</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400">Track all the latest updates and improvements to YTConv.</p>
+        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Changelog</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Track all the latest updates and improvements to SaveYTB - your favorite free and ad-free YouTube to MP3 converter.</p>
       </div>
       <div className="space-y-4">
         {changelogData.map(version => (

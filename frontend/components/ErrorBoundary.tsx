@@ -29,7 +29,7 @@ class ErrorBoundary extends Component<Props, State> {
           <p className="mb-4">We're sorry for the inconvenience. Please try refreshing the page.</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 text-white bg-brand-600 rounded-lg hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
           >
             Refresh
           </button>

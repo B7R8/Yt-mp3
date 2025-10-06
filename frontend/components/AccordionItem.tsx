@@ -16,7 +16,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ question, answer }) => {
         className="w-full flex justify-between items-center text-left p-5 font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700/50 focus:outline-none"
         aria-expanded={isOpen}
       >
-        <span className="text-lg">{question}</span>
+        <span className="text-sm">{question}</span>
         <ChevronDownIcon
           className={`w-6 h-6 transform transition-transform duration-300 ${
             isOpen ? 'rotate-180' : ''
@@ -29,7 +29,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ question, answer }) => {
         }`}
       >
         <div className="overflow-hidden">
-          <p className="p-5 pt-0 text-gray-600 dark:text-gray-300">
+          <p className="p-5 pt-0 text-sm text-gray-600 dark:text-gray-300">
             {answer}
           </p>
         </div>

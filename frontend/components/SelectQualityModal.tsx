@@ -82,7 +82,7 @@ const SelectQualityModal: React.FC<SelectQualityModalProps> = ({ isOpen, onClose
                 type="checkbox" 
                 checked={alwaysUse}
                 onChange={(e) => setAlwaysUse(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" 
+                className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500" 
             />
             <label htmlFor="always-use" className="ml-2 block text-xs sm:text-sm text-gray-800 dark:text-gray-300">
                 Always use this quality
