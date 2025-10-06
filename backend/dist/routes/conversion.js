@@ -9,6 +9,7 @@ const validation_1 = require("../middleware/validation");
 const rateLimiter_1 = require("../middleware/rateLimiter");
 const logger_1 = __importDefault(require("../config/logger"));
 const child_process_1 = require("child_process");
+const errorHandler_1 = require("../utils/errorHandler");
 const router = express_1.default.Router();
 const conversionService = new conversionService_1.ConversionService();
 const videoInfoCache = new Map();
@@ -35,11 +36,9 @@ router.post('/convert', rateLimiter_1.conversionRateLimit, validation_1.validate
         });
     }
     catch (error) {
-        logger_1.default.error('Failed to create conversion job:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to start conversion job'
-        });
+        const userMessage = (0, errorHandler_1.getUserFriendlyError)(error);
+        (0, errorHandler_1.logTechnicalError)(error, 'Create Conversion Job', req);
+        (0, errorHandler_1.sendErrorResponse)(res, 500, userMessage, error);
     }
 });
 // GET /api/status/:id - Get conversion job status
@@ -64,11 +63,9 @@ router.get('/status/:id', rateLimiter_1.statusRateLimit, validation_1.validateJo
         });
     }
     catch (error) {
-        logger_1.default.error('Failed to get job status:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to get job status'
-        });
+        const userMessage = (0, errorHandler_1.getUserFriendlyError)(error);
+        (0, errorHandler_1.logTechnicalError)(error, 'Get Job Status', req);
+        (0, errorHandler_1.sendErrorResponse)(res, 500, userMessage, error);
     }
 });
 // GET /api/download/:id - Download the converted MP3 file
@@ -114,11 +111,9 @@ router.get('/download/:id', validation_1.validateJobId, async (req, res) => {
         fileStream.pipe(res);
     }
     catch (error) {
-        logger_1.default.error('Download request failed:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Download request failed'
-        });
+        const userMessage = (0, errorHandler_1.getUserFriendlyError)(error);
+        (0, errorHandler_1.logTechnicalError)(error, 'Download File', req);
+        (0, errorHandler_1.sendErrorResponse)(res, 500, userMessage, error);
     }
 });
 // GET /api/video-info - Get video information (duration, title) - ULTRA FAST
@@ -131,8 +126,8 @@ router.get('/video-info', rateLimiter_1.statusRateLimit, async (req, res) => {
                 message: 'URL parameter is required'
             });
         }
-        // Extract video ID for caching
-        const videoIdMatch = url.match(/(?:v=|\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        // Extract video ID for caching (supports regular videos, Shorts, and youtu.be links)
+        const videoIdMatch = url.match(/(?:v=|youtu\.be\/|shorts\/)([a-zA-Z0-9_-]{11})/);
         const videoId = videoIdMatch ? videoIdMatch[1] : url;
         // Check cache first - INSTANT response if cached!
         const cached = videoInfoCache.get(videoId);
@@ -232,40 +227,33 @@ router.get('/video-info', rateLimiter_1.statusRateLimit, async (req, res) => {
                     });
                 }
                 catch (parseError) {
-                    logger_1.default.error(`Failed to parse JSON output: ${parseError}`);
-                    logger_1.default.debug(`Raw output: ${output}`);
-                    res.status(500).json({
-                        success: false,
-                        message: 'Failed to parse video information'
-                    });
+                    const userMessage = (0, errorHandler_1.getUserFriendlyError)(parseError);
+                    (0, errorHandler_1.logTechnicalError)(parseError, 'Parse Video Info', req);
+                    (0, errorHandler_1.sendErrorResponse)(res, 500, userMessage, parseError);
                 }
             }
             else {
-                logger_1.default.error(`yt-dlp video info failed with code ${code}: ${errorOutput}`);
-                res.status(500).json({
-                    success: false,
-                    message: 'Failed to fetch video information'
-                });
+                // Create error with technical details for logging only
+                const technicalError = new Error(`yt-dlp failed with code ${code}: ${errorOutput}`);
+                const userMessage = (0, errorHandler_1.getUserFriendlyError)(technicalError);
+                (0, errorHandler_1.logTechnicalError)(technicalError, 'yt-dlp Video Info', req);
+                (0, errorHandler_1.sendErrorResponse)(res, 500, userMessage, technicalError);
             }
         });
         ytdlp.on('error', (error) => {
             clearTimeout(timeout);
             if (res.headersSent)
                 return;
-            logger_1.default.error('yt-dlp process error:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Failed to fetch video information'
-            });
+            const userMessage = (0, errorHandler_1.getUserFriendlyError)(error);
+            (0, errorHandler_1.logTechnicalError)(error, 'yt-dlp Process Error', req);
+            (0, errorHandler_1.sendErrorResponse)(res, 500, userMessage, error);
         });
     }
     catch (error) {
-        logger_1.default.error('Video info request failed:', error);
+        const userMessage = (0, errorHandler_1.getUserFriendlyError)(error);
+        (0, errorHandler_1.logTechnicalError)(error, 'Video Info Request', req);
         if (!res.headersSent) {
-            res.status(500).json({
-                success: false,
-                message: 'Failed to fetch video information'
-            });
+            (0, errorHandler_1.sendErrorResponse)(res, 500, userMessage, error);
         }
     }
 });

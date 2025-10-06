@@ -6,6 +6,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import { ConversionJob, ConversionRequest } from '../types';
 import logger from '../config/logger';
 import { db } from '../config/database';
+import { getUserFriendlyError, logTechnicalError } from '../utils/errorHandler';
 
 export class ConversionService {
   private downloadsDir: string;
@@ -305,10 +306,12 @@ export class ConversionService {
       }
 
       // Step 4: Mark as completed
-      await this.updateJobStatus(jobId, 'completed', mp3Filename);
+      await this.updateJobStatus(jobId, 'completed', undefined, mp3Filename);
       logger.info(`[Job ${jobId}] Conversion completed successfully`);
 
     } catch (error) {
+      // Log technical error details for debugging
+      logTechnicalError(error, `Conversion Job ${jobId}`);
       logger.error(`[Job ${jobId}] Conversion failed:`, error);
       
       // Cleanup temp file on error
@@ -320,11 +323,13 @@ export class ConversionService {
         }
       }
       
+      // Store user-friendly error message only
+      const userFriendlyError = getUserFriendlyError(error);
       await this.updateJobStatus(
         jobId, 
         'failed', 
         undefined, 
-        error instanceof Error ? error.message : 'Unknown error'
+        userFriendlyError
       );
     }
   }

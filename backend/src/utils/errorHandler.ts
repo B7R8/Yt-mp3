@@ -39,8 +39,33 @@ export const USER_ERROR_MESSAGES = {
   CONTACT_SUPPORT: "If this problem persists, please contact our support team.",
 };
 
+// Check if error contains technical details that should be hidden
+const isTechnicalError = (message: string): boolean => {
+  const technicalKeywords = [
+    'yt-dlp', 'youtube-dl', 'ffmpeg', 'spawn', 'process', 'exit code',
+    'failed with code', 'warning:', 'error:', 'traceback', 'stack trace',
+    'requested format is not available', 'use --list-formats',
+    'github.com/yt-dlp', 'sabr', 'client https formats', 'server-side',
+    'experiment', 'missing a url', 'forcing sabr streaming',
+    'tv client https formats', 'web_safari client', 'web client',
+    'youtube may have enabled', 'sabr-only', 'server-side ad placement',
+    'some tv client', 'some web_safari client', 'some web client',
+    'youtube is forcing', 'sabr streaming', 'client https formats',
+    'missing a url', 'youtube may have', 'enabled the sabr-only',
+    'server-side ad placement experiment', 'current session',
+    'see https://github.com/yt-dlp', 'for more details'
+  ];
+  
+  return technicalKeywords.some(keyword => message.toLowerCase().includes(keyword));
+};
+
 // Get user-friendly error message based on technical error
 export const getUserFriendlyError = (error: any): string => {
+  // If it's a technical error, return generic message immediately
+  if (error?.message && isTechnicalError(error.message)) {
+    return USER_ERROR_MESSAGES.CONVERSION_FAILED;
+  }
+  
   // Handle specific error types
   if (error?.code) {
     switch (error.code) {

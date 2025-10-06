@@ -7,7 +7,7 @@ import { getUserFriendlyError, logTechnicalError } from '../utils/errorMessages'
 
 type ShowToastFn = (message: string, type: 'success' | 'error' | 'info') => void;
 
-export const useConverter = (showToast: ShowToastFn) => {
+export const useConverter = (showToast: ShowToastFn, autoDownload: boolean = false) => {
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const pollingIntervalRef = useRef<number | null>(null);
@@ -26,6 +26,18 @@ export const useConverter = (showToast: ShowToastFn) => {
 
       if (currentJob.status === JobStatus.COMPLETED) {
         showToast(`Successfully converted "${currentJob.title}"!`, 'success');
+        
+        // Auto-download if enabled
+        if (autoDownload) {
+          const downloadUrl = `/api/download/${currentJob.id}`;
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = `${currentJob.title || 'converted'}.mp3`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+        
         clearPolling();
       } else if (currentJob.status === JobStatus.FAILED) {
         const userMessage = getUserFriendlyError(currentJob.error || 'Conversion failed');
@@ -40,7 +52,7 @@ export const useConverter = (showToast: ShowToastFn) => {
       clearPolling();
       setJob(prev => prev ? { ...prev, status: JobStatus.FAILED, error: userMessage } : null);
     }
-  }, [showToast]);
+  }, [showToast, autoDownload]);
 
   useEffect(() => {
     if (job?.id && (job.status === JobStatus.PENDING || job.status === JobStatus.PROCESSING)) {

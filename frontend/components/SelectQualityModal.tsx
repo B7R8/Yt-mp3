@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { Quality } from '../types';
 import { MusicNoteIcon } from './icons/MusicNoteIcon';
@@ -16,9 +16,31 @@ const qualities: Quality[] = ['64K', '128K', '192K', '256K', '320K'];
 
 const SelectQualityModal: React.FC<SelectQualityModalProps> = ({ isOpen, onClose, currentQuality, onSave }) => {
     const [selectedQuality, setSelectedQuality] = useState<Quality>(currentQuality);
+    const [alwaysUse, setAlwaysUse] = useState<boolean>(false);
+
+    // Check if there's a saved preference when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            const savedQuality = localStorage.getItem('preferredQuality');
+            if (savedQuality && ['64K', '128K', '192K', '256K', '320K'].includes(savedQuality)) {
+                setAlwaysUse(true);
+            } else {
+                setAlwaysUse(false);
+            }
+        }
+    }, [isOpen]);
 
     const handleSave = () => {
         onSave(selectedQuality);
+        
+        // Save to localStorage if "Always use this quality" is checked
+        if (alwaysUse) {
+            localStorage.setItem('preferredQuality', selectedQuality);
+        } else {
+            // Remove from localStorage if unchecked
+            localStorage.removeItem('preferredQuality');
+        }
+        
         onClose();
     }
 
@@ -55,7 +77,13 @@ const SelectQualityModal: React.FC<SelectQualityModalProps> = ({ isOpen, onClose
         </div>
 
         <div className="flex items-center mb-6 sm:mb-8">
-            <input id="always-use" type="checkbox" className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" />
+            <input 
+                id="always-use" 
+                type="checkbox" 
+                checked={alwaysUse}
+                onChange={(e) => setAlwaysUse(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" 
+            />
             <label htmlFor="always-use" className="ml-2 block text-xs sm:text-sm text-gray-800 dark:text-gray-300">
                 Always use this quality
             </label>

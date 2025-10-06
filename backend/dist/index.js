@@ -41,10 +41,12 @@ app.use('/api', health_1.default);
 app.use('/api', conversion_1.default);
 // Error handling middleware
 app.use((error, req, res, next) => {
-    logger_1.default.error('Unhandled error:', error);
+    const { getUserFriendlyError, logTechnicalError } = require('./utils/errorHandler');
+    const userMessage = getUserFriendlyError(error);
+    logTechnicalError(error, 'Express Error', req);
     res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: userMessage
     });
 });
 // 404 handler

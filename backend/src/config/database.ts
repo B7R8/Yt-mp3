@@ -20,12 +20,20 @@ export async function initializeDatabase() {
       youtube_url TEXT NOT NULL,
       video_title TEXT,
       status TEXT NOT NULL DEFAULT 'pending',
+      progress INTEGER DEFAULT 0,
       mp3_filename TEXT,
       error_message TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+  
+  // Add progress column if it doesn't exist (for existing databases)
+  await database.exec(`
+    ALTER TABLE conversions ADD COLUMN progress INTEGER DEFAULT 0
+  `).catch(() => {
+    // Column already exists, ignore error
+  });
 
   console.log('SQLite database initialized');
 }

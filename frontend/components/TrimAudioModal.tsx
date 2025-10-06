@@ -602,30 +602,54 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
         <div className="flex justify-center">
             {isTrimEnabled ? (
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                {/* Save Button - Modern Gradient Design */}
                 <button 
                   onClick={handleSave}
                   disabled={!canSave}
-                  className={`flex-1 px-4 sm:px-6 py-2.5 sm:py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors text-sm sm:text-base ${
+                  className={`group relative flex-1 px-6 py-3 font-semibold rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 text-sm sm:text-base overflow-hidden ${
                     canSave 
-                      ? 'text-white bg-gray-800 dark:bg-gray-200 dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-white focus:ring-brand-500 dark:focus:ring-offset-gray-800' 
-                      : 'text-gray-400 bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
+                      ? 'text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:ring-blue-500 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95' 
+                      : 'text-gray-400 bg-gray-300 dark:bg-gray-600 cursor-not-allowed shadow-sm'
                   }`}
                 >
-                  Save
+                  {canSave && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  )}
+                  <span className="relative flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Save
+                  </span>
                 </button>
+
+                {/* Reset Button - Modern Outline Design */}
                 <button 
                   onClick={handleReset}
-                  className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-gray-800 transition-colors text-sm sm:text-base"
+                  className="group relative flex-1 px-6 py-3 font-semibold rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 text-sm sm:text-base overflow-hidden text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 hover:border-orange-400 dark:hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 focus:ring-orange-500 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
                 >
-                  Reset All
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <span className="relative flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Reset All
+                  </span>
                 </button>
               </div>
             ) : (
+              /* Cancel Button - Modern Red Gradient Design */
               <button 
                 onClick={onClose}
-                className="px-8 sm:px-12 py-2.5 sm:py-3 font-semibold text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800 transition-colors text-sm sm:text-base shadow-lg"
+                className="group relative px-8 sm:px-12 py-3 sm:py-4 font-semibold rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-300 text-sm sm:text-base overflow-hidden text-white bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 focus:ring-red-500 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
               >
-                Cancel
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Cancel
+                </span>
               </button>
             )}
         </div>

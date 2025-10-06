@@ -147,8 +147,8 @@ router.get('/video-info', statusRateLimit, async (req: Request, res: Response) =
       });
     }
 
-    // Extract video ID for caching
-    const videoIdMatch = url.match(/(?:v=|\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    // Extract video ID for caching (supports regular videos, Shorts, and youtu.be links)
+    const videoIdMatch = url.match(/(?:v=|youtu\.be\/|shorts\/)([a-zA-Z0-9_-]{11})/);
     const videoId = videoIdMatch ? videoIdMatch[1] : url;
 
     // Check cache first - INSTANT response if cached!
@@ -264,10 +264,11 @@ router.get('/video-info', statusRateLimit, async (req: Request, res: Response) =
           sendErrorResponse(res, 500, userMessage, parseError);
         }
       } else {
-        const error = new Error(`yt-dlp failed with code ${code}: ${errorOutput}`);
-        const userMessage = getUserFriendlyError(error);
-        logTechnicalError(error, 'yt-dlp Video Info', req);
-        sendErrorResponse(res, 500, userMessage, error);
+        // Create error with technical details for logging only
+        const technicalError = new Error(`yt-dlp failed with code ${code}: ${errorOutput}`);
+        const userMessage = getUserFriendlyError(technicalError);
+        logTechnicalError(technicalError, 'yt-dlp Video Info', req);
+        sendErrorResponse(res, 500, userMessage, technicalError);
       }
     });
 

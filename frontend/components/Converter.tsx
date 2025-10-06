@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useConverter } from '../hooks/useConverter';
 import { JobStatus, Quality } from '../types';
 import LoadingSpinner from './LoadingSpinner';
@@ -28,7 +28,16 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   const [trimEnabled, setTrimEnabled] = useState(false);
   const [trimStart, setTrimStart] = useState('00:00:00');
   const [trimEnd, setTrimEnd] = useState('00:00:00');
-  const { job, isLoading, handleSubmit, resetConverter } = useConverter(showToast);
+  const [autoDownload, setAutoDownload] = useState(false);
+  const { job, isLoading, handleSubmit, resetConverter } = useConverter(showToast, autoDownload);
+
+  // Load preferred quality from localStorage on component mount
+  useEffect(() => {
+    const savedQuality = localStorage.getItem('preferredQuality');
+    if (savedQuality && ['64K', '128K', '192K', '256K', '320K'].includes(savedQuality)) {
+      setQuality(savedQuality as Quality);
+    }
+  }, []);
 
   // Fetch video duration when URL is entered
   const fetchVideoDuration = async (videoUrl: string) => {
@@ -82,7 +91,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   // Extract YouTube video ID from URL
   const extractVideoId = (url: string): string | null => {
     const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([^&\n?#]+)/,
       /^([a-zA-Z0-9_-]{11})$/
     ];
     
@@ -157,8 +166,13 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
     if (isLoading && !job) {
       return (
         <div className="text-center">
-          <LoadingSpinner className="w-12 h-12 mx-auto text-brand-500" />
-          <p className="mt-4 text-lg">Starting conversion...</p>
+          <LoadingSpinner className="w-16 h-16 mx-auto" />
+          <p className="mt-6 text-lg font-medium text-gray-700 dark:text-gray-300">Starting conversion...</p>
+          <div className="flex justify-center mt-4 space-x-1">
+            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
         </div>
       );
     }
@@ -170,14 +184,70 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
           return (
             <div className="max-w-md mx-auto">
               <h3 className="text-lg font-semibold text-center truncate mb-2" title={job.title}>{job.title || 'Processing...'}</h3>
-              <p className="text-center text-brand-500 dark:text-brand-400 mb-4 capitalize">{job.status}...</p>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
-                <div
-                  className="bg-brand-500 h-4 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${job.progress || 0}%` }}
-                ></div>
+              <p className="text-center text-gray-600 dark:text-gray-400 mb-6 capitalize font-medium">{job.status}...</p>
+              
+              {/* Clean Progress Bar */}
+              <div className="relative w-full">
+                {/* Progress Track */}
+                <div className="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
+                  {/* Progress Fill */}
+                  <div 
+                    className="h-full bg-green-600 dark:bg-red-500 rounded-full transition-all duration-800 ease-out"
+                    style={{ width: `${job.progress || 0}%` }}
+                  ></div>
+                </div>
+                
+                {/* Centered Progress Indicators */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex space-x-3">
+                  {/* Indicator 1 */}
+                  <div className={`w-3 h-3 rounded-full transition-all duration-700 ${
+                    (job.progress || 0) >= 25 ? 'bg-green-600 dark:bg-red-500 shadow-lg scale-110' : 'bg-gray-400 dark:bg-gray-600'
+                  }`}></div>
+                  
+                  {/* Indicator 2 */}
+                  <div className={`w-3 h-3 rounded-full transition-all duration-700 ${
+                    (job.progress || 0) >= 50 ? 'bg-green-600 dark:bg-red-500 shadow-lg scale-110' : 'bg-gray-400 dark:bg-gray-600'
+                  }`}></div>
+                  
+                  {/* Indicator 3 */}
+                  <div className={`w-3 h-3 rounded-full transition-all duration-700 ${
+                    (job.progress || 0) >= 75 ? 'bg-green-600 dark:bg-red-500 shadow-lg scale-110' : 'bg-gray-400 dark:bg-gray-600'
+                  }`}></div>
+                  
+                  {/* Indicator 4 */}
+                  <div className={`w-3 h-3 rounded-full transition-all duration-700 ${
+                    (job.progress || 0) >= 100 ? 'bg-green-600 dark:bg-red-500 shadow-lg scale-110' : 'bg-gray-400 dark:bg-gray-600'
+                  }`}></div>
+                </div>
               </div>
-              <p className="text-center mt-2 font-mono">{job.progress || 0}%</p>
+              
+              {/* Custom CSS for particle animations */}
+              <style jsx>{`
+                @keyframes particle1 {
+                  0% { transform: translateX(0) translateY(-50%); opacity: 0; }
+                  50% { opacity: 1; }
+                  100% { transform: translateX(400px) translateY(-50%); opacity: 0; }
+                }
+                @keyframes particle2 {
+                  0% { transform: translateX(0) translateY(-50%); opacity: 0; }
+                  50% { opacity: 1; }
+                  100% { transform: translateX(400px) translateY(-50%); opacity: 0; }
+                }
+              `}</style>
+              
+              {/* Percentage display with green colors */}
+              <div className="flex items-center justify-center mt-4">
+                <span className="text-green-600 dark:text-red-500 font-bold text-lg">
+                  {job.progress || 0}%
+                </span>
+              </div>
+              
+              {/* Animated dots with green colors */}
+              <div className="flex justify-center mt-4 space-x-1">
+                <div className="w-1.5 h-1.5 bg-green-500 dark:bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-1.5 h-1.5 bg-green-400 dark:bg-red-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-1.5 h-1.5 bg-green-300 dark:bg-red-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
             </div>
           );
         case JobStatus.COMPLETED:
@@ -365,6 +435,28 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
             {!isLoading && <RefreshIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />}
           </button>
         </form>
+        
+        {/* Auto Download Toggle */}
+        <div className="flex items-center justify-center mt-4">
+          <div className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Auto Download
+            </span>
+            <button
+              type="button"
+              onClick={() => setAutoDownload(!autoDownload)}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 ${
+                autoDownload ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                  autoDownload ? 'translate-x-5' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
         
         <TrimAudioModal 
             isOpen={isTrimModalOpen} 

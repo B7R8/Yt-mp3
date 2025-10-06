@@ -123,6 +123,26 @@ export const TECHNICAL_ERROR_MAP = {
   'EHWPOISON': 'Memory page has hardware error',
 };
 
+// Check if error contains technical details that should be hidden
+const isTechnicalError = (message: string): boolean => {
+  const technicalKeywords = [
+    'yt-dlp', 'youtube-dl', 'ffmpeg', 'spawn', 'process', 'exit code',
+    'failed with code', 'warning:', 'error:', 'traceback', 'stack trace',
+    'requested format is not available', 'use --list-formats',
+    'github.com/yt-dlp', 'sabr', 'client https formats', 'server-side',
+    'experiment', 'missing a url', 'forcing sabr streaming',
+    'tv client https formats', 'web_safari client', 'web client',
+    'youtube may have enabled', 'sabr-only', 'server-side ad placement',
+    'some tv client', 'some web_safari client', 'some web client',
+    'youtube is forcing', 'sabr streaming', 'client https formats',
+    'missing a url', 'youtube may have', 'enabled the sabr-only',
+    'server-side ad placement experiment', 'current session',
+    'see https://github.com/yt-dlp', 'for more details'
+  ];
+  
+  return technicalKeywords.some(keyword => message.toLowerCase().includes(keyword));
+};
+
 // Get user-friendly error message
 export const getUserFriendlyError = (error: any): string => {
   // Handle specific error types
@@ -132,6 +152,11 @@ export const getUserFriendlyError = (error: any): string => {
   
   if (error?.message) {
     const message = error.message.toLowerCase();
+    
+    // If it's a technical error, return generic message
+    if (isTechnicalError(error.message)) {
+      return ERROR_MESSAGES.CONVERSION_FAILED;
+    }
     
     // Network/connection errors
     if (message.includes('network') || message.includes('connection') || message.includes('timeout')) {
@@ -155,7 +180,7 @@ export const getUserFriendlyError = (error: any): string => {
       return ERROR_MESSAGES.VIDEO_TOO_LONG;
     }
     
-    // Conversion errors
+    // Conversion errors - Hide technical details
     if (message.includes('conversion failed') || message.includes('processing failed')) {
       return ERROR_MESSAGES.CONVERSION_FAILED;
     }
@@ -164,6 +189,20 @@ export const getUserFriendlyError = (error: any): string => {
     }
     if (message.includes('ffmpeg') || message.includes('processing')) {
       return ERROR_MESSAGES.PROCESSING_ERROR;
+    }
+    
+    // Hide yt-dlp technical errors
+    if (message.includes('yt-dlp') || message.includes('youtube-dl')) {
+      return ERROR_MESSAGES.CONVERSION_FAILED;
+    }
+    if (message.includes('failed with code') || message.includes('exit code')) {
+      return ERROR_MESSAGES.CONVERSION_FAILED;
+    }
+    if (message.includes('requested format is not available')) {
+      return ERROR_MESSAGES.VIDEO_UNAVAILABLE;
+    }
+    if (message.includes('warning') || message.includes('error:')) {
+      return ERROR_MESSAGES.CONVERSION_FAILED;
     }
     
     // File errors
@@ -175,7 +214,11 @@ export const getUserFriendlyError = (error: any): string => {
     }
   }
   
-  // Default fallback
+  // Default fallback - but check if it looks technical
+  if (error?.message && isTechnicalError(error.message)) {
+    return ERROR_MESSAGES.CONVERSION_FAILED;
+  }
+  
   return ERROR_MESSAGES.UNKNOWN_ERROR;
 };
 
