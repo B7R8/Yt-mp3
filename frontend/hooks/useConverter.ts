@@ -29,13 +29,47 @@ export const useConverter = (showToast: ShowToastFn, autoDownload: boolean = fal
         
         // Auto-download if enabled
         if (autoDownload) {
-          const downloadUrl = `/api/download/${currentJob.id}`;
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.download = `${currentJob.title || 'converted'}.mp3`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          // Small delay to ensure the file is ready
+          setTimeout(() => {
+            const downloadUrl = `/api/download/${currentJob.id}`;
+            
+            // Use XMLHttpRequest for reliable download
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', downloadUrl, true);
+            xhr.responseType = 'blob';
+            xhr.setRequestHeader('Accept', 'audio/mpeg');
+            xhr.setRequestHeader('Cache-Control', 'no-cache');
+            
+            xhr.onload = function() {
+              if (xhr.status === 200) {
+                const blob = xhr.response;
+                const url = window.URL.createObjectURL(blob);
+                
+                // Create a hidden download link
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${currentJob.title || 'converted'}.mp3`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                
+                // Clean up
+                setTimeout(() => {
+                  if (document.body.contains(link)) {
+                    document.body.removeChild(link);
+                  }
+                  window.URL.revokeObjectURL(url);
+                }, 100);
+              }
+            };
+            
+            xhr.onerror = function() {
+              // Fallback: try direct window.open
+              window.open(downloadUrl, '_blank');
+            };
+            
+            xhr.send();
+          }, 500);
         }
         
         clearPolling();

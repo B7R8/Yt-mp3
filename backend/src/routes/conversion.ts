@@ -182,7 +182,6 @@ router.get('/video-info', statusRateLimit, async (req: Request, res: Response) =
       '--no-playlist',           // Single video only
       '--no-warnings',           // Reduce output
       '--no-check-certificates', // Skip SSL verification
-      '--no-call-home',          // Don't check for updates
       '--no-cache-dir',          // Don't use cache
       '--socket-timeout', '30',  // 30 second socket timeout for long videos
       '--extractor-retries', '2', // 2 retries for reliability

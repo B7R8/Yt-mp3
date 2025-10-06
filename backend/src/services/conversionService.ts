@@ -29,6 +29,8 @@ export class ConversionService {
       const ytdlp = spawn('python', ['-m', 'yt_dlp',
         '--get-title',
         '--no-playlist',
+        '--no-warnings',
+        '--extractor-args', 'youtube:player_client=android',
         url
       ]);
 
@@ -144,11 +146,14 @@ export class ConversionService {
     return new Promise((resolve, reject) => {
       const ytdlpArgs = [
         '-m', 'yt_dlp',
-        '-f', 'bestaudio',
+        '-f', 'bestaudio[ext=m4a]/bestaudio/best',
         '--extract-audio',
         '--audio-format', 'mp3',
+        '--audio-quality', '192K',
         '--output', outputPath,
         '--no-playlist',
+        '--no-warnings',
+        '--extractor-args', 'youtube:player_client=android',
         url
       ];
 
@@ -306,7 +311,7 @@ export class ConversionService {
       }
 
       // Step 4: Mark as completed
-      await this.updateJobStatus(jobId, 'completed', undefined, mp3Filename);
+      await this.updateJobStatus(jobId, 'completed', mp3Filename);
       logger.info(`[Job ${jobId}] Conversion completed successfully`);
 
     } catch (error) {

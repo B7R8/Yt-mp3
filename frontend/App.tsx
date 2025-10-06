@@ -30,16 +30,8 @@ function App() {
     }, 5000);
   }, []);
 
-  // Prevent page refreshes from download managers
+  // Handle page visibility changes to prevent unwanted refreshes
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // Only prevent unload if it's not a user-initiated action
-      if (e.type === 'beforeunload') {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-
     const handleVisibilityChange = () => {
       // Prevent automatic refreshes when page becomes visible again
       if (document.visibilityState === 'visible') {
@@ -47,13 +39,11 @@ function App() {
       }
     };
 
-    // Add event listeners
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    // Add event listener
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Cleanup
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);

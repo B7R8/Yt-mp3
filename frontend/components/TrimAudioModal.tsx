@@ -507,8 +507,8 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
           <div className="flex items-center justify-center py-12 mb-6">
             {isFetchingDuration ? (
               <div className="flex flex-col items-center gap-3">
-                <ClockIcon className="w-12 h-12 text-yellow-500 dark:text-yellow-400 animate-spin" />
-                <span className="text-lg text-yellow-600 dark:text-yellow-400 font-semibold">
+                <ClockIcon className="w-12 h-12 text-black dark:text-white animate-spin" />
+                <span className="text-lg text-black dark:text-white font-semibold">
                   Fetching video duration...
                 </span>
               </div>
