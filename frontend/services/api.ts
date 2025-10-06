@@ -1,10 +1,13 @@
 
 import { Job, JobStatus } from '../types';
+import { getUserFriendlyError, logTechnicalError } from '../utils/errorMessages';
 
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
-    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    const technicalError = new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    logTechnicalError(technicalError, 'API Response');
+    throw technicalError;
   }
   return response.json();
 };

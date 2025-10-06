@@ -117,11 +117,22 @@ class ConversionService {
         return new Promise((resolve, reject) => {
             const ytdlpArgs = [
                 '-m', 'yt_dlp',
-                '-f', 'bestaudio',
+                '-f', 'bestaudio[ext=m4a]/bestaudio', // Prefer m4a for faster processing
                 '--extract-audio',
                 '--audio-format', 'mp3',
                 '--output', outputPath,
                 '--no-playlist',
+                '--no-warnings', // Reduce output noise
+                '--no-check-certificates', // Skip SSL verification for speed
+                '--no-call-home', // Don't check for updates
+                '--no-cache-dir', // Don't use cache
+                '--socket-timeout', '30', // 30 second socket timeout
+                '--extractor-retries', '2', // 2 retries for reliability
+                '--fragment-retries', '2', // 2 fragment retries
+                '--retries', '3', // 3 total retries
+                '--http-chunk-size', '10485760', // 10MB chunks for faster processing
+                '--concurrent-fragments', '4', // 4 concurrent fragments
+                '--extractor-args', 'youtube:player_client=android', // Use mobile client for faster access
                 url
             ];
             logger_1.default.info(`Downloading audio with yt-dlp: ${ytdlpArgs.join(' ')}`);
@@ -145,11 +156,24 @@ class ConversionService {
                         resolve(outputPath);
                     }
                     catch (error) {
-                        reject(new Error(`Output file not created: ${outputPath}`));
+                        // Log technical error in background
+                        logger_1.default.error('Download output file not created:', {
+                            outputPath,
+                            error: error instanceof Error ? error.message : 'Unknown error',
+                            timestamp: new Date().toISOString()
+                        });
+                        reject(new Error('Download failed. Please try again.'));
                     }
                 }
                 else {
-                    reject(new Error(`yt-dlp failed with code ${code}: ${errorOutput}`));
+                    // Log technical error in background
+                    logger_1.default.error('yt-dlp download failed:', {
+                        code,
+                        errorOutput,
+                        url,
+                        timestamp: new Date().toISOString()
+                    });
+                    reject(new Error('Unable to download video. Please check the URL and try again.'));
                 }
             });
             ytdlp.on('error', (error) => {
@@ -194,10 +218,16 @@ class ConversionService {
                     logger_1.default.info(`Setting duration: ${duration} seconds (${startTime} to ${endTime})`);
                 }
             }
-            // Set audio bitrate and format
+            // Set audio bitrate and format with performance optimizations
             command
                 .audioBitrate(bitrate)
                 .toFormat('mp3')
+                .audioCodec('libmp3lame') // Use libmp3lame for better performance
+                .audioChannels(2) // Stereo
+                .audioFrequency(44100) // Standard sample rate
+                .addOption('-threads', '0') // Use all available CPU cores
+                .addOption('-preset', 'fast') // Fast encoding preset
+                .addOption('-q:a', '2') // High quality audio
                 .output(outputPath)
                 .on('start', (commandLine) => {
                 logger_1.default.info(`FFmpeg command: ${commandLine}`);
@@ -210,9 +240,18 @@ class ConversionService {
                 resolve();
             })
                 .on('error', (error, stdout, stderr) => {
-                logger_1.default.error(`FFmpeg error: ${error.message}`);
-                logger_1.default.error(`FFmpeg stderr: ${stderr}`);
-                reject(new Error(`FFmpeg processing failed: ${error.message}`));
+                // Log technical error in background
+                logger_1.default.error('FFmpeg processing error:', {
+                    error: error.message,
+                    stderr,
+                    inputPath,
+                    outputPath,
+                    bitrate,
+                    startTime,
+                    endTime,
+                    timestamp: new Date().toISOString()
+                });
+                reject(new Error('Audio processing failed. Please try again.'));
             })
                 .run();
         });

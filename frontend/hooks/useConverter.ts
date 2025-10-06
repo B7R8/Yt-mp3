@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Job, JobStatus } from '../types';
 import { startConversion, getJobStatus } from '../services/api';
 import { POLLING_INTERVAL } from '../constants';
+import { getUserFriendlyError, logTechnicalError } from '../utils/errorMessages';
 
 type ShowToastFn = (message: string, type: 'success' | 'error' | 'info') => void;
 
@@ -27,14 +28,17 @@ export const useConverter = (showToast: ShowToastFn) => {
         showToast(`Successfully converted "${currentJob.title}"!`, 'success');
         clearPolling();
       } else if (currentJob.status === JobStatus.FAILED) {
-        showToast(currentJob.error || 'Conversion failed. Please try again.', 'error');
+        const userMessage = getUserFriendlyError(currentJob.error || 'Conversion failed');
+        showToast(userMessage, 'error');
+        logTechnicalError(currentJob.error, 'Job Failed');
         clearPolling();
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to get job status.';
-      showToast(errorMessage, 'error');
+      const userMessage = getUserFriendlyError(error);
+      showToast(userMessage, 'error');
+      logTechnicalError(error, 'Poll Status');
       clearPolling();
-      setJob(prev => prev ? { ...prev, status: JobStatus.FAILED, error: errorMessage } : null);
+      setJob(prev => prev ? { ...prev, status: JobStatus.FAILED, error: userMessage } : null);
     }
   }, [showToast]);
 
@@ -100,8 +104,9 @@ export const useConverter = (showToast: ShowToastFn) => {
       // Initial status fetch
       pollStatus(id);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-      showToast(errorMessage, 'error');
+      const userMessage = getUserFriendlyError(error);
+      showToast(userMessage, 'error');
+      logTechnicalError(error, 'Start Conversion');
     } finally {
       setIsLoading(false);
     }

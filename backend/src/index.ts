@@ -46,11 +46,13 @@ app.use('/api', conversionRoutes);
 
 // Error handling middleware
 app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Unhandled error:', error);
+  const { getUserFriendlyError, logTechnicalError } = require('./utils/errorHandler');
+  const userMessage = getUserFriendlyError(error);
+  logTechnicalError(error, 'Express Error', req);
   
   res.status(500).json({
     success: false,
-    message: 'Internal server error'
+    message: userMessage
   });
 });
 
