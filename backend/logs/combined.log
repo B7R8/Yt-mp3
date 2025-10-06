@@ -1127,3 +1127,54 @@
 {"level":"info","message":"[Job f182115c-8958-43ef-a4b3-5545209e9c33] Conversion completed successfully","service":"youtube-converter","timestamp":"2025-10-05T04:41:04.542Z"}
 {"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-05T04:42:09.854Z"}
 {"level":"info","message":"Video info fetched and cached: صفر مشاهدات؟ صفر اشتراكات؟ غيرت 5 إعدادات وكل حاجة اتغيرت! (420s)","service":"youtube-converter","timestamp":"2025-10-05T04:42:22.885Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:34:06.080Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:34:06.091Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:34:06.092Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:34:47.523Z"}
+{"level":"warn","message":"Video info request timeout for: https://www.youtube.com/watch?v=Q_IWex-7MrU","service":"youtube-converter","timestamp":"2025-10-06T03:35:02.542Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:35:33.198Z"}
+{"level":"warn","message":"Video info request timeout for: https://www.youtube.com/watch?v=Q_IWex-7MrU","service":"youtube-converter","timestamp":"2025-10-06T03:35:48.202Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:35:48.219Z"}
+{"level":"warn","message":"Video info request timeout for: https://www.youtube.com/watch?v=Q_IWex-7MrU","service":"youtube-converter","timestamp":"2025-10-06T03:36:03.222Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:37:31.845Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:37:31.957Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:37:32.020Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:37:37.173Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:37:37.285Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:37:37.287Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:38:36.163Z"}
+{"level":"warn","message":"Video info request timeout for: https://www.youtube.com/watch?v=dPDI7NQXZGA","service":"youtube-converter","timestamp":"2025-10-06T03:38:44.176Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:38:44.511Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:38:47.159Z"}
+{"level":"warn","message":"Video info request timeout for: https://www.youtube.com/watch?v=dPDI7NQXZGA","service":"youtube-converter","timestamp":"2025-10-06T03:38:52.517Z"}
+{"level":"warn","message":"Video info request timeout for: https://www.youtube.com/watch?v=dPDI7NQXZGA","service":"youtube-converter","timestamp":"2025-10-06T03:38:55.161Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:38:55.493Z"}
+{"level":"warn","message":"Video info request timeout for: https://www.youtube.com/watch?v=dPDI7NQXZGA","service":"youtube-converter","timestamp":"2025-10-06T03:39:03.497Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:39:22.804Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:39:22.814Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:39:22.816Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:41:06.245Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:41:06.254Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:41:06.255Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:41:14.819Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:41:14.842Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:41:14.844Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:42:40.218Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:42:40.256Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:42:40.257Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:45:12.180Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:45:12.184Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:45:12.185Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:45:31.795Z"}
+{"level":"warn","message":"Video info request timeout for: https://www.youtube.com/watch?v=dPDI7NQXZGA","service":"youtube-converter","timestamp":"2025-10-06T03:45:46.804Z"}
+{"level":"info","message":"GET /api/video-info - ::1","service":"youtube-converter","timestamp":"2025-10-06T03:45:47.131Z"}
+{"level":"info","message":"Video info fetched and cached: 1 Minute Timer / 1 Minute Timer With Ticking Sound (64s)","service":"youtube-converter","timestamp":"2025-10-06T03:46:01.776Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:47:18.217Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:47:18.221Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:47:18.222Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:47:27.267Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:47:27.273Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:47:27.274Z"}
+{"level":"info","message":"Server running on port 3001","service":"youtube-converter","timestamp":"2025-10-06T03:47:31.953Z"}
+{"level":"info","message":"Environment: development","service":"youtube-converter","timestamp":"2025-10-06T03:47:31.958Z"}
+{"level":"info","message":"Using SQLite database for development","service":"youtube-converter","timestamp":"2025-10-06T03:47:31.959Z"}

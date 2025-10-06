@@ -169,18 +169,18 @@ router.get('/video-info', statusRateLimit, async (req: Request, res: Response) =
       });
     }
 
-    // Set aggressive timeout for maximum speed
+    // Set longer timeout for very long videos (up to 50 hours)
     const timeout = setTimeout(() => {
       logger.warn(`Video info request timeout for: ${url}`);
       if (!res.headersSent) {
         res.status(408).json({
           success: false,
-          message: 'Request timeout - video might be unavailable'
+          message: 'Request timeout - video might be unavailable or very long'
         });
       }
-    }, 15000); // 15 second timeout (reduced from 20s)
+    }, 60000); // 60 second timeout for long videos
 
-    // Use yt-dlp with MAXIMUM SPEED optimizations
+    // Use yt-dlp with optimized settings for long videos
     const ytdlp = spawn('python', [
       '-m', 'yt_dlp',
       '--skip-download',         // Don't download anything
@@ -189,11 +189,15 @@ router.get('/video-info', statusRateLimit, async (req: Request, res: Response) =
       '--no-check-certificates', // Skip SSL verification
       '--no-call-home',          // Don't check for updates
       '--no-cache-dir',          // Don't use cache
-      '--socket-timeout', '5',   // 5 second socket timeout
-      '--extractor-retries', '1', // Only 1 retry
-      '--fragment-retries', '1',  // Only 1 fragment retry
+      '--socket-timeout', '30',  // 30 second socket timeout for long videos
+      '--extractor-retries', '2', // 2 retries for reliability
+      '--fragment-retries', '2',  // 2 fragment retries
+      '--retries', '3',           // 3 total retries
+      '--http-chunk-size', '10485760', // 10MB chunks for faster processing
+      '--concurrent-fragments', '4',   // 4 concurrent fragments
       '-J',                       // JSON output (faster parsing)
       '--flat-playlist',          // Don't extract playlist
+      '--extractor-args', 'youtube:player_client=android', // Use mobile client for faster access
       url
     ]);
 

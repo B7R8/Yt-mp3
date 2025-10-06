@@ -46,7 +46,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
       
       // Direct call to backend with timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout for longer videos
+      const timeoutId = setTimeout(() => controller.abort(), 65000); // 65 second timeout for very long videos (up to 50 hours)
       
       const durationResponse = await fetch(
         `/api/video-info?url=${encodeURIComponent(videoUrl)}`,

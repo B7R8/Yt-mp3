@@ -12,8 +12,8 @@ export interface ConversionJob {
 export interface ConversionRequest {
   url: string;
   quality?: string;
-  trim_start?: number;
-  trim_end?: number;
+  trim_start?: string;
+  trim_end?: string;
 }
 
 export interface ConversionResponse {
