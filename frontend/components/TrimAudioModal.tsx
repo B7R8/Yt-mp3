@@ -19,41 +19,331 @@ const TimeInput: React.FC<{
   value: { h: string; m: string; s: string };
   onChange: (value: { h: string; m: string; s: string }) => void;
   disabled: boolean;
-}> = ({ value, onChange, disabled }) => {
+  maxDuration?: number; // Video duration in seconds
+  isEndTime?: boolean; // Whether this is the end time field
+  otherTime?: { h: string; m: string; s: string }; // The other time field for comparison
+}> = ({ value, onChange, disabled, maxDuration, isEndTime = false, otherTime }) => {
   const handleInput = (field: 'h' | 'm' | 's', val: string) => {
+    // Only allow numbers, remove any non-numeric characters
     const numVal = val.replace(/[^0-9]/g, '').slice(0, 2);
-    const paddedVal = numVal.padStart(2, '0');
-    onChange({ ...value, [field]: paddedVal });
+    
+    // If no valid numbers, keep the original value
+    if (numVal === '' && val !== '') {
+      return; // Don't change anything if user typed non-numeric characters
+    }
+    
+    // Create new value with the updated field
+    const newValue = { ...value, [field]: numVal };
+    const newTotalSeconds = parseInt(newValue.h) * 3600 + parseInt(newValue.m) * 60 + parseInt(newValue.s);
+    
+    // Validate against video duration
+    if (maxDuration && newTotalSeconds > maxDuration) {
+      return; // Don't allow values exceeding video duration
+    }
+    
+    // Validate start time vs end time
+    if (otherTime) {
+      const otherTotalSeconds = parseInt(otherTime.h) * 3600 + parseInt(otherTime.m) * 60 + parseInt(otherTime.s);
+      
+      if (isEndTime && newTotalSeconds <= otherTotalSeconds) {
+        return; // End time must be greater than start time
+      }
+      if (!isEndTime && newTotalSeconds >= otherTotalSeconds) {
+        return; // Start time must be less than end time
+      }
+    }
+    
+    // Don't pad while typing, let user type naturally
+    onChange(newValue);
   };
 
+  const handleBlur = (field: 'h' | 'm' | 's') => {
+    // Add padding when user finishes typing (onBlur)
+    const currentVal = value[field];
+    if (currentVal === '' || currentVal === '0') {
+      onChange({ ...value, [field]: '00' });
+    } else if (currentVal.length === 1) {
+      onChange({ ...value, [field]: currentVal.padStart(2, '0') });
+    }
+  };
+
+  const increment = (field: 'h' | 'm' | 's') => {
+    if (disabled) return;
+    const current = parseInt(value[field]);
+    const max = field === 'h' ? 99 : 59;
+    const newVal = current >= max ? 0 : current + 1;
+    const paddedVal = newVal.toString().padStart(2, '0');
+    
+    const newValue = { ...value, [field]: paddedVal };
+    const newTotalSeconds = parseInt(newValue.h) * 3600 + parseInt(newValue.m) * 60 + parseInt(newValue.s);
+    
+    // Validate against video duration
+    if (maxDuration && newTotalSeconds > maxDuration) {
+      return; // Don't allow values exceeding video duration
+    }
+    
+    // Validate start time vs end time
+    if (otherTime) {
+      const otherTotalSeconds = parseInt(otherTime.h) * 3600 + parseInt(otherTime.m) * 60 + parseInt(otherTime.s);
+      
+      if (isEndTime && newTotalSeconds <= otherTotalSeconds) {
+        return; // End time must be greater than start time
+      }
+      if (!isEndTime && newTotalSeconds >= otherTotalSeconds) {
+        return; // Start time must be less than end time
+      }
+    }
+    
+    onChange(newValue);
+  };
+
+  const decrement = (field: 'h' | 'm' | 's') => {
+    if (disabled) return;
+    const current = parseInt(value[field]);
+    const max = field === 'h' ? 99 : 59;
+    const newVal = current <= 0 ? max : current - 1;
+    const paddedVal = newVal.toString().padStart(2, '0');
+    
+    const newValue = { ...value, [field]: paddedVal };
+    const newTotalSeconds = parseInt(newValue.h) * 3600 + parseInt(newValue.m) * 60 + parseInt(newValue.s);
+    
+    // Validate against video duration
+    if (maxDuration && newTotalSeconds > maxDuration) {
+      return; // Don't allow values exceeding video duration
+    }
+    
+    // Validate start time vs end time
+    if (otherTime) {
+      const otherTotalSeconds = parseInt(otherTime.h) * 3600 + parseInt(otherTime.m) * 60 + parseInt(otherTime.s);
+      
+      if (isEndTime && newTotalSeconds <= otherTotalSeconds) {
+        return; // End time must be greater than start time
+      }
+      if (!isEndTime && newTotalSeconds >= otherTotalSeconds) {
+        return; // Start time must be less than end time
+      }
+    }
+    
+    onChange(newValue);
+  };
+
+  // Check if increment/decrement buttons should be disabled
+  const isIncrementDisabled = (field: 'h' | 'm' | 's') => {
+    if (disabled) return true;
+    const current = parseInt(value[field]);
+    const max = field === 'h' ? 99 : 59;
+    const newVal = current >= max ? 0 : current + 1;
+    const newValue = { ...value, [field]: newVal.toString().padStart(2, '0') };
+    const newTotalSeconds = parseInt(newValue.h) * 3600 + parseInt(newValue.m) * 60 + parseInt(newValue.s);
+    
+    // Check video duration limit
+    if (maxDuration && newTotalSeconds > maxDuration) return true;
+    
+    // Check start/end time relationship
+    if (otherTime) {
+      const otherTotalSeconds = parseInt(otherTime.h) * 3600 + parseInt(otherTime.m) * 60 + parseInt(otherTime.s);
+      if (isEndTime && newTotalSeconds <= otherTotalSeconds) return true;
+      if (!isEndTime && newTotalSeconds >= otherTotalSeconds) return true;
+    }
+    
+    return false;
+  };
+
+  const isDecrementDisabled = (field: 'h' | 'm' | 's') => {
+    if (disabled) return true;
+    const current = parseInt(value[field]);
+    const max = field === 'h' ? 99 : 59;
+    const newVal = current <= 0 ? max : current - 1;
+    const newValue = { ...value, [field]: newVal.toString().padStart(2, '0') };
+    const newTotalSeconds = parseInt(newValue.h) * 3600 + parseInt(newValue.m) * 60 + parseInt(newValue.s);
+    
+    // Check video duration limit
+    if (maxDuration && newTotalSeconds > maxDuration) return true;
+    
+    // Check start/end time relationship
+    if (otherTime) {
+      const otherTotalSeconds = parseInt(otherTime.h) * 3600 + parseInt(otherTime.m) * 60 + parseInt(otherTime.s);
+      if (isEndTime && newTotalSeconds <= otherTotalSeconds) return true;
+      if (!isEndTime && newTotalSeconds >= otherTotalSeconds) return true;
+    }
+    
+    return false;
+  };
+
+  // Check if current time has validation issues
+  const hasValidationError = () => {
+    const currentSeconds = parseInt(value.h) * 3600 + parseInt(value.m) * 60 + parseInt(value.s);
+    
+    // Check video duration limit
+    if (maxDuration && currentSeconds > maxDuration) return true;
+    
+    // Check start/end relationship
+    if (otherTime) {
+      const otherSeconds = parseInt(otherTime.h) * 3600 + parseInt(otherTime.m) * 60 + parseInt(otherTime.s);
+      if (isEndTime && currentSeconds <= otherSeconds) return true;
+      if (!isEndTime && currentSeconds >= otherSeconds) return true;
+    }
+    
+    return false;
+  };
+
+  const hasError = hasValidationError();
+
   return (
-    <div className="flex items-center gap-1 font-mono text-lg sm:text-2xl bg-gray-100 dark:bg-gray-700 p-1.5 sm:p-2 rounded-md">
+    <div className={`flex items-center gap-1 font-mono text-lg sm:text-2xl p-1.5 sm:p-2 rounded-md transition-all duration-200 ${
+      hasError 
+        ? 'bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-600' 
+        : 'bg-gray-100 dark:bg-gray-700 border-2 border-transparent'
+    }`}>
+      <div className="relative group">
+        <button
+          type="button"
+          onClick={() => increment('h')}
+          disabled={disabled || isIncrementDisabled('h')}
+          className={`absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:cursor-not-allowed rounded-t-sm transition-opacity ${
+            disabled || isIncrementDisabled('h') 
+              ? 'opacity-0' 
+              : 'opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          <svg className="w-2 h-2 text-gray-600 dark:text-gray-300 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
       <input 
         type="text" 
         value={value.h} 
         onChange={(e) => handleInput('h', e.target.value)}
+          onBlur={() => handleBlur('h')}
+          onFocus={(e) => e.target.select()}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              increment('h');
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              decrement('h');
+            }
+          }}
         maxLength={2} 
         className="w-7 sm:w-9 text-center bg-transparent focus:outline-none" 
         disabled={disabled} 
       />
+        <button
+          type="button"
+          onClick={() => decrement('h')}
+          disabled={disabled || isDecrementDisabled('h')}
+          className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:cursor-not-allowed rounded-b-sm transition-opacity ${
+            disabled || isDecrementDisabled('h') 
+              ? 'opacity-0' 
+              : 'opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          <svg className="w-2 h-2 text-gray-600 dark:text-gray-300 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
       <span>:</span>
+      <div className="relative group">
+        <button
+          type="button"
+          onClick={() => increment('m')}
+          disabled={disabled || isIncrementDisabled('m')}
+          className={`absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:cursor-not-allowed rounded-t-sm transition-opacity ${
+            disabled || isIncrementDisabled('m') 
+              ? 'opacity-0' 
+              : 'opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          <svg className="w-2 h-2 text-gray-600 dark:text-gray-300 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
       <input 
         type="text" 
         value={value.m} 
         onChange={(e) => handleInput('m', e.target.value)}
+          onBlur={() => handleBlur('m')}
+          onFocus={(e) => e.target.select()}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              increment('m');
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              decrement('m');
+            }
+          }}
         maxLength={2} 
         className="w-7 sm:w-9 text-center bg-transparent focus:outline-none" 
         disabled={disabled} 
       />
+        <button
+          type="button"
+          onClick={() => decrement('m')}
+          disabled={disabled || isDecrementDisabled('m')}
+          className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:cursor-not-allowed rounded-b-sm transition-opacity ${
+            disabled || isDecrementDisabled('m') 
+              ? 'opacity-0' 
+              : 'opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          <svg className="w-2 h-2 text-gray-600 dark:text-gray-300 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
       <span>:</span>
+      <div className="relative group">
+        <button
+          type="button"
+          onClick={() => increment('s')}
+          disabled={disabled || isIncrementDisabled('s')}
+          className={`absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:cursor-not-allowed rounded-t-sm transition-opacity ${
+            disabled || isIncrementDisabled('s') 
+              ? 'opacity-0' 
+              : 'opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          <svg className="w-2 h-2 text-gray-600 dark:text-gray-300 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
       <input 
         type="text" 
         value={value.s} 
         onChange={(e) => handleInput('s', e.target.value)}
+          onBlur={() => handleBlur('s')}
+          onFocus={(e) => e.target.select()}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              increment('s');
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              decrement('s');
+            }
+          }}
         maxLength={2} 
         className="w-7 sm:w-9 text-center bg-transparent focus:outline-none" 
         disabled={disabled} 
       />
+        <button
+          type="button"
+          onClick={() => decrement('s')}
+          disabled={disabled || isDecrementDisabled('s')}
+          className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:cursor-not-allowed rounded-b-sm transition-opacity ${
+            disabled || isDecrementDisabled('s') 
+              ? 'opacity-0' 
+              : 'opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          <svg className="w-2 h-2 text-gray-600 dark:text-gray-300 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 };
@@ -137,11 +427,34 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
       return 0;
     }
     
-    return Math.max(0, endSeconds - startSeconds);
+    // Ensure end time doesn't exceed video duration
+    const maxEndSeconds = videoDuration || endSeconds;
+    const validEndSeconds = Math.min(endSeconds, maxEndSeconds);
+    
+    return Math.max(0, validEndSeconds - startSeconds);
   };
 
   // Get trimmed duration for display
   const trimmedDuration = calculateTrimmedDuration();
+
+  // Check if times are valid for saving
+  const isTimeValid = () => {
+    const startSeconds = parseInt(startTime.h) * 3600 + parseInt(startTime.m) * 60 + parseInt(startTime.s);
+    const endSeconds = parseInt(endTime.h) * 3600 + parseInt(endTime.m) * 60 + parseInt(endTime.s);
+    
+    // Check if times are valid numbers
+    if (isNaN(startSeconds) || isNaN(endSeconds)) return false;
+    
+    // Check if start < end
+    if (startSeconds >= endSeconds) return false;
+    
+    // Check if end doesn't exceed video duration
+    if (videoDuration && endSeconds > videoDuration) return false;
+    
+    return true;
+  };
+
+  const canSave = isTimeValid();
 
   const handleSave = () => {
     const startStr = `${startTime.h}:${startTime.m}:${startTime.s}`;
@@ -227,15 +540,15 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 text-gray-800 dark:text-gray-200">
+             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 text-gray-800 dark:text-gray-200">
               <div className="text-center">
                 <label className="block text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Start Time</label>
-                <TimeInput value={startTime} onChange={setStartTime} disabled={false} />
+                 <TimeInput value={startTime} onChange={setStartTime} disabled={false} maxDuration={videoDuration} isEndTime={false} otherTime={endTime} />
               </div>
               <span className="text-gray-400 dark:text-gray-500 text-lg sm:text-xl">--</span>
               <div className="text-center">
                 <label className="block text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">End Time</label>
-                <TimeInput value={endTime} onChange={setEndTime} disabled={false} />
+                 <TimeInput value={endTime} onChange={setEndTime} disabled={false} maxDuration={videoDuration} isEndTime={true} otherTime={startTime} />
               </div>
             </div>
 
@@ -269,6 +582,20 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
                 }
               </span>
             </div>
+
+            {/* Video Duration Warning */}
+            {videoDuration && (() => {
+              const endSeconds = parseInt(endTime.h) * 3600 + parseInt(endTime.m) * 60 + parseInt(endTime.s);
+              const exceedsDuration = endSeconds > videoDuration;
+              return exceedsDuration ? (
+                <div className="flex items-center justify-center gap-2 mb-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <ClockIcon className="w-4 h-4 text-red-600 dark:text-red-400" />
+                  <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                    End time cannot exceed video duration ({formatDuration(videoDuration)})
+                  </span>
+                </div>
+              ) : null;
+            })()}
           </>
         )}
 
@@ -277,7 +604,12 @@ const TrimAudioModal: React.FC<TrimAudioModalProps> = ({
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
                 <button 
                   onClick={handleSave}
-                  className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 font-semibold text-white bg-gray-800 dark:bg-gray-200 dark:text-gray-900 rounded-lg hover:bg-gray-700 dark:hover:bg-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-gray-800 transition-colors text-sm sm:text-base"
+                  disabled={!canSave}
+                  className={`flex-1 px-4 sm:px-6 py-2.5 sm:py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors text-sm sm:text-base ${
+                    canSave 
+                      ? 'text-white bg-gray-800 dark:bg-gray-200 dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-white focus:ring-brand-500 dark:focus:ring-offset-gray-800' 
+                      : 'text-gray-400 bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
+                  }`}
                 >
                   Save
                 </button>
