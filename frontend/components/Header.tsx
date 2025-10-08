@@ -24,11 +24,8 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
   return (
     <header className="w-full p-1.5 sm:p-2 md:p-2.5 bg-gradient-to-b from-gray-100 to-gray-200/50 dark:bg-gradient-to-b dark:from-[#151A1D] dark:to-[#0f1214] backdrop-blur-sm sticky top-0 z-20 border-b border-gray-300 dark:border-gray-800">
       <div className="container mx-auto flex justify-between items-center max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl px-2 sm:px-4">
-        <button onClick={() => handleNavigate('home')} className="flex items-center gap-1.5 sm:gap-2" aria-label="Go to homepage">
-          <img src="/favicon.svg" alt="YouTube to MP3 Converter Logo - SaveYTB" className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />
-          <span className="text-lg sm:text-xl md:text-2xl font-bold text-red-600 dark:text-red-500">
-            SaveYTB
-          </span>
+        <button onClick={() => handleNavigate('home')} className="flex items-center" aria-label="Go to homepage">
+          <img src="/logo.png" alt="YouTube to MP3 Converter Logo - SaveYTB" className="h-8 sm:h-10 md:h-12 w-auto" />
         </button>
         
         {/* Desktop Nav */}
