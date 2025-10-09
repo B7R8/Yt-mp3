@@ -11,6 +11,7 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
   const [job, setJob] = useState<Job | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const qualityMessageShownRef = useRef<boolean>(false);
 
   const clearPolling = useCallback(() => {
     if (pollingIntervalRef.current) {
@@ -23,6 +24,12 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
     try {
       const currentJob = await getJobStatus(id);
       setJob(currentJob);
+
+      // Show quality message only once (for 3-hour rule)
+      if (currentJob.quality_message && !qualityMessageShownRef.current) {
+        showToast(currentJob.quality_message, 'info');
+        qualityMessageShownRef.current = true;
+      }
 
       if (currentJob.status === JobStatus.COMPLETED) {
         showToast(`Successfully converted "${currentJob.title}"!`, 'success');
@@ -119,6 +126,7 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
     clearPolling();
     setJob(null);
     setIsConverting(false);
+    qualityMessageShownRef.current = false; // Reset the flag for new conversions
   }, [clearPolling]);
 
   // Cleanup on unmount

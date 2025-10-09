@@ -31,6 +31,7 @@ async function initializeDatabase() {
       progress INTEGER DEFAULT 0,
       mp3_filename TEXT,
       error_message TEXT,
+      quality_message TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -38,6 +39,12 @@ async function initializeDatabase() {
     // Add progress column if it doesn't exist (for existing databases)
     await database.exec(`
     ALTER TABLE conversions ADD COLUMN progress INTEGER DEFAULT 0
+  `).catch(() => {
+        // Column already exists, ignore error
+    });
+    // Add quality_message column if it doesn't exist (for existing databases)
+    await database.exec(`
+    ALTER TABLE conversions ADD COLUMN quality_message TEXT
   `).catch(() => {
         // Column already exists, ignore error
     });

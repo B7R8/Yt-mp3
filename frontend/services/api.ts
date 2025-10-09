@@ -79,6 +79,7 @@ export const getJobStatus = async (id: string): Promise<Job> => {
     progress: data.status === 'completed' ? 100 : data.status === 'processing' ? 50 : 0,
     title: data.video_title,
     url: data.youtube_url || '', // Handle missing youtube_url
-    error: data.error_message
+    error: data.error_message,
+    quality_message: data.quality_message
   };
 };

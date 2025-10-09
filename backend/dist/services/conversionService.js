@@ -105,6 +105,7 @@ class ConversionService {
                 status: result.status,
                 mp3_filename: result.mp3_filename,
                 error_message: result.error_message,
+                quality_message: result.quality_message,
                 created_at: new Date(result.created_at),
                 updated_at: new Date(result.updated_at)
             };
@@ -114,12 +115,12 @@ class ConversionService {
             throw error;
         }
     }
-    async updateJobStatus(jobId, status, mp3Filename, errorMessage) {
+    async updateJobStatus(jobId, status, mp3Filename, errorMessage, qualityMessage) {
         const database = await database_1.db;
         try {
             await database.run(`UPDATE conversions 
-         SET status = ?, mp3_filename = ?, error_message = ?, updated_at = datetime('now') 
-         WHERE id = ?`, [status, mp3Filename, errorMessage, jobId]);
+         SET status = ?, mp3_filename = ?, error_message = ?, quality_message = ?, updated_at = datetime('now') 
+         WHERE id = ?`, [status, mp3Filename, errorMessage, qualityMessage, jobId]);
         }
         catch (error) {
             logger_1.default.error('Failed to update job status:', error);
@@ -201,6 +202,76 @@ class ConversionService {
         }
     }
     /**
+     * Get video metadata including duration
+     */
+    async getVideoMetadata(url) {
+        return new Promise((resolve, reject) => {
+            const ytdlp = (0, child_process_1.spawn)('python', [
+                '-m', 'yt_dlp',
+                '--dump-json',
+                '--no-playlist',
+                '--no-warnings',
+                '--extractor-args', 'youtube:player_client=android',
+                url
+            ], {
+                env: {
+                    ...process.env,
+                    PYTHONIOENCODING: 'utf-8',
+                    PYTHONUTF8: '1',
+                    LANG: 'en_US.UTF-8',
+                    LC_ALL: 'en_US.UTF-8'
+                }
+            });
+            let output = '';
+            let errorOutput = '';
+            ytdlp.stdout.on('data', (data) => {
+                output += data.toString('utf8');
+            });
+            ytdlp.stderr.on('data', (data) => {
+                errorOutput += data.toString('utf8');
+            });
+            ytdlp.on('close', (code) => {
+                if (code === 0 && output.trim()) {
+                    try {
+                        const jsonData = JSON.parse(output);
+                        const title = (0, titleProcessor_1.preserveExactTitle)(jsonData.title || 'Unknown');
+                        const duration = jsonData.duration || 0;
+                        resolve({ title, duration });
+                    }
+                    catch (parseError) {
+                        reject(new Error(`Failed to parse video metadata: ${parseError}`));
+                    }
+                }
+                else {
+                    reject(new Error(`Failed to get video metadata: ${errorOutput}`));
+                }
+            });
+            ytdlp.on('error', (error) => {
+                reject(new Error(`Error getting video metadata: ${error.message}`));
+            });
+        });
+    }
+    /**
+     * Determine quality based on video duration (3-hour rule)
+     */
+    determineQuality(userQuality, videoDurationSeconds) {
+        const LONG_VIDEO_THRESHOLD = 3 * 60 * 60; // 3 hours in seconds (10800)
+        if (videoDurationSeconds > LONG_VIDEO_THRESHOLD) {
+            // Extract numeric value from quality string (e.g., "192k" -> 192)
+            const userQualityNum = parseInt(userQuality.replace('k', ''));
+            // If user selected 128k or lower, use their choice
+            if (userQualityNum <= 128) {
+                return { quality: userQuality };
+            }
+            // If user selected higher than 128k, force 128k
+            return {
+                quality: '128k',
+                message: 'Note: For videos longer than 3 hours, audio quality is automatically set to 128k for faster processing.'
+            };
+        }
+        return { quality: userQuality };
+    }
+    /**
      * Process audio with ffmpeg: trim and set bitrate
      */
     async processAudioWithFFmpeg(inputPath, outputPath, bitrate, startTime, endTime) {
@@ -222,10 +293,11 @@ class ConversionService {
                     logger_1.default.info(`Setting duration: ${duration} seconds (${startTime} to ${endTime})`);
                 }
             }
-            // Set audio bitrate and format
+            // Set audio bitrate and format with ultrafast preset for speed
             command
                 .audioBitrate(bitrate)
                 .toFormat('mp3')
+                .addOption('-preset', 'ultrafast')
                 .output(outputPath)
                 .on('start', (commandLine) => {
                 logger_1.default.info(`FFmpeg command: ${commandLine}`);
@@ -253,11 +325,23 @@ class ConversionService {
             const tempFilename = `${jobId}_temp.mp3`;
             const outputPath = path_1.default.join(this.downloadsDir, mp3Filename);
             tempAudioPath = path_1.default.join(this.downloadsDir, tempFilename);
+            // Step 0: Get video metadata to apply 3-hour rule
+            logger_1.default.info(`[Job ${jobId}] Step 0: Getting video metadata for duration check`);
+            const { duration } = await this.getVideoMetadata(request.url);
+            // Apply 3-hour rule for quality
+            const qualityResult = this.determineQuality(request.quality || '192k', duration);
+            const finalQuality = qualityResult.quality;
+            const qualityMessage = qualityResult.message;
+            if (qualityMessage) {
+                logger_1.default.info(`[Job ${jobId}] 3-hour rule applied: ${qualityMessage}`);
+                // Store the message in the job for later retrieval
+                await this.updateJobStatus(jobId, 'processing', undefined, undefined, qualityMessage);
+            }
             // Step 1: Download audio using yt-dlp
-            logger_1.default.info(`[Job ${jobId}] Step 1: Downloading audio from ${request.url}`);
+            logger_1.default.info(`[Job ${jobId}] Step 1: Downloading audio from ${request.url} (duration: ${duration}s, quality: ${finalQuality})`);
             await this.downloadAudio(request.url, tempAudioPath);
             // Step 2: Process with FFmpeg (trim + bitrate)
-            const bitrate = request.quality ? parseInt(request.quality.replace('k', '')) : 192;
+            const bitrate = parseInt(finalQuality.replace('k', ''));
             if (request.trim_start && request.trim_end) {
                 logger_1.default.info(`[Job ${jobId}] Step 2: Processing with FFmpeg (trim: ${request.trim_start} to ${request.trim_end}, bitrate: ${bitrate}k)`);
                 await this.processAudioWithFFmpeg(tempAudioPath, outputPath, bitrate, request.trim_start, request.trim_end);

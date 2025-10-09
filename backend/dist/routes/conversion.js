@@ -62,6 +62,7 @@ router.get('/status/:id', rateLimiter_1.statusRateLimit, validation_1.validateJo
             video_title: job.video_title,
             mp3_filename: job.mp3_filename,
             error_message: job.error_message,
+            quality_message: job.quality_message,
             created_at: job.created_at,
             updated_at: job.updated_at
         });

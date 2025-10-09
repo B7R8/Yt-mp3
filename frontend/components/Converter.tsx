@@ -191,6 +191,15 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               <h3 className="text-sm font-semibold text-center mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title || 'Processing...'}</h3>
               <p className="text-center text-gray-600 dark:text-gray-400 mb-6 capitalize font-medium">{job.status}...</p>
               
+              {/* Quality Message for 3-hour rule */}
+              {job.quality_message && (
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-sm text-blue-700 dark:text-blue-300 text-center">
+                    {job.quality_message}
+                  </p>
+                </div>
+              )}
+              
               {/* Clean Progress Bar */}
               <div className="relative w-full">
                 {/* Progress Track */}

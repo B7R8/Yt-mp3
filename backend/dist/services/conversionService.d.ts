@@ -17,6 +17,14 @@ export declare class ConversionService {
      */
     private timeToSeconds;
     /**
+     * Get video metadata including duration
+     */
+    private getVideoMetadata;
+    /**
+     * Determine quality based on video duration (3-hour rule)
+     */
+    private determineQuality;
+    /**
      * Process audio with ffmpeg: trim and set bitrate
      */
     private processAudioWithFFmpeg;

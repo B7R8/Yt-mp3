@@ -74,6 +74,7 @@ router.get('/status/:id', statusRateLimit, validateJobId, async (req: Request, r
       video_title: job.video_title,
       mp3_filename: job.mp3_filename,
       error_message: job.error_message,
+      quality_message: job.quality_message,
       created_at: job.created_at,
       updated_at: job.updated_at
     });

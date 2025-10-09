@@ -13,6 +13,7 @@ export interface Job {
   title?: string;
   url?: string;
   error?: string;
+  quality_message?: string;
 }
 
 export enum Theme {

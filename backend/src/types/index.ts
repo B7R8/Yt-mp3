@@ -5,6 +5,7 @@ export interface ConversionJob {
   status: 'pending' | 'processing' | 'completed' | 'failed';
   mp3_filename?: string;
   error_message?: string;
+  quality_message?: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -28,6 +29,7 @@ export interface StatusResponse {
   video_title?: string;
   mp3_filename?: string;
   error_message?: string;
+  quality_message?: string;
   created_at: string;
   updated_at: string;
 }
