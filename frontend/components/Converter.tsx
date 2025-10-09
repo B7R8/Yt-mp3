@@ -389,7 +389,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
     return (
       <>
         <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-3 md:gap-4">
-          <div className="flex-grow flex w-full bg-white dark:bg-[#1D2528] border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
+          <div className="flex-grow flex w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
             <input
               id="url-input"
               type="text"
@@ -442,7 +442,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
           </div>
           <button
             type="submit"
-            className="flex items-center justify-center gap-1 sm:gap-2 w-full md:w-auto md:shrink-0 px-5 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-3 md:py-3.5 lg:py-4 font-semibold text-white bg-gray-900 dark:bg-black rounded-lg hover:bg-black dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-[#1D2528] transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-xs sm:text-sm"
+            className="flex items-center justify-center gap-1 sm:gap-2 w-full md:w-auto md:shrink-0 px-5 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-3 md:py-3.5 lg:py-4 font-semibold text-white bg-gray-900 dark:bg-black rounded-lg hover:bg-black dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-gray-800 transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-xs sm:text-sm"
             disabled={isLoading}
           >
             {isLoading ? <LoadingSpinner className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"/> : 'Convert'}

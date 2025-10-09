@@ -52,6 +52,7 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
               <button onClick={() => navigateTo('faqs')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors">FAQs</button>
               <button onClick={() => navigateTo('contact')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors">Contact</button>
               <button onClick={() => navigateTo('changelog')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors">Changelog</button>
+              <button onClick={() => navigateTo('support-us')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors">Support Us</button>
             </div>
           </div>
 

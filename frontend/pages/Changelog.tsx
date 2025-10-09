@@ -5,28 +5,10 @@ import { ChevronDownIcon } from '../components/icons/ChevronDownIcon';
 
 const changelogData = [
     {
-        version: 'Version 1.2.0',
-        date: 'October 4, 2024',
-        changes: [
-            { type: 'new', description: 'Interactive Trim Audio and Select Quality modals implemented.' },
-            { type: 'improvement', description: 'Redesigned FAQ, Changelog, and Contact pages for a better user experience.' },
-            { type: 'improvement', description: 'Full mobile responsiveness for all screen sizes, including very small devices.' },
-        ]
-    },
-    {
-        version: 'Version 1.1.0',
-        date: 'September 28, 2024',
-        changes: [
-            { type: 'new', description: 'Added Dark/Light mode with a theme toggle.' },
-            { type: 'new', description: 'Real-time conversion progress indicator with percentage.' },
-            { type: 'improvement', description: 'Enhanced error handling with more descriptive toast notifications.' }
-        ]
-    },
-    {
         version: 'Version 1.0.0',
-        date: 'September 20, 2024',
+        date: '10/10/2025',
         changes: [
-            { type: 'new', description: 'Initial Release of SaveYTB with core YouTube to MP3 conversion functionality - completely free and ad-free.' },
+            { type: 'new', description: 'Initial Release of SaveYTB - Free YouTube to MP3 converter with high-quality audio conversion, mobile-friendly design, and no registration required.' },
         ]
     }
 ];

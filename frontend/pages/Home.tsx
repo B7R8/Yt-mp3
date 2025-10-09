@@ -23,7 +23,7 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
       </section>
       
       <section className="mb-12">
-        <SupportLinks />
+        <SupportLinks navigateTo={navigateTo} />
       </section>
       
       <section className="mb-6 sm:mb-8 md:mb-12 px-2 sm:px-3 md:px-4">

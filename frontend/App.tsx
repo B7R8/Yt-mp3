@@ -15,9 +15,12 @@ import Contact from './pages/Contact';
 import Copyright from './pages/Copyright';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import ComingSoon from './pages/ComingSoon';
+import SupportUs from './pages/SupportUs';
+import CryptoDonation from './pages/CryptoDonation';
 import SupportLinks from './components/SupportLinks';
 
-export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy';
+export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation';
 
 function App() {
   const [toast, setToast] = useState<ToastData | null>(null);
@@ -69,6 +72,12 @@ function App() {
         return <Terms />;
       case 'privacy':
         return <Privacy />;
+      case 'coming-soon':
+        return <ComingSoon navigateTo={navigateTo} />;
+      case 'support-us':
+        return <SupportUs navigateTo={navigateTo} />;
+      case 'crypto-donation':
+        return <CryptoDonation />;
       default:
         return <Home showToast={showToast} navigateTo={navigateTo} />;
     }

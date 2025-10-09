@@ -25,6 +25,24 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://saveytb.com/support-us</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://saveytb.com/crypto-donation</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://saveytb.com/coming-soon</loc>
+    <lastmod>2024-12-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://saveytb.com/terms</loc>
     <lastmod>2024-12-19</lastmod>
     <changefreq>yearly</changefreq>
