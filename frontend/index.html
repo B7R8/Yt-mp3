@@ -113,7 +113,17 @@
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+  <body class="bg-gray-50 transition-colors duration-300" style="background-color: #f9fafb;" data-theme="light">
+    <style>
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #1a1a1a !important;
+        }
+      }
+      .dark body {
+        background-color: #1a1a1a !important;
+      }
+    </style>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

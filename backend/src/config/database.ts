@@ -34,6 +34,18 @@ export async function initializeDatabase() {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Create blacklist table
+  await database.exec(`
+    CREATE TABLE IF NOT EXISTS blacklist (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT NOT NULL CHECK (type IN ('channel', 'url', 'video_id')),
+      value TEXT NOT NULL,
+      reason TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      created_by TEXT DEFAULT 'admin'
+    )
+  `);
   
   // Add progress column if it doesn't exist (for existing databases)
   await database.exec(`

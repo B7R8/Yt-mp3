@@ -6,6 +6,7 @@ import Converter from './components/Converter';
 import Toast from './components/Toast';
 import ThemeToggle from './components/ThemeToggle';
 import ScrollToTop from './components/ScrollToTop';
+import { ThemeProvider } from './context/ThemeContext';
 import { ToastData } from './types';
 import HowToSection from './components/HowToSection';
 import Home from './pages/Home';
@@ -18,9 +19,10 @@ import Privacy from './pages/Privacy';
 import ComingSoon from './pages/ComingSoon';
 import SupportUs from './pages/SupportUs';
 import CryptoDonation from './pages/CryptoDonation';
+import Admin from './pages/Admin';
 import SupportLinks from './components/SupportLinks';
 
-export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation';
+export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation' | 'admin';
 
 function App() {
   const [toast, setToast] = useState<ToastData | null>(null);
@@ -53,8 +55,19 @@ function App() {
   
   const navigateTo = (p: Page) => {
     setPage(p);
-    window.scrollTo(0, 0);
+    // Scroll to top immediately when navigating
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   };
+
+  // Ensure scroll to top whenever page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, [page]);
+
+  // Scroll to top when component mounts (handles browser back/forward)
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, []);
 
   const renderPage = () => {
     switch (page) {
@@ -77,29 +90,33 @@ function App() {
       case 'support-us':
         return <SupportUs navigateTo={navigateTo} />;
       case 'crypto-donation':
-        return <CryptoDonation />;
+        return <CryptoDonation navigateTo={navigateTo} />;
+      case 'admin':
+        return <Admin navigateTo={navigateTo} />;
       default:
         return <Home showToast={showToast} navigateTo={navigateTo} />;
     }
   };
 
   return (
-    <div className="flex flex-col min-h-screen font-sans text-gray-800 dark:text-gray-200 overflow-x-hidden">
-      <Header navigateTo={navigateTo} />
-      <main className="flex-grow w-full max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 lg:py-6 overflow-x-hidden">
-        {renderPage()}
-      </main>
-      <Footer navigateTo={navigateTo} />
-      <ThemeToggle />
-      <ScrollToTop />
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
-    </div>
+    <ThemeProvider>
+      <div className="flex flex-col min-h-screen font-sans text-gray-800 dark:text-gray-200 overflow-x-hidden">
+        <Header navigateTo={navigateTo} />
+        <main className="flex-grow w-full max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 lg:py-6 overflow-x-hidden">
+          {renderPage()}
+        </main>
+        <Footer navigateTo={navigateTo} />
+        <ThemeToggle />
+        <ScrollToTop />
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </div>
+    </ThemeProvider>
   );
 }
 

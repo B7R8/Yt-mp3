@@ -75,11 +75,83 @@ export class ConversionService {
     });
   }
 
+  private async checkBlacklist(url: string): Promise<{ isBlacklisted: boolean; reason?: string; type?: string }> {
+    try {
+      const database = await db;
+      
+      // Extract video ID from URL
+      const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+      const videoId = videoIdMatch ? videoIdMatch[1] : null;
+      
+      // Check for exact URL match
+      const urlMatch = await database.get(
+        'SELECT reason FROM blacklist WHERE type = ? AND value = ?',
+        ['url', url]
+      );
+      
+      if (urlMatch) {
+        logger.info(`URL blacklisted: ${url}`);
+        return { 
+          isBlacklisted: true, 
+          reason: urlMatch.reason || 'This URL has been blocked by the content owner or administrator',
+          type: 'URL'
+        };
+      }
+      
+      // Check for video ID match
+      if (videoId) {
+        const videoIdMatch = await database.get(
+          'SELECT reason FROM blacklist WHERE type = ? AND value = ?',
+          ['video_id', videoId]
+        );
+        
+        if (videoIdMatch) {
+          logger.info(`Video ID blacklisted: ${videoId}`);
+          return { 
+            isBlacklisted: true, 
+            reason: videoIdMatch.reason || 'This video has been blocked by the content owner or administrator',
+            type: 'Video'
+          };
+        }
+      }
+      
+      // Check for channel match (extract channel ID from URL)
+      const channelMatch = url.match(/youtube\.com\/channel\/([^&\n?#]+)/);
+      if (channelMatch) {
+        const channelId = channelMatch[1];
+        const channelMatchResult = await database.get(
+          'SELECT reason FROM blacklist WHERE type = ? AND value = ?',
+          ['channel', channelId]
+        );
+        
+        if (channelMatchResult) {
+          logger.info(`Channel blacklisted: ${channelId}`);
+          return { 
+            isBlacklisted: true, 
+            reason: channelMatchResult.reason || 'This channel has been blocked by the content owner or administrator',
+            type: 'Channel'
+          };
+        }
+      }
+      
+      return { isBlacklisted: false };
+    } catch (error) {
+      logger.error('Error checking blacklist:', error);
+      return { isBlacklisted: false }; // Allow conversion if blacklist check fails
+    }
+  }
+
   async createJob(request: ConversionRequest): Promise<string> {
     const jobId = uuidv4();
     const database = await db;
 
     try {
+      // Check if URL is blacklisted
+      const blacklistResult = await this.checkBlacklist(request.url);
+      if (blacklistResult.isBlacklisted) {
+        throw new Error(blacklistResult.reason || 'This content is not available for conversion');
+      }
+
       // First, extract video title using yt-dlp
       const videoTitle = await this.extractVideoTitle(request.url);
       

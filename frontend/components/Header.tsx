@@ -40,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
   }, [isMenuOpen]);
 
   return (
-    <header className="w-full p-3 sm:p-2 md:p-2.5 bg-gradient-to-b from-gray-100 to-gray-200/50 dark:bg-gradient-to-b dark:from-[#151A1D] dark:to-[#0f1214] sticky top-0 z-20 border-b border-gray-300 dark:border-gray-800">
+    <header className="w-full p-3 sm:p-2 md:p-2.5 bg-gradient-to-b from-gray-100 to-gray-200/50 dark:bg-gradient-to-b dark:from-[#2d2d2d] dark:to-[#1f1f1f] sticky top-0 z-20 border-b border-gray-300 dark:border-gray-600">
       <div className="container mx-auto flex justify-between items-center max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl px-2 sm:px-4">
         <button onClick={() => handleNavigate('home')} className="flex items-center" aria-label="Go to homepage">
           <img src="/logo.png" alt="YouTube to MP3 Converter Logo - SaveYTB" className="h-10 sm:h-10 md:h-12 w-auto" />
@@ -52,6 +52,7 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
           <button onClick={() => handleNavigate('changelog')} className="hover:text-red-500 transition-colors">Changelog</button>
           <button onClick={() => handleNavigate('contact')} className="hover:text-red-500 transition-colors">Contact</button>
           <button onClick={() => handleNavigate('support-us')} className="hover:text-red-500 transition-colors">Support Us</button>
+          <button onClick={() => handleNavigate('admin')} className="hover:text-red-500 transition-colors text-xs opacity-60 hidden">b7r8</button>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -70,7 +71,7 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
         {isMenuOpen && (
           <div 
             ref={menuRef}
-            className="fixed top-12 right-2 sm:right-4 z-30 w-40 bg-white dark:bg-[#2d3748] rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 md:hidden overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200"
+            className="fixed top-12 right-2 sm:right-4 z-30 w-40 bg-white dark:bg-[#2d2d2d] rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 md:hidden overflow-hidden animate-in slide-in-from-top-2 fade-in duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <nav className="flex flex-col">
@@ -103,6 +104,12 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
                 className="text-left px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-150 text-sm font-medium hover:translate-x-1"
               >
                 Support Us
+              </button>
+              <button 
+                onClick={() => handleNavigate('admin')} 
+                className="text-left px-4 py-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-150 text-xs font-medium hover:translate-x-1 opacity-60 hidden"
+              >
+                b7r8
               </button>
             </nav>
           </div>

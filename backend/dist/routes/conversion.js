@@ -24,6 +24,47 @@ setInterval(() => {
         }
     }
 }, 5 * 60 * 1000); // Every 5 minutes
+// POST /api/check-url - Check if URL is blacklisted before conversion
+router.post('/check-url', async (req, res) => {
+    try {
+        const { url } = req.body;
+        if (!url) {
+            return res.status(400).json({
+                success: false,
+                message: 'YouTube URL is required'
+            });
+        }
+        // Validate URL format
+        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/)|youtu\.be\/)[\w-]+/;
+        if (!youtubeRegex.test(url)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide a valid YouTube URL'
+            });
+        }
+        const blacklistResult = await conversionService.checkBlacklist(url);
+        if (blacklistResult.isBlacklisted) {
+            return res.json({
+                success: false,
+                isBlacklisted: true,
+                message: blacklistResult.reason || 'This content is not available for conversion',
+                type: blacklistResult.type || 'Content'
+            });
+        }
+        res.json({
+            success: true,
+            isBlacklisted: false,
+            message: 'URL is available for conversion'
+        });
+    }
+    catch (error) {
+        logger_1.default.error('URL check error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to check URL'
+        });
+    }
+});
 // POST /api/convert - Start a new conversion
 router.post('/convert', rateLimiter_1.conversionRateLimit, validation_1.validateConversionRequest, async (req, res) => {
     try {

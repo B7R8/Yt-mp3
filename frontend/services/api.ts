@@ -25,6 +25,30 @@ const handleResponse = async (response: Response) => {
   }
 };
 
+export const checkUrl = async (url: string): Promise<{ 
+  success: boolean; 
+  isBlacklisted: boolean; 
+  message: string; 
+  type?: string 
+}> => {
+  const response = await fetch('/api/check-url', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Accept': 'application/json; charset=utf-8',
+    },
+    body: JSON.stringify({ url }),
+  });
+  
+  const data = await handleResponse(response);
+  return {
+    success: data.success,
+    isBlacklisted: data.isBlacklisted || false,
+    message: data.message,
+    type: data.type
+  };
+};
+
 export const startConversion = async (
   url: string,
   quality?: string,

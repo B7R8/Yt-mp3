@@ -4,6 +4,7 @@ export declare class ConversionService {
     constructor();
     private ensureDownloadsDir;
     private extractVideoTitle;
+    private checkBlacklist;
     createJob(request: ConversionRequest): Promise<string>;
     getJobStatus(jobId: string): Promise<ConversionJob | null>;
     private updateJobStatus;

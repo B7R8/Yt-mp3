@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Job, JobStatus } from '../types';
-import { startConversion, getJobStatus } from '../services/api';
+import { startConversion, getJobStatus, checkUrl } from '../services/api';
+import { sanitizeText, validateInput, logSecurityIncident, detectSuspiciousPatterns } from '../utils/securityUtils';
 
 interface UseConverterProps {
   showToast: (message: string, type: 'success' | 'error' | 'info') => void;
@@ -96,6 +97,35 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
     try {
       setIsConverting(true);
       setJob(null);
+
+      // Security: Sanitize and validate input
+      const sanitizedUrl = sanitizeText(url);
+      if (!validateInput(sanitizedUrl, 'url')) {
+        logSecurityIncident('INVALID_URL_INPUT', { originalUrl: url, sanitizedUrl });
+        showToast('Invalid URL format. Please check your input.', 'error');
+        setIsConverting(false);
+        return;
+      }
+
+      // Check for suspicious patterns
+      const suspiciousPatterns = detectSuspiciousPatterns(url);
+      if (suspiciousPatterns.length > 0) {
+        logSecurityIncident('SUSPICIOUS_URL_PATTERNS', { url, patterns: suspiciousPatterns });
+        showToast('Suspicious URL detected. Please use a valid YouTube URL.', 'error');
+        setIsConverting(false);
+        return;
+      }
+
+      // First check if URL is blacklisted
+      const urlCheck = await checkUrl(sanitizedUrl);
+      
+      if (urlCheck.isBlacklisted) {
+        // Show detailed blacklist message
+        const blacklistMessage = `${urlCheck.message}${urlCheck.type ? ` (${urlCheck.type})` : ''}`;
+        showToast(blacklistMessage, 'error');
+        setIsConverting(false);
+        return;
+      }
 
       const response = await startConversion(url, quality, trimEnabled, trimStart, trimEnd);
       

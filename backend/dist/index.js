@@ -10,6 +10,8 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const node_cron_1 = __importDefault(require("node-cron"));
 const conversion_1 = __importDefault(require("./routes/conversion"));
 const health_1 = __importDefault(require("./routes/health"));
+const admin_1 = __importDefault(require("./routes/admin"));
+const secureWallet_1 = __importDefault(require("./routes/secureWallet"));
 const conversionService_1 = require("./services/conversionService");
 const logger_1 = __importDefault(require("./config/logger"));
 const database_1 = require("./config/database");
@@ -50,6 +52,10 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api', health_1.default);
 app.use('/api', conversion_1.default);
+app.use('/api/secure-wallet', secureWallet_1.default);
+app.use('/api', admin_1.default);
+// Debug: Log all registered routes
+console.log('Routes registered: health, conversion, admin');
 // Error handling middleware
 app.use((error, req, res, next) => {
     const { getUserFriendlyError, logTechnicalError } = require('./utils/errorHandler');

@@ -8,6 +8,7 @@ import { ScissorsIcon } from './icons/ScissorsIcon';
 import { RefreshIcon } from './icons/RefreshIcon';
 import { CloseIcon } from './icons/CloseIcon';
 import HeartIcon from './icons/HeartIcon';
+import { sanitizeText, validateInput, logSecurityIncident } from '../utils/securityUtils';
 import AutorenewIcon from './icons/AutorenewIcon';
 import Tooltip from './Tooltip';
 import TrimAudioModal from './TrimAudioModal';
@@ -354,7 +355,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               
               <button
                 onClick={() => window.open('https://buymeacoffee.com/ytconverter', '_blank')}
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-xs sm:text-sm w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#41484B] transition-colors duration-300 text-xs sm:text-sm w-full sm:w-auto"
                 style={{ backgroundColor: '#ff5f5f' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff4a4a'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ff5f5f'}
@@ -365,7 +366,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               
               <button 
                 onClick={resetConverter} 
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-gray-600 rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-xs sm:text-sm w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-gray-600 dark:bg-[#2d2d2d] rounded-lg shadow-md hover:bg-gray-700 dark:hover:bg-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-[#2d2d2d] transition-colors duration-300 text-xs sm:text-sm w-full sm:w-auto"
               >
                 <AutorenewIcon className="w-5 h-5" />
                 Convert Next
@@ -389,7 +390,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
     return (
       <>
         <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-3 md:gap-4">
-          <div className="flex-grow flex w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
+          <div className="flex-grow flex w-full bg-white dark:bg-[#3a3a3a] border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
             <input
               id="url-input"
               type="text"
@@ -442,7 +443,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
           </div>
           <button
             type="submit"
-            className="flex items-center justify-center gap-1 sm:gap-2 w-full md:w-auto md:shrink-0 px-5 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-3 md:py-3.5 lg:py-4 font-semibold text-white bg-gray-900 dark:bg-black rounded-lg hover:bg-black dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-gray-800 transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-xs sm:text-sm"
+            className="flex items-center justify-center gap-1 sm:gap-2 w-full md:w-auto md:shrink-0 px-5 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-3 md:py-3.5 lg:py-4 font-semibold text-white bg-gray-900 dark:bg-[#1f1f1f] rounded-lg hover:bg-black dark:hover:bg-[#1f1f1f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-[#3a3a3a] transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-xs sm:text-sm"
             disabled={isLoading}
           >
             {isLoading ? <LoadingSpinner className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"/> : 'Convert'}
@@ -452,7 +453,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
         
         {/* Auto Download Toggle */}
         <div className="flex items-center justify-center mt-3">
-          <div className="flex items-center gap-2 sm:gap-3 bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
+          <div className="flex items-center gap-2 sm:gap-3 bg-gray-100 dark:bg-[#2d2d2d] rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
             <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
               Auto Download
             </span>
@@ -493,7 +494,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   };
 
   return (
-    <div className="w-full max-w-full md:max-w-3xl lg:max-w-4xl mx-auto bg-gray-100/50 dark:bg-[#2d3748] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-3 sm:p-5 md:p-6 lg:p-7 xl:p-8 transition-all duration-300 flex items-center justify-center">
+    <div className="w-full max-w-full md:max-w-3xl lg:max-w-4xl mx-auto bg-gray-100/50 dark:bg-[#2d2d2d] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-3 sm:p-5 md:p-6 lg:p-7 xl:p-8 transition-all duration-300 flex items-center justify-center">
       <div className="w-full">
         {renderContent()}
       </div>
