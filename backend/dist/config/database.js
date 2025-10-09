@@ -12,11 +12,16 @@ const path_1 = __importDefault(require("path"));
 const dbPath = path_1.default.join(process.cwd(), 'conversions.db');
 exports.db = (0, sqlite_1.open)({
     filename: dbPath,
-    driver: sqlite3_1.default.Database
+    driver: sqlite3_1.default.Database,
+    // Ensure UTF-8 support for SQLite
+    mode: sqlite3_1.default.OPEN_READWRITE | sqlite3_1.default.OPEN_CREATE
 });
 // Initialize database tables
 async function initializeDatabase() {
     const database = await exports.db;
+    // Set UTF-8 encoding for the database
+    await database.exec(`PRAGMA encoding = "UTF-8"`);
+    await database.exec(`PRAGMA foreign_keys = ON`);
     await database.exec(`
     CREATE TABLE IF NOT EXISTS conversions (
       id TEXT PRIMARY KEY,

@@ -59,7 +59,12 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
       
       const durationResponse = await fetch(
         `/api/video-info?url=${encodeURIComponent(videoUrl)}`,
-        { signal: controller.signal }
+        { 
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json; charset=utf-8',
+          },
+        }
       );
       
       clearTimeout(timeoutId);
@@ -182,8 +187,8 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
         case JobStatus.PENDING:
         case JobStatus.PROCESSING:
           return (
-            <div className="max-w-md mx-auto">
-              <h3 className="text-sm font-semibold text-center truncate mb-2" title={job.title}>{job.title || 'Processing...'}</h3>
+            <div className="max-w-lg mx-auto">
+              <h3 className="text-sm font-semibold text-center mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title || 'Processing...'}</h3>
               <p className="text-center text-gray-600 dark:text-gray-400 mb-6 capitalize font-medium">{job.status}...</p>
               
               {/* Clean Progress Bar */}
@@ -253,7 +258,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
         case JobStatus.COMPLETED:
           return (
             <div className="text-center">
-              <h3 className="text-sm font-semibold truncate mb-2" title={job.title}>{job.title}</h3>
+              <h3 className="text-sm font-semibold mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title}</h3>
               <p className="text-green-500 mb-6 text-sm font-medium">Conversion Complete!</p>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 justify-center items-center">
                 <button
@@ -479,7 +484,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   };
 
   return (
-    <div className="w-full max-w-full md:max-w-3xl lg:max-w-4xl mx-auto bg-gray-100/50 dark:bg-[#2d3748] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-3 sm:p-5 md:p-6 lg:p-7 xl:p-8 transition-all duration-300 flex items-center justify-center overflow-hidden">
+    <div className="w-full max-w-full md:max-w-3xl lg:max-w-4xl mx-auto bg-gray-100/50 dark:bg-[#2d3748] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-3 sm:p-5 md:p-6 lg:p-7 xl:p-8 transition-all duration-300 flex items-center justify-center">
       <div className="w-full">
         {renderContent()}
       </div>

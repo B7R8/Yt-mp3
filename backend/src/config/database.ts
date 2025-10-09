@@ -7,12 +7,18 @@ const dbPath = path.join(process.cwd(), 'conversions.db');
 
 export const db = open({
   filename: dbPath,
-  driver: sqlite3.Database
+  driver: sqlite3.Database,
+  // Ensure UTF-8 support for SQLite
+  mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE
 });
 
 // Initialize database tables
 export async function initializeDatabase() {
   const database = await db;
+  
+  // Set UTF-8 encoding for the database
+  await database.exec(`PRAGMA encoding = "UTF-8"`);
+  await database.exec(`PRAGMA foreign_keys = ON`);
   
   await database.exec(`
     CREATE TABLE IF NOT EXISTS conversions (

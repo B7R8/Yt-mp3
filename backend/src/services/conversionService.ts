@@ -7,6 +7,7 @@ import { ConversionJob, ConversionRequest } from '../types';
 import logger from '../config/logger';
 import { db } from '../config/database';
 import { getUserFriendlyError, logTechnicalError } from '../utils/errorHandler';
+import { processVideoTitle, preserveExactTitle, isValidTitle } from '../utils/titleProcessor';
 
 export class ConversionService {
   private downloadsDir: string;
@@ -32,29 +33,42 @@ export class ConversionService {
         '--no-warnings',
         '--extractor-args', 'youtube:player_client=android',
         url
-      ]);
+      ], {
+        env: {
+          ...process.env,
+          PYTHONIOENCODING: 'utf-8',
+          PYTHONUTF8: '1',
+          LANG: 'en_US.UTF-8',
+          LC_ALL: 'en_US.UTF-8'
+        }
+      });
 
       let title = '';
       let errorOutput = '';
 
-      ytdlp.stdout.on('data', (data) => {
-        title += data.toString().trim();
+      ytdlp.stdout.on('data', (data: Buffer) => {
+        // Use UTF-8 encoding explicitly and accumulate all data
+        const chunk = data.toString('utf8');
+        title += chunk;
       });
 
-      ytdlp.stderr.on('data', (data) => {
-        errorOutput += data.toString();
+      ytdlp.stderr.on('data', (data: Buffer) => {
+        errorOutput += data.toString('utf8');
       });
 
-      ytdlp.on('close', (code) => {
+      ytdlp.on('close', (code: number | null) => {
         if (code === 0 && title) {
-          resolve(title);
+          // Preserve the exact original title from yt-dlp
+          const exactTitle = preserveExactTitle(title);
+          logger.info(`Extracted exact title: "${exactTitle}" (raw: "${title}")`);
+          resolve(exactTitle);
         } else {
           logger.warn(`Failed to extract video title for ${url}: ${errorOutput}`);
           resolve('Unknown Video'); // Fallback title
         }
       });
 
-      ytdlp.on('error', (error) => {
+      ytdlp.on('error', (error: Error) => {
         logger.error(`Error extracting video title for ${url}:`, error);
         resolve('Unknown Video'); // Fallback title
       });
@@ -159,7 +173,15 @@ export class ConversionService {
 
       logger.info(`Downloading audio with yt-dlp: ${ytdlpArgs.join(' ')}`);
 
-      const ytdlp = spawn('python', ytdlpArgs);
+      const ytdlp = spawn('python', ytdlpArgs, {
+        env: {
+          ...process.env,
+          PYTHONIOENCODING: 'utf-8',
+          PYTHONUTF8: '1',
+          LANG: 'en_US.UTF-8',
+          LC_ALL: 'en_US.UTF-8'
+        }
+      });
       
       let errorOutput = '';
       let stdOutput = '';

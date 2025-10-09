@@ -12,6 +12,7 @@ const fluent_ffmpeg_1 = __importDefault(require("fluent-ffmpeg"));
 const logger_1 = __importDefault(require("../config/logger"));
 const database_1 = require("../config/database");
 const errorHandler_1 = require("../utils/errorHandler");
+const titleProcessor_1 = require("../utils/titleProcessor");
 class ConversionService {
     constructor() {
         this.downloadsDir = process.env.DOWNLOADS_DIR || './downloads';
@@ -33,18 +34,31 @@ class ConversionService {
                 '--no-warnings',
                 '--extractor-args', 'youtube:player_client=android',
                 url
-            ]);
+            ], {
+                env: {
+                    ...process.env,
+                    PYTHONIOENCODING: 'utf-8',
+                    PYTHONUTF8: '1',
+                    LANG: 'en_US.UTF-8',
+                    LC_ALL: 'en_US.UTF-8'
+                }
+            });
             let title = '';
             let errorOutput = '';
             ytdlp.stdout.on('data', (data) => {
-                title += data.toString().trim();
+                // Use UTF-8 encoding explicitly and accumulate all data
+                const chunk = data.toString('utf8');
+                title += chunk;
             });
             ytdlp.stderr.on('data', (data) => {
-                errorOutput += data.toString();
+                errorOutput += data.toString('utf8');
             });
             ytdlp.on('close', (code) => {
                 if (code === 0 && title) {
-                    resolve(title);
+                    // Preserve the exact original title from yt-dlp
+                    const exactTitle = (0, titleProcessor_1.preserveExactTitle)(title);
+                    logger_1.default.info(`Extracted exact title: "${exactTitle}" (raw: "${title}")`);
+                    resolve(exactTitle);
                 }
                 else {
                     logger_1.default.warn(`Failed to extract video title for ${url}: ${errorOutput}`);
@@ -131,7 +145,15 @@ class ConversionService {
                 url
             ];
             logger_1.default.info(`Downloading audio with yt-dlp: ${ytdlpArgs.join(' ')}`);
-            const ytdlp = (0, child_process_1.spawn)('python', ytdlpArgs);
+            const ytdlp = (0, child_process_1.spawn)('python', ytdlpArgs, {
+                env: {
+                    ...process.env,
+                    PYTHONIOENCODING: 'utf-8',
+                    PYTHONUTF8: '1',
+                    LANG: 'en_US.UTF-8',
+                    LC_ALL: 'en_US.UTF-8'
+                }
+            });
             let errorOutput = '';
             let stdOutput = '';
             ytdlp.stdout.on('data', (data) => {

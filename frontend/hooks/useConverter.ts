@@ -1,23 +1,23 @@
-
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Job, JobStatus } from '../types';
 import { startConversion, getJobStatus } from '../services/api';
-import { POLLING_INTERVAL } from '../constants';
-import { getUserFriendlyError, logTechnicalError } from '../utils/errorMessages';
 
-type ShowToastFn = (message: string, type: 'success' | 'error' | 'info') => void;
+interface UseConverterProps {
+  showToast: (message: string, type: 'success' | 'error' | 'info') => void;
+  autoDownload: boolean;
+}
 
-export const useConverter = (showToast: ShowToastFn, autoDownload: boolean = false) => {
+export const useConverter = (showToast: (message: string, type: 'success' | 'error' | 'info') => void, autoDownload: boolean) => {
   const [job, setJob] = useState<Job | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const pollingIntervalRef = useRef<number | null>(null);
+  const [isConverting, setIsConverting] = useState(false);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const clearPolling = () => {
+  const clearPolling = useCallback(() => {
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
     }
-  };
+  }, []);
 
   const pollStatus = useCallback(async (id: string) => {
     try {
@@ -48,18 +48,11 @@ export const useConverter = (showToast: ShowToastFn, autoDownload: boolean = fal
                 // Create a hidden download link
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `${currentJob.title || 'converted'}.mp3`;
-                link.style.display = 'none';
+                link.download = `${currentJob.title || 'download'}.mp3`;
                 document.body.appendChild(link);
                 link.click();
-                
-                // Clean up
-                setTimeout(() => {
-                  if (document.body.contains(link)) {
-                    document.body.removeChild(link);
-                  }
-                  window.URL.revokeObjectURL(url);
-                }, 100);
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
               }
             };
             
@@ -74,94 +67,71 @@ export const useConverter = (showToast: ShowToastFn, autoDownload: boolean = fal
         
         clearPolling();
       } else if (currentJob.status === JobStatus.FAILED) {
-        const userMessage = getUserFriendlyError(currentJob.error || 'Conversion failed');
-        showToast(userMessage, 'error');
-        logTechnicalError(currentJob.error, 'Job Failed');
+        showToast(`Conversion failed: ${currentJob.error || 'Unknown error'}`, 'error');
         clearPolling();
       }
     } catch (error) {
-      const userMessage = getUserFriendlyError(error);
-      showToast(userMessage, 'error');
-      logTechnicalError(error, 'Poll Status');
-      clearPolling();
-      setJob(prev => prev ? { ...prev, status: JobStatus.FAILED, error: userMessage } : null);
-    }
-  }, [showToast, autoDownload]);
-
-  useEffect(() => {
-    if (job?.id && (job.status === JobStatus.PENDING || job.status === JobStatus.PROCESSING)) {
-      if (!pollingIntervalRef.current) {
-        pollingIntervalRef.current = window.setInterval(() => {
-          pollStatus(job.id);
-        }, POLLING_INTERVAL);
-      }
-    } else {
-      // Clear polling if job is completed or failed
+      console.error('Error polling job status:', error);
+      showToast('Error checking conversion status', 'error');
       clearPolling();
     }
+  }, [autoDownload, clearPolling]);
 
-    return () => {
-      clearPolling();
-    };
-  }, [job, pollStatus]);
-
-  const handleSubmit = async (
+  const handleSubmit = useCallback(async (
     url: string,
     quality?: string,
     trimEnabled?: boolean,
     trimStart?: string,
     trimEnd?: string
   ) => {
-    if (!url.trim()) {
-      showToast('Please enter a YouTube URL.', 'error');
-      return;
-    }
-    
-    // A simple regex to validate YouTube URLs
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
-    if (!youtubeRegex.test(url)) {
-        showToast('Please enter a valid YouTube URL.', 'error');
-        return;
-    }
-
-    setIsLoading(true);
-    setJob(null);
-    clearPolling();
+    if (isConverting) return;
 
     try {
-      const { id } = await startConversion(url, quality, trimEnabled, trimStart, trimEnd);
+      setIsConverting(true);
+      setJob(null);
+
+      const response = await startConversion(url, quality, trimEnabled, trimStart, trimEnd);
       
-      let message = 'Conversion started!';
-      if (trimEnabled && trimStart && trimEnd) {
-        message += ` Trimming from ${trimStart} to ${trimEnd}`;
+      if (response.id) {
+        setJob({
+          id: response.id,
+          status: JobStatus.PENDING,
+          progress: 0,
+          title: undefined,
+          url: url
+        });
+
+        // Start polling for status updates
+        pollingIntervalRef.current = setInterval(() => {
+          pollStatus(response.id);
+        }, 2000);
+
+        showToast('Conversion started!', 'info');
       }
-      if (quality) {
-        message += ` at ${quality}`;
-      }
-      
-      showToast(message, 'info');
-      // Set initial job state and start polling
-      setJob({
-        id,
-        status: JobStatus.PENDING,
-        progress: 0,
-        title: 'Starting conversion...'
-      });
-      // Initial status fetch
-      pollStatus(id);
     } catch (error) {
-      const userMessage = getUserFriendlyError(error);
-      showToast(userMessage, 'error');
-      logTechnicalError(error, 'Start Conversion');
-    } finally {
-      setIsLoading(false);
+      console.error('Conversion error:', error);
+      showToast('Failed to start conversion', 'error');
+      setIsConverting(false);
     }
-  };
+  }, [isConverting, pollStatus]);
 
-  const resetConverter = () => {
-    setJob(null);
+  const resetConverter = useCallback(() => {
     clearPolling();
-  };
+    setJob(null);
+    setIsConverting(false);
+  }, [clearPolling]);
 
-  return { job, isLoading, handleSubmit, resetConverter };
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      clearPolling();
+    };
+  }, [clearPolling]);
+
+  return {
+    job,
+    isLoading: isConverting,
+    handleSubmit,
+    resetConverter
+  };
 };

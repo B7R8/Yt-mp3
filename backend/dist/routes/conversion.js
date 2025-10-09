@@ -10,6 +10,7 @@ const rateLimiter_1 = require("../middleware/rateLimiter");
 const logger_1 = __importDefault(require("../config/logger"));
 const child_process_1 = require("child_process");
 const errorHandler_1 = require("../utils/errorHandler");
+const titleProcessor_1 = require("../utils/titleProcessor");
 const router = express_1.default.Router();
 const conversionService = new conversionService_1.ConversionService();
 const videoInfoCache = new Map();
@@ -51,6 +52,9 @@ router.get('/status/:id', rateLimiter_1.statusRateLimit, validation_1.validateJo
                 message: 'Job not found'
             });
         }
+        // Set proper UTF-8 headers for Unicode support
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Content-Encoding', 'utf-8');
         res.json({
             success: true,
             jobId: job.id,
@@ -133,6 +137,9 @@ router.get('/video-info', rateLimiter_1.statusRateLimit, async (req, res) => {
         const cached = videoInfoCache.get(videoId);
         if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
             logger_1.default.info(`Cache hit for video: ${videoId}`);
+            // Set proper UTF-8 headers for Unicode support
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            res.setHeader('Content-Encoding', 'utf-8');
             return res.json({
                 success: true,
                 title: cached.title,
@@ -169,14 +176,23 @@ router.get('/video-info', rateLimiter_1.statusRateLimit, async (req, res) => {
             '--flat-playlist', // Don't extract playlist
             '--extractor-args', 'youtube:player_client=android', // Use mobile client for faster access
             url
-        ]);
+        ], {
+            env: {
+                ...process.env,
+                PYTHONIOENCODING: 'utf-8',
+                PYTHONUTF8: '1',
+                LANG: 'en_US.UTF-8',
+                LC_ALL: 'en_US.UTF-8'
+            }
+        });
         let output = '';
         let errorOutput = '';
         ytdlp.stdout.on('data', (data) => {
-            output += data.toString();
+            // Use UTF-8 encoding explicitly to handle Unicode characters properly
+            output += data.toString('utf8');
         });
         ytdlp.stderr.on('data', (data) => {
-            errorOutput += data.toString();
+            errorOutput += data.toString('utf8');
         });
         ytdlp.on('close', (code) => {
             clearTimeout(timeout);
@@ -186,7 +202,9 @@ router.get('/video-info', rateLimiter_1.statusRateLimit, async (req, res) => {
                 try {
                     // Parse JSON output (faster than line parsing)
                     const jsonData = JSON.parse(output);
-                    const title = jsonData.title || 'Unknown';
+                    // Preserve the exact original title from yt-dlp
+                    const rawTitle = jsonData.title || 'Unknown';
+                    const title = (0, titleProcessor_1.preserveExactTitle)(rawTitle);
                     let durationSeconds = 0;
                     // Handle duration from JSON
                     if (jsonData.duration && typeof jsonData.duration === 'number') {
@@ -216,7 +234,10 @@ router.get('/video-info', rateLimiter_1.statusRateLimit, async (req, res) => {
                         durationFormatted,
                         timestamp: Date.now()
                     });
-                    logger_1.default.info(`Video info fetched and cached: ${title} (${durationSeconds}s)`);
+                    logger_1.default.info(`Video info fetched and cached: "${title}" (${durationSeconds}s) - Original: "${rawTitle}"`);
+                    // Set proper UTF-8 headers for Unicode support
+                    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+                    res.setHeader('Content-Encoding', 'utf-8');
                     res.json({
                         success: true,
                         title,

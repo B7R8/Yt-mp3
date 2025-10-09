@@ -9,7 +9,20 @@ const handleResponse = async (response: Response) => {
     logTechnicalError(technicalError, 'API Response');
     throw technicalError;
   }
-  return response.json();
+  
+  // Ensure proper UTF-8 handling
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    return response.json();
+  }
+  
+  // Fallback to text if not JSON
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 };
 
 export const startConversion = async (
@@ -40,7 +53,8 @@ export const startConversion = async (
   const response = await fetch('/api/convert', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
+      'Accept': 'application/json; charset=utf-8',
     },
     body: JSON.stringify(requestBody),
   });
@@ -50,8 +64,13 @@ export const startConversion = async (
 };
 
 export const getJobStatus = async (id: string): Promise<Job> => {
-  const response = await fetch(`/api/status/${id}`);
+  const response = await fetch(`/api/status/${id}`, {
+    headers: {
+      'Accept': 'application/json; charset=utf-8',
+    },
+  });
   const data = await handleResponse(response);
+  
   
   // Transform backend response to frontend Job format
   return {
