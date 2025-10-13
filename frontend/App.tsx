@@ -20,8 +20,10 @@ import ComingSoon from './pages/ComingSoon';
 import SupportUs from './pages/SupportUs';
 import CryptoDonation from './pages/CryptoDonation';
 import SupportLinks from './components/SupportLinks';
+import NotFound from './components/NotFound';
+import { useURLRouting, updateURL } from './hooks/useURLRouting';
 
-export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation';
+export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation' | 'not-found';
 
 function App() {
   const [toast, setToast] = useState<ToastData | null>(null);
@@ -54,9 +56,13 @@ function App() {
   
   const navigateTo = (p: Page) => {
     setPage(p);
+    updateURL(p);
     // Scroll to top immediately when navigating
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
   };
+
+  // Handle URL routing
+  useURLRouting({ setPage });
 
   // Ensure scroll to top whenever page changes
   useEffect(() => {
@@ -90,8 +96,10 @@ function App() {
         return <SupportUs navigateTo={navigateTo} />;
       case 'crypto-donation':
         return <CryptoDonation navigateTo={navigateTo} />;
+      case 'not-found':
+        return <NotFound navigateTo={navigateTo} showToast={showToast} />;
       default:
-        return <Home showToast={showToast} navigateTo={navigateTo} />;
+        return <NotFound navigateTo={navigateTo} showToast={showToast} />;
     }
   };
 

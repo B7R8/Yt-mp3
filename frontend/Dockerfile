@@ -4,18 +4,16 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better caching
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY vite.config.ts ./
 
 # Install dependencies
-RUN npm ci && npm cache clean --force
+RUN npm ci --only=production && npm cache clean --force
 
-# Copy source code
-COPY src/ ./src/
-COPY public/ ./public/
-COPY index.html ./
+# Copy source code (no src folder in this project)
+COPY ./frontend/ ./
 
 # Build the application
 RUN npm run build
@@ -23,17 +21,33 @@ RUN npm run build
 # Production stage with Nginx
 FROM nginx:alpine AS production
 
+# Install wget for health checks
+RUN apk add --no-cache wget
+
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Create nginx user and set permissions
+RUN addgroup -g 1001 -S nginx && \
+    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
+    chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid
+
+# Switch to non-root user
+USER nginx
+
 # Expose port
 EXPOSE 80
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
 # Start nginx
