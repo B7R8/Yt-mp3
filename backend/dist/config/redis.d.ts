@@ -1,0 +1,40 @@
+import Redis from 'ioredis';
+declare class RedisManager {
+    private client;
+    private subscriber;
+    private publisher;
+    private isConnected;
+    constructor();
+    private setupEventHandlers;
+    connect(): Promise<void>;
+    set(key: string, value: any, ttlSeconds?: number): Promise<void>;
+    get<T>(key: string): Promise<T | null>;
+    del(key: string): Promise<number>;
+    exists(key: string): Promise<boolean>;
+    hset(key: string, field: string, value: any): Promise<void>;
+    hget<T>(key: string, field: string): Promise<T | null>;
+    hdel(key: string, field: string): Promise<number>;
+    lpush(key: string, ...values: any[]): Promise<number>;
+    rpop<T>(key: string): Promise<T | null>;
+    llen(key: string): Promise<number>;
+    sadd(key: string, ...members: string[]): Promise<number>;
+    srem(key: string, ...members: string[]): Promise<number>;
+    smembers(key: string): Promise<string[]>;
+    publish(channel: string, message: any): Promise<number>;
+    subscribe(channel: string, callback: (message: any) => void): Promise<void>;
+    incr(key: string): Promise<number>;
+    decr(key: string): Promise<number>;
+    expire(key: string, seconds: number): Promise<boolean>;
+    ttl(key: string): Promise<number>;
+    mget<T>(keys: string[]): Promise<(T | null)[]>;
+    mset(keyValuePairs: Record<string, any>): Promise<void>;
+    ping(): Promise<boolean>;
+    isHealthy(): boolean;
+    disconnect(): Promise<void>;
+    getClient(): Redis;
+    getSubscriber(): Redis;
+    getPublisher(): Redis;
+}
+export declare const redisManager: RedisManager;
+export default redisManager;
+//# sourceMappingURL=redis.d.ts.map

@@ -354,7 +354,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               </button>
               
               <button
-                onClick={() => window.open('https://buymeacoffee.com/ytconverter', '_blank')}
+                onClick={() => window.open('https://ko-fi.com/saveytb', '_blank')}
                 className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#41484B] transition-colors duration-300 text-xs sm:text-sm w-full sm:w-auto"
                 style={{ backgroundColor: '#ff5f5f' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff4a4a'}

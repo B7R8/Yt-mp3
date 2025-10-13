@@ -10,6 +10,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   
   const handleNavigate = (page: Page) => {
@@ -21,6 +22,34 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
       } catch {}
     }
   }
+
+  // Detect dark mode
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const isDark = document.documentElement.classList.contains('dark') || 
+                    window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(isDark);
+    };
+
+    // Check initial state
+    checkDarkMode();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkDarkMode);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', checkDarkMode);
+    };
+  }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -43,7 +72,11 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
     <header className="w-full p-3 sm:p-2 md:p-2.5 bg-gradient-to-b from-gray-100 to-gray-200/50 dark:bg-gradient-to-b dark:from-[#2d2d2d] dark:to-[#1f1f1f] sticky top-0 z-20 border-b border-gray-300 dark:border-gray-600">
       <div className="container mx-auto flex justify-between items-center max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl px-2 sm:px-4">
         <button onClick={() => handleNavigate('home')} className="flex items-center" aria-label="Go to homepage">
-          <img src="/logo.png" alt="YouTube to MP3 Converter Logo - SaveYTB" className="h-10 sm:h-10 md:h-12 w-auto" />
+          <img 
+            src={isDarkMode ? "/logo-dm.png" : "/logo.png"} 
+            alt="YouTube to MP3 Converter Logo - SaveYTB" 
+            className="h-10 sm:h-10 md:h-12 w-auto transition-opacity duration-200" 
+          />
         </button>
         
         {/* Desktop Nav */}

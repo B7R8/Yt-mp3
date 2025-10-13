@@ -6,6 +6,27 @@ import logger from '../config/logger';
 import { spawn } from 'child_process';
 import { getUserFriendlyError, logTechnicalError, sendErrorResponse } from '../utils/errorHandler';
 import { processVideoTitle, preserveExactTitle, isValidTitle } from '../utils/titleProcessor';
+import path from 'path';
+
+// Helper function to check if cookies file exists and is valid
+const getCookiesPath = (): string | null => {
+  try {
+    const cookiesPath = path.join(__dirname, '../../cookies.txt');
+    // Check if file exists synchronously (for performance)
+    const fs = require('fs');
+    if (fs.existsSync(cookiesPath)) {
+      const stats = fs.statSync(cookiesPath);
+      // Check if file is not empty and is readable
+      if (stats.size > 0) {
+        return cookiesPath;
+      }
+    }
+    return null;
+  } catch (error) {
+    logger.warn('Cookies file check failed:', error);
+    return null;
+  }
+};
 import { optimizedDb } from '../config/optimizedDatabase';
 import crypto from 'crypto';
 
@@ -254,8 +275,8 @@ router.get('/video-info', statusRateLimit, async (req: Request, res: Response) =
       }
     }, 30000); // 30 second timeout for faster response
 
-    // Use yt-dlp with highly optimized settings
-    const ytdlp = spawn('python', [
+    // Build yt-dlp command with optional cookies
+    const ytdlpArgs = [
       '-m', 'yt_dlp',
       '--skip-download',         // Don't download anything
       '--no-playlist',           // Single video only
@@ -271,8 +292,21 @@ router.get('/video-info', statusRateLimit, async (req: Request, res: Response) =
       '-J',                       // JSON output (faster parsing)
       '--flat-playlist',          // Don't extract playlist
       '--extractor-args', 'youtube:player_client=android', // Use mobile client for faster access
-      url
-    ], {
+    ];
+
+    // Add cookies if available
+    const cookiesPath = getCookiesPath();
+    if (cookiesPath) {
+      ytdlpArgs.push('--cookies', cookiesPath);
+      logger.info(`Using cookies file: ${cookiesPath}`);
+    } else {
+      logger.info('No valid cookies file found, proceeding without cookies');
+    }
+
+    ytdlpArgs.push(url);
+
+    // Use yt-dlp with highly optimized settings
+    const ytdlp = spawn('python', ytdlpArgs, {
       env: {
         ...process.env,
         PYTHONIOENCODING: 'utf-8',

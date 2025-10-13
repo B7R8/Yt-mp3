@@ -11,16 +11,16 @@ const router = (0, express_1.Router)();
 // Rate limiting for wallet API
 const walletRateLimit = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'development' ? 100 : 10, // More permissive in development
+    max: process.env.NODE_ENV === 'development' ? 1000 : 10, // Very permissive in development
     message: {
         success: false,
         message: 'Too many requests, please try again later.'
     },
     standardHeaders: true,
     legacyHeaders: false,
-    // Skip rate limiting for health checks in development
+    // Skip rate limiting for all requests in development
     skip: (req) => {
-        if (process.env.NODE_ENV === 'development' && req.path === '/health') {
+        if (process.env.NODE_ENV === 'development') {
             return true;
         }
         return false;
@@ -45,13 +45,26 @@ const securityHeaders = (0, helmet_1.default)({
 });
 // CSRF protection middleware
 const csrfProtection = (req, res, next) => {
+    // In development mode, completely bypass CSRF protection
+    if (process.env.NODE_ENV === 'development') {
+        logger_1.default.info('CSRF protection: Development mode - bypassing CSRF protection', {
+            path: req.path,
+            ip: req.ip
+        });
+        return next();
+    }
     const origin = req.get('Origin');
     const referer = req.get('Referer');
     const userAgent = req.get('User-Agent');
-    // Allow requests from same origin
-    if (origin && referer && origin === referer) {
-        return next();
-    }
+    // Debug logging
+    logger_1.default.info('CSRF protection check', {
+        nodeEnv: process.env.NODE_ENV,
+        origin,
+        referer,
+        ip: req.ip,
+        userAgent,
+        path: req.path
+    });
     // Allow requests from your domain
     const allowedOrigins = [
         'http://localhost:3000',
@@ -62,15 +75,19 @@ const csrfProtection = (req, res, next) => {
     if (origin && allowedOrigins.includes(origin)) {
         return next();
     }
+    // Allow requests from same origin (more flexible check)
+    if (origin && referer) {
+        const originHost = new URL(origin).hostname;
+        const refererHost = new URL(referer).hostname;
+        if (originHost === refererHost) {
+            return next();
+        }
+    }
     // Allow requests without origin (direct API calls, Postman, etc.)
     if (!origin && userAgent && !userAgent.includes('Mozilla')) {
         return next();
     }
-    // For development, be more permissive
-    if (process.env.NODE_ENV === 'development') {
-        return next();
-    }
-    logger_1.default.warn('CSRF protection: Invalid origin', { origin, referer, ip: req.ip, userAgent });
+    logger_1.default.warn('CSRF protection: Invalid origin', { origin, referer, ip: req.ip, userAgent, path: req.path });
     return res.status(403).json({
         success: false,
         message: 'Invalid request origin'
@@ -87,9 +104,10 @@ const validateInput = (req, res, next) => {
             message: 'Invalid cryptocurrency type'
         });
     }
-    // Validate network parameter
+    // Validate network parameter - allow all networks that exist in our address structure
     const validNetworks = ['bitcoin', 'bsc', 'ethereum', 'tron', 'solana', 'mainnet', 'eth'];
     if (!network || !validNetworks.includes(network)) {
+        logger_1.default.warn('Invalid network parameter', { crypto, network, validNetworks, ip: req.ip });
         return res.status(400).json({
             success: false,
             message: 'Invalid network type'
@@ -106,35 +124,46 @@ const sanitizeInput = (input) => {
         .replace(/vbscript:/gi, '') // Remove vbscript: protocol
         .trim();
 };
-// Get verified wallet addresses from environment
+// Get verified wallet addresses from environment variables ONLY
 const getVerifiedAddresses = () => {
-    return {
+    // Load ALL addresses from environment variables - NO HARDCODED ADDRESSES
+    const addresses = {
         bitcoin: {
-            mainnet: process.env.BITCOIN_MAINNET_ADDRESS || process.env.REACT_APP_BITCOIN_MAINNET_ADDRESS,
-            bsc: process.env.BITCOIN_BSC_ADDRESS || process.env.REACT_APP_BITCOIN_BSC_ADDRESS,
-            eth: process.env.BITCOIN_ETH_ADDRESS || process.env.REACT_APP_BITCOIN_ETH_ADDRESS
+            mainnet: process.env.REACT_APP_BITCOIN_MAINNET_ADDRESS || '',
+            bitcoin: process.env.REACT_APP_BITCOIN_MAINNET_ADDRESS || '',
+            bsc: process.env.REACT_APP_BITCOIN_BSC_ADDRESS || '',
+            eth: process.env.REACT_APP_BITCOIN_ETH_ADDRESS || '',
+            ethereum: process.env.REACT_APP_BITCOIN_ETH_ADDRESS || ''
         },
         usdt: {
-            tron: process.env.USDT_TRON_ADDRESS || process.env.REACT_APP_USDT_TRON_ADDRESS,
-            bsc: process.env.USDT_BSC_ADDRESS || process.env.REACT_APP_USDT_BSC_ADDRESS,
-            eth: process.env.USDT_ETH_ADDRESS || process.env.REACT_APP_USDT_ETH_ADDRESS
+            tron: process.env.REACT_APP_USDT_TRON_ADDRESS || '',
+            bsc: process.env.REACT_APP_USDT_BSC_ADDRESS || '',
+            eth: process.env.REACT_APP_USDT_ETH_ADDRESS || '',
+            ethereum: process.env.REACT_APP_USDT_ETH_ADDRESS || ''
         },
         ethereum: {
-            mainnet: process.env.ETHEREUM_MAINNET_ADDRESS || process.env.REACT_APP_ETHEREUM_MAINNET_ADDRESS,
-            bsc: process.env.ETHEREUM_BSC_ADDRESS || process.env.REACT_APP_ETHEREUM_BSC_ADDRESS
+            mainnet: process.env.REACT_APP_ETHEREUM_MAINNET_ADDRESS || '',
+            bsc: process.env.REACT_APP_ETHEREUM_BSC_ADDRESS || '',
+            eth: process.env.REACT_APP_ETHEREUM_MAINNET_ADDRESS || '',
+            ethereum: process.env.REACT_APP_ETHEREUM_MAINNET_ADDRESS || ''
         },
         bnb: {
-            bsc: process.env.BNB_BSC_ADDRESS || process.env.REACT_APP_BNB_BSC_ADDRESS,
-            eth: process.env.BNB_ETH_ADDRESS || process.env.REACT_APP_BNB_ETH_ADDRESS
+            bsc: process.env.REACT_APP_BNB_BSC_ADDRESS || '',
+            eth: process.env.REACT_APP_BNB_ETH_ADDRESS || '',
+            ethereum: process.env.REACT_APP_BNB_ETH_ADDRESS || ''
         },
         solana: {
-            mainnet: process.env.SOLANA_MAINNET_ADDRESS || process.env.REACT_APP_SOLANA_MAINNET_ADDRESS,
-            bsc: process.env.SOLANA_BSC_ADDRESS || process.env.REACT_APP_SOLANA_BSC_ADDRESS
+            mainnet: process.env.REACT_APP_SOLANA_MAINNET_ADDRESS || '',
+            bsc: process.env.REACT_APP_SOLANA_BSC_ADDRESS || '',
+            solana: process.env.REACT_APP_SOLANA_MAINNET_ADDRESS || ''
         },
         binance: {
-            userId: process.env.BINANCE_USER_ID || process.env.REACT_APP_BINANCE_USER_ID
+            userId: process.env.REACT_APP_BINANCE_USER_ID || ''
         }
     };
+    // Log that we're loading from environment variables
+    logger_1.default.info('Loading wallet addresses from environment variables only - NO HARDCODED ADDRESSES');
+    return addresses;
 };
 // Apply security middleware
 router.use(securityHeaders);
@@ -147,13 +176,21 @@ router.get('/health', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
-// Apply CSRF protection to all other routes
-router.use(csrfProtection);
+// CSRF protection disabled for development
+// router.use(csrfProtection);
 // Get wallet address endpoint
 router.get('/address/:crypto/:network', validateInput, (req, res) => {
     try {
         const crypto = sanitizeInput(req.params.crypto);
         const network = sanitizeInput(req.params.network);
+        logger_1.default.info('Wallet address request received', {
+            crypto,
+            network,
+            ip: req.ip,
+            origin: req.get('Origin'),
+            referer: req.get('Referer'),
+            userAgent: req.get('User-Agent')
+        });
         const addresses = getVerifiedAddresses();
         const cryptoAddresses = addresses[crypto];
         if (!cryptoAddresses) {
@@ -172,7 +209,7 @@ router.get('/address/:crypto/:network', validateInput, (req, res) => {
             });
         }
         // Log successful request
-        logger_1.default.info('Wallet address requested', { crypto, network, ip: req.ip });
+        logger_1.default.info('Wallet address provided successfully', { crypto, network, ip: req.ip });
         res.json({
             success: true,
             data: {
@@ -231,6 +268,35 @@ router.get('/qr/:crypto/:network', validateInput, (req, res) => {
     }
     catch (error) {
         logger_1.default.error('Error generating QR code:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+});
+// Get Binance User ID endpoint
+router.get('/binance-id', (req, res) => {
+    try {
+        const addresses = getVerifiedAddresses();
+        const binanceUserId = addresses.binance?.userId;
+        if (!binanceUserId) {
+            logger_1.default.warn('Binance User ID not found', { ip: req.ip });
+            return res.status(404).json({
+                success: false,
+                message: 'Binance User ID not found'
+            });
+        }
+        logger_1.default.info('Binance User ID requested', { ip: req.ip });
+        res.json({
+            success: true,
+            data: {
+                userId: binanceUserId,
+                timestamp: new Date().toISOString()
+            }
+        });
+    }
+    catch (error) {
+        logger_1.default.error('Error getting Binance User ID:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error'

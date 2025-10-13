@@ -227,21 +227,31 @@ export class ConversionService {
   }
 
   /**
-   * Download audio from YouTube using yt-dlp
+   * Download audio from YouTube using yt-dlp at specified quality
    * Returns path to the downloaded audio file
    */
-  private async downloadAudio(url: string, outputPath: string): Promise<string> {
+  private async downloadAudio(url: string, outputPath: string, quality: string = '192K'): Promise<string> {
     return new Promise((resolve, reject) => {
       const ytdlpArgs = [
         '-m', 'yt_dlp',
-        '-f', 'bestaudio[ext=m4a]/bestaudio/best',
-        '--extract-audio',
-        '--audio-format', 'mp3',
-        '--audio-quality', '192K',
-        '--output', outputPath,
-        '--no-playlist',
-        '--no-warnings',
-        '--extractor-args', 'youtube:player_client=android',
+        '-f', 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best',  // Audio-only streams
+        '--extract-audio',                           // Extract audio only
+        '--audio-format', 'mp3',                     // Convert to MP3
+        '--audio-quality', quality,                   // Set user-requested quality
+        '--output', outputPath,                      // Output path
+        '--no-playlist',                             // Single video only
+        '--no-warnings',                             // Reduce output noise
+        '--no-check-certificates',                   // Skip SSL verification for speed
+        '--no-cache-dir',                            // Don't use cache
+        '--concurrent-fragments', '4',               // Parallel downloads for speed
+        '--fragment-retries', '3',                   // Retry failed fragments
+        '--retries', '3',                            // Total retries
+        '--socket-timeout', '30',                    // Socket timeout
+        '--extractor-retries', '2',                  // Extractor retries
+        '--http-chunk-size', '10485760',             // 10MB chunks for faster processing
+        '--postprocessor-args', 'ffmpeg:-vn',        // Force no video stream in output
+        '--cookies', path.join(__dirname, '../../cookies.txt'), // Use cookies to bypass robot verification
+        '--extractor-args', 'youtube:player_client=android', // Use mobile client for faster access
         url
       ];
 
@@ -315,6 +325,7 @@ export class ConversionService {
         '--dump-json',
         '--no-playlist',
         '--no-warnings',
+        '--cookies', path.join(__dirname, '../../cookies.txt'), // Use cookies to bypass robot verification
         '--extractor-args', 'youtube:player_client=android',
         url
       ], {
@@ -420,9 +431,17 @@ export class ConversionService {
 
       // Set audio bitrate and format with ultrafast preset for speed
       command
-        .audioBitrate(bitrate)
         .toFormat('mp3')
         .addOption('-preset', 'ultrafast')
+        .addOption('-vn')  // Force no video stream
+        .addOption('-acodec', 'libmp3lame');  // Force audio codec
+      
+      // Only set bitrate if it's not 0 (0 means no quality change needed)
+      if (bitrate > 0) {
+        command.audioBitrate(bitrate);
+      }
+      
+      command
         .output(outputPath)
         .on('start', (commandLine) => {
           logger.info(`FFmpeg command: ${commandLine}`);
@@ -469,29 +488,24 @@ export class ConversionService {
         await this.updateJobStatus(jobId, 'processing', undefined, undefined, qualityMessage);
       }
 
-      // Step 1: Download audio using yt-dlp
+      // Step 1: Download audio using yt-dlp at user-requested quality
       logger.info(`[Job ${jobId}] Step 1: Downloading audio from ${request.url} (duration: ${duration}s, quality: ${finalQuality})`);
-      await this.downloadAudio(request.url, tempAudioPath);
+      await this.downloadAudio(request.url, tempAudioPath, finalQuality);
 
-      // Step 2: Process with FFmpeg (trim + bitrate)
-      const bitrate = parseInt(finalQuality.replace('k', ''));
-      
+      // Step 2: Process with FFmpeg (only for trimming, quality already set by yt-dlp)
       if (request.trim_start && request.trim_end) {
-        logger.info(`[Job ${jobId}] Step 2: Processing with FFmpeg (trim: ${request.trim_start} to ${request.trim_end}, bitrate: ${bitrate}k)`);
+        logger.info(`[Job ${jobId}] Step 2: Processing with FFmpeg (trim only: ${request.trim_start} to ${request.trim_end})`);
         await this.processAudioWithFFmpeg(
           tempAudioPath,
           outputPath,
-          bitrate,
+          0, // No bitrate change needed, already at correct quality
           request.trim_start,
           request.trim_end
         );
       } else {
-        logger.info(`[Job ${jobId}] Step 2: Processing with FFmpeg (bitrate: ${bitrate}k, no trimming)`);
-        await this.processAudioWithFFmpeg(
-          tempAudioPath,
-          outputPath,
-          bitrate
-        );
+        logger.info(`[Job ${jobId}] Step 2: No FFmpeg processing needed - copying file directly`);
+        // No processing needed, just copy the file
+        await fs.copyFile(tempAudioPath, outputPath);
       }
 
       // Step 3: Cleanup temporary file

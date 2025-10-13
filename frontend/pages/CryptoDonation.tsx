@@ -334,11 +334,11 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
           </h3>
           <div className="bg-gray-50 dark:bg-[#3a3a3a] rounded-lg p-4 mb-4">
             <p className="text-sm text-gray-900 dark:text-white font-mono">
-              {secureConfig?.binance?.userId || '555991639'}
+              {secureConfig?.binance?.userId || 'Binance ID not configured'}
             </p>
           </div>
           <button
-            onClick={() => copyToClipboard(secureConfig?.binance?.userId || '555991639', 'binance')}
+            onClick={() => copyToClipboard(secureConfig?.binance?.userId || '', 'binance')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
               copiedAddress === 'binance'
                 ? 'bg-green-500 text-white'

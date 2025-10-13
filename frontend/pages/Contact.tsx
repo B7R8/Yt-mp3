@@ -12,17 +12,71 @@ const Contact: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = () => {
     const newErrors: { name?: string; email?: string; message?: string } = {};
-    if (!name.trim()) newErrors.name = 'Name is required.';
+    
+    // Name validation
+    if (!name.trim()) {
+      newErrors.name = 'Name is required.';
+    } else if (name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters long.';
+    }
+    
+    // Enhanced email validation
     if (!email.trim()) {
       newErrors.email = 'Email is required.';
     } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
-      if (!emailRegex.test(email)) newErrors.email = 'Please enter a valid email address.';
+      // More strict email validation
+      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+      
+      if (!emailRegex.test(email)) {
+        newErrors.email = 'Please enter a valid email address.';
+      } else {
+        // Check for common fake email patterns
+        const fakeEmailPatterns = [
+          /^test@/i,
+          /^fake@/i,
+          /^dummy@/i,
+          /^example@/i,
+          /@test\./i,
+          /@fake\./i,
+          /@dummy\./i,
+          /@example\./i,
+          /@localhost/i,
+          /@invalid/i,
+          /@nonexistent/i,
+          /@temp\./i,
+          /@temporary\./i
+        ];
+        
+        if (fakeEmailPatterns.some(pattern => pattern.test(email))) {
+          newErrors.email = 'Please enter a real email address, not a test or fake email.';
+        }
+        
+        // Check for disposable email domains
+        const disposableDomains = [
+          '10minutemail.com', 'tempmail.org', 'guerrillamail.com', 'mailinator.com',
+          'temp-mail.org', 'throwaway.email', 'getnada.com', 'maildrop.cc'
+        ];
+        
+        const emailDomain = email.split('@')[1]?.toLowerCase();
+        if (emailDomain && disposableDomains.includes(emailDomain)) {
+          newErrors.email = 'Please use a permanent email address, not a temporary one.';
+        }
+      }
     }
-    if (!message.trim()) newErrors.message = 'Message is required.';
+    
+    // Message validation
+    if (!message.trim()) {
+      newErrors.message = 'Message is required.';
+    } else if (message.trim().length < 10) {
+      newErrors.message = 'Message must be at least 10 characters long.';
+    } else if (message.trim().length > 1000) {
+      newErrors.message = 'Message must be less than 1000 characters.';
+    }
+    
     return newErrors;
   };
 
@@ -35,17 +89,47 @@ const Contact: React.FC = () => {
     }
   };
 
-  const confirmSend = () => {
+  const confirmSend = async () => {
     setShowConfirm(false);
-    // Simulate successful submit
-    setSubmitted(true);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-    // Reset form (optional)
-    setName('');
-    setEmail('');
-    setSubject('General Inquiry');
-    setMessage('');
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          subject: subject,
+          message: message.trim()
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        setSubmitted(true);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 5000);
+        
+        // Reset form
+        setName('');
+        setEmail('');
+        setSubject('General Inquiry');
+        setMessage('');
+        setErrors({});
+      } else {
+        throw new Error(data.message || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      setShowToast(true);
+      // You could add error state handling here
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   return (
     <div className="max-w-4xl mx-auto py-8">
@@ -119,8 +203,22 @@ const Contact: React.FC = () => {
               {errors.message && <p id="message-error" className="mt-1 text-xs text-red-600">{errors.message}</p>}
             </div>
             <div>
-              <button type="submit" className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-red-500">
-                Send Message
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Sending...
+                  </>
+                ) : (
+                  'Send Message'
+                )}
               </button>
             </div>
           </form>

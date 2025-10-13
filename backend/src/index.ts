@@ -9,6 +9,7 @@ import conversionRoutes from './routes/conversion';
 import healthRoutes from './routes/health';
 import adminRoutes from './routes/admin';
 import secureWalletRoutes from './routes/secureWallet';
+import contactRoutes from './routes/contact';
 import { ConversionService } from './services/conversionService';
 import logger from './config/logger';
 import { initializeDatabase } from './config/database';
@@ -57,11 +58,12 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api', healthRoutes);
 app.use('/api', conversionRoutes);
+app.use('/api', contactRoutes);
 app.use('/api/secure-wallet', secureWalletRoutes);
 app.use('/api', adminRoutes);
 
 // Debug: Log all registered routes
-console.log('Routes registered: health, conversion, admin');
+console.log('Routes registered: health, conversion, contact, admin');
 
 // Error handling middleware
 app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
