@@ -85,7 +85,6 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
           <button onClick={() => handleNavigate('changelog')} className="hover:text-red-500 transition-colors">Changelog</button>
           <button onClick={() => handleNavigate('contact')} className="hover:text-red-500 transition-colors">Contact</button>
           <button onClick={() => handleNavigate('support-us')} className="hover:text-red-500 transition-colors">Support Us</button>
-          <button onClick={() => handleNavigate('admin')} className="hover:text-red-500 transition-colors text-xs opacity-60 hidden">b7r8</button>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -137,12 +136,6 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
                 className="text-left px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-150 text-sm font-medium hover:translate-x-1"
               >
                 Support Us
-              </button>
-              <button 
-                onClick={() => handleNavigate('admin')} 
-                className="text-left px-4 py-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-150 text-xs font-medium hover:translate-x-1 opacity-60 hidden"
-              >
-                b7r8
               </button>
             </nav>
           </div>

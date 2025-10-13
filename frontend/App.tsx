@@ -19,10 +19,9 @@ import Privacy from './pages/Privacy';
 import ComingSoon from './pages/ComingSoon';
 import SupportUs from './pages/SupportUs';
 import CryptoDonation from './pages/CryptoDonation';
-import Admin from './pages/Admin';
 import SupportLinks from './components/SupportLinks';
 
-export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation' | 'admin';
+export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation';
 
 function App() {
   const [toast, setToast] = useState<ToastData | null>(null);
@@ -91,8 +90,6 @@ function App() {
         return <SupportUs navigateTo={navigateTo} />;
       case 'crypto-donation':
         return <CryptoDonation navigateTo={navigateTo} />;
-      case 'admin':
-        return <Admin navigateTo={navigateTo} />;
       default:
         return <Home showToast={showToast} navigateTo={navigateTo} />;
     }

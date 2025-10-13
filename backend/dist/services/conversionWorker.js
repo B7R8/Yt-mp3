@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const worker_threads_1 = require("worker_threads");
 const child_process_1 = require("child_process");
 const fs_1 = require("fs");
+const path_1 = __importDefault(require("path"));
 const fluent_ffmpeg_1 = __importDefault(require("fluent-ffmpeg"));
 const titleProcessor_1 = require("../utils/titleProcessor");
 class ConversionWorker {
@@ -49,6 +50,7 @@ class ConversionWorker {
                 '--dump-json',
                 '--no-playlist',
                 '--no-warnings',
+                '--cookies', path_1.default.join(__dirname, '../../cookies.txt'), // Use cookies to bypass robot verification
                 '--extractor-args', 'youtube:player_client=android',
                 this.url
             ], {
@@ -107,17 +109,24 @@ class ConversionWorker {
         return new Promise((resolve, reject) => {
             const ytdlpArgs = [
                 '-m', 'yt_dlp',
-                '-f', 'bestaudio[ext=m4a]/bestaudio/best',
-                '--extract-audio',
-                '--audio-format', 'mp3',
-                '--audio-quality', '192K',
-                '--output', this.tempPath,
-                '--no-playlist',
-                '--no-warnings',
-                '--extractor-args', 'youtube:player_client=android',
-                '--concurrent-fragments', '4',
-                '--fragment-retries', '3',
-                '--retries', '3',
+                '-f', 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best', // Audio-only streams
+                '--extract-audio', // Extract audio only
+                '--audio-format', 'mp3', // Convert to MP3
+                '--audio-quality', this.quality, // Set user-requested quality
+                '--output', this.tempPath, // Output path
+                '--no-playlist', // Single video only
+                '--no-warnings', // Reduce output noise
+                '--no-check-certificates', // Skip SSL verification for speed
+                '--no-cache-dir', // Don't use cache
+                '--concurrent-fragments', '4', // Parallel downloads for speed
+                '--fragment-retries', '3', // Retry failed fragments
+                '--retries', '3', // Total retries
+                '--socket-timeout', '30', // Socket timeout
+                '--extractor-retries', '2', // Extractor retries
+                '--http-chunk-size', '10485760', // 10MB chunks for faster processing
+                '--postprocessor-args', 'ffmpeg:-vn', // Force no video stream in output
+                '--cookies', path_1.default.join(__dirname, '../../cookies.txt'), // Use cookies to bypass robot verification
+                '--extractor-args', 'youtube:player_client=android', // Use mobile client for faster access
                 this.url
             ];
             const ytdlp = (0, child_process_1.spawn)('python', ytdlpArgs, {
@@ -158,7 +167,6 @@ class ConversionWorker {
     }
     async processAudioWithFFmpeg() {
         return new Promise((resolve, reject) => {
-            const bitrate = parseInt(this.quality.replace('k', ''));
             const command = (0, fluent_ffmpeg_1.default)(this.tempPath);
             // Set start time if provided
             if (this.trimStart) {
@@ -173,14 +181,15 @@ class ConversionWorker {
                     command.setDuration(duration);
                 }
             }
-            // Optimized FFmpeg settings for speed
+            // Optimized FFmpeg settings for speed (no bitrate change needed, already correct quality)
             command
-                .audioBitrate(bitrate)
                 .toFormat('mp3')
                 .addOption('-preset', 'ultrafast')
                 .addOption('-threads', '0') // Use all available threads
                 .addOption('-ac', '2') // Stereo
                 .addOption('-ar', '44100') // Sample rate
+                .addOption('-vn') // Force no video stream
+                .addOption('-acodec', 'libmp3lame') // Force audio codec
                 .output(this.outputPath)
                 .on('start', (commandLine) => {
                 this.sendMessage('progress', { progress: 25 });
@@ -216,9 +225,16 @@ class ConversionWorker {
             // Step 2: Download audio
             this.sendMessage('progress', { progress: 10 });
             await this.downloadAudio();
-            // Step 3: Process with FFmpeg
+            // Step 3: Process with FFmpeg (only if trimming needed)
             this.sendMessage('progress', { progress: 20 });
-            await this.processAudioWithFFmpeg();
+            if (this.trimStart || this.trimEnd) {
+                await this.processAudioWithFFmpeg();
+            }
+            else {
+                // No trimming needed, just copy the file
+                await fs_1.promises.copyFile(this.tempPath, this.outputPath);
+                this.sendMessage('progress', { progress: 100 });
+            }
             // Step 4: Cleanup temporary file
             try {
                 await fs_1.promises.unlink(this.tempPath);

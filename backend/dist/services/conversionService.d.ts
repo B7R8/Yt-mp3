@@ -9,7 +9,7 @@ export declare class ConversionService {
     getJobStatus(jobId: string): Promise<ConversionJob | null>;
     private updateJobStatus;
     /**
-     * Download audio from YouTube using yt-dlp
+     * Download audio from YouTube using yt-dlp at specified quality
      * Returns path to the downloaded audio file
      */
     private downloadAudio;

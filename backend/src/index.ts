@@ -7,7 +7,6 @@ import cron from 'node-cron';
 
 import conversionRoutes from './routes/conversion';
 import healthRoutes from './routes/health';
-import adminRoutes from './routes/admin';
 import secureWalletRoutes from './routes/secureWallet';
 import contactRoutes from './routes/contact';
 import { ConversionService } from './services/conversionService';
@@ -60,10 +59,9 @@ app.use('/api', healthRoutes);
 app.use('/api', conversionRoutes);
 app.use('/api', contactRoutes);
 app.use('/api/secure-wallet', secureWalletRoutes);
-app.use('/api', adminRoutes);
 
 // Debug: Log all registered routes
-console.log('Routes registered: health, conversion, contact, admin');
+console.log('Routes registered: health, conversion, contact');
 
 // Error handling middleware
 app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {

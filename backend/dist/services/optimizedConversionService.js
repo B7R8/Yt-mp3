@@ -143,6 +143,7 @@ class OptimizedConversionService extends events_1.EventEmitter {
                 '--fragment-retries', '2',
                 '--retries', '3',
                 '--concurrent-fragments', '4',
+                '--cookies', path_1.default.join(__dirname, '../../cookies.txt'), // Use cookies to bypass robot verification
                 '--extractor-args', 'youtube:player_client=android',
                 url
             ], {

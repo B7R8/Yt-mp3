@@ -11,6 +11,27 @@ const logger_1 = __importDefault(require("../config/logger"));
 const child_process_1 = require("child_process");
 const errorHandler_1 = require("../utils/errorHandler");
 const titleProcessor_1 = require("../utils/titleProcessor");
+const path_1 = __importDefault(require("path"));
+// Helper function to check if cookies file exists and is valid
+const getCookiesPath = () => {
+    try {
+        const cookiesPath = path_1.default.join(__dirname, '../../cookies.txt');
+        // Check if file exists synchronously (for performance)
+        const fs = require('fs');
+        if (fs.existsSync(cookiesPath)) {
+            const stats = fs.statSync(cookiesPath);
+            // Check if file is not empty and is readable
+            if (stats.size > 0) {
+                return cookiesPath;
+            }
+        }
+        return null;
+    }
+    catch (error) {
+        logger_1.default.warn('Cookies file check failed:', error);
+        return null;
+    }
+};
 const router = express_1.default.Router();
 const conversionService = new conversionService_1.ConversionService();
 const videoInfoCache = new Map();
@@ -200,8 +221,8 @@ router.get('/video-info', rateLimiter_1.statusRateLimit, async (req, res) => {
                 });
             }
         }, 60000); // 60 second timeout for long videos
-        // Use yt-dlp with optimized settings for long videos
-        const ytdlp = (0, child_process_1.spawn)('python', [
+        // Build yt-dlp command with optional cookies
+        const ytdlpArgs = [
             '-m', 'yt_dlp',
             '--skip-download', // Don't download anything
             '--no-playlist', // Single video only
@@ -217,8 +238,19 @@ router.get('/video-info', rateLimiter_1.statusRateLimit, async (req, res) => {
             '-J', // JSON output (faster parsing)
             '--flat-playlist', // Don't extract playlist
             '--extractor-args', 'youtube:player_client=android', // Use mobile client for faster access
-            url
-        ], {
+        ];
+        // Add cookies if available
+        const cookiesPath = getCookiesPath();
+        if (cookiesPath) {
+            ytdlpArgs.push('--cookies', cookiesPath);
+            logger_1.default.info(`Using cookies file: ${cookiesPath}`);
+        }
+        else {
+            logger_1.default.info('No valid cookies file found, proceeding without cookies');
+        }
+        ytdlpArgs.push(url);
+        // Use yt-dlp with optimized settings for long videos
+        const ytdlp = (0, child_process_1.spawn)('python', ytdlpArgs, {
             env: {
                 ...process.env,
                 PYTHONIOENCODING: 'utf-8',
