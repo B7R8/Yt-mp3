@@ -392,13 +392,16 @@ class ConversionService {
         let tempAudioPath = null;
         try {
             await this.updateJobStatus(jobId, 'processing');
-            const mp3Filename = `${jobId}.mp3`;
+            // Step 0: Get video metadata for filename and duration
+            logger_1.default.info(`[Job ${jobId}] Step 0: Getting video metadata for filename and duration check`);
+            const videoInfo = await this.getVideoMetadata(request.url);
+            const { duration } = videoInfo;
+            // Generate filename from video title
+            const titleBasedFilename = (0, titleProcessor_1.generateFilenameFromTitle)(videoInfo.title);
+            const mp3Filename = `${titleBasedFilename}.mp3`;
             const tempFilename = `${jobId}_temp.mp3`;
             const outputPath = path_1.default.join(this.downloadsDir, mp3Filename);
             tempAudioPath = path_1.default.join(this.downloadsDir, tempFilename);
-            // Step 0: Get video metadata to apply 3-hour rule
-            logger_1.default.info(`[Job ${jobId}] Step 0: Getting video metadata for duration check`);
-            const { duration } = await this.getVideoMetadata(request.url);
             // Apply 3-hour rule for quality
             const qualityResult = this.determineQuality(request.quality || '192k', duration);
             const finalQuality = qualityResult.quality;

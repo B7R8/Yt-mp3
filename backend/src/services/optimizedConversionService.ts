@@ -7,7 +7,7 @@ import { ConversionJob, ConversionRequest } from '../types';
 import logger from '../config/logger';
 import { db } from '../config/database';
 import { getUserFriendlyError, logTechnicalError } from '../utils/errorHandler';
-import { processVideoTitle, preserveExactTitle, isValidTitle } from '../utils/titleProcessor';
+import { processVideoTitle, preserveExactTitle, isValidTitle, generateFilenameFromTitle } from '../utils/titleProcessor';
 import { Worker } from 'worker_threads';
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
@@ -326,15 +326,17 @@ export class OptimizedConversionService extends EventEmitter {
       if (cached) {
         // Create a new job entry for the cached result
         const videoInfo = await this.getVideoInfoOptimized(request.url);
+        const titleBasedFilename = generateFilenameFromTitle(videoInfo.title);
+        const mp3Filename = `${titleBasedFilename}.mp3`;
         
         await database.run(
           `INSERT INTO conversions (id, youtube_url, video_title, status, mp3_filename, created_at, updated_at) 
            VALUES (?, ?, ?, 'completed', ?, datetime('now'), datetime('now'))`,
-          [jobId, request.url, videoInfo.title, path.basename(cached.filePath)]
+          [jobId, request.url, videoInfo.title, mp3Filename]
         );
 
-        // Copy cached file to downloads directory
-        const newFilePath = path.join(this.downloadsDir, `${jobId}.mp3`);
+        // Copy cached file to downloads directory with title-based filename
+        const newFilePath = path.join(this.downloadsDir, mp3Filename);
         await fs.copyFile(cached.filePath, newFilePath);
         
         logger.info(`Job ${jobId} served from cache`);
@@ -367,7 +369,10 @@ export class OptimizedConversionService extends EventEmitter {
     try {
       await this.updateJobStatus(jobId, 'processing');
       
-      const mp3Filename = `${jobId}.mp3`;
+      // Get video info for title-based filename
+      const videoInfo = await this.getVideoInfoOptimized(request.url);
+      const titleBasedFilename = generateFilenameFromTitle(videoInfo.title);
+      const mp3Filename = `${titleBasedFilename}.mp3`;
       const tempFilename = `${jobId}_temp.mp3`;
       const outputPath = path.join(this.downloadsDir, mp3Filename);
       const tempPath = path.join(this.tempDir, tempFilename);

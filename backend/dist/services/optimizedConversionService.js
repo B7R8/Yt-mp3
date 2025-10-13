@@ -245,10 +245,12 @@ class OptimizedConversionService extends events_1.EventEmitter {
             if (cached) {
                 // Create a new job entry for the cached result
                 const videoInfo = await this.getVideoInfoOptimized(request.url);
+                const titleBasedFilename = (0, titleProcessor_1.generateFilenameFromTitle)(videoInfo.title);
+                const mp3Filename = `${titleBasedFilename}.mp3`;
                 await database.run(`INSERT INTO conversions (id, youtube_url, video_title, status, mp3_filename, created_at, updated_at) 
-           VALUES (?, ?, ?, 'completed', ?, datetime('now'), datetime('now'))`, [jobId, request.url, videoInfo.title, path_1.default.basename(cached.filePath)]);
-                // Copy cached file to downloads directory
-                const newFilePath = path_1.default.join(this.downloadsDir, `${jobId}.mp3`);
+           VALUES (?, ?, ?, 'completed', ?, datetime('now'), datetime('now'))`, [jobId, request.url, videoInfo.title, mp3Filename]);
+                // Copy cached file to downloads directory with title-based filename
+                const newFilePath = path_1.default.join(this.downloadsDir, mp3Filename);
                 await fs_1.promises.copyFile(cached.filePath, newFilePath);
                 logger_1.default.info(`Job ${jobId} served from cache`);
                 return jobId;
@@ -272,7 +274,10 @@ class OptimizedConversionService extends events_1.EventEmitter {
     async processConversionWithWorker(jobId, request) {
         try {
             await this.updateJobStatus(jobId, 'processing');
-            const mp3Filename = `${jobId}.mp3`;
+            // Get video info for title-based filename
+            const videoInfo = await this.getVideoInfoOptimized(request.url);
+            const titleBasedFilename = (0, titleProcessor_1.generateFilenameFromTitle)(videoInfo.title);
+            const mp3Filename = `${titleBasedFilename}.mp3`;
             const tempFilename = `${jobId}_temp.mp3`;
             const outputPath = path_1.default.join(this.downloadsDir, mp3Filename);
             const tempPath = path_1.default.join(this.tempDir, tempFilename);

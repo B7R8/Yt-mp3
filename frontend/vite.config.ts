@@ -35,6 +35,31 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+      build: {
+        // Disable source maps for production
+        sourcemap: false,
+        // Minify code
+        minify: 'terser',
+        // Remove console logs in production
+        terserOptions: {
+          compress: {
+            drop_console: true,
+            drop_debugger: true,
+          },
+        },
+        // Optimize chunk splitting
+        rollupOptions: {
+          output: {
+            // Obfuscate chunk names
+            chunkFileNames: 'assets/[hash].js',
+            entryFileNames: 'assets/[hash].js',
+            assetFileNames: 'assets/[hash].[ext]',
+            // Remove comments and license files
+            banner: '',
+            footer: '',
+          },
+        },
+      },
     };
 });

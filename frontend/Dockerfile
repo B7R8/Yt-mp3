@@ -10,13 +10,16 @@ COPY tsconfig.json ./
 COPY vite.config.ts ./
 
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 # Copy source code (no src folder in this project)
-COPY ./frontend/ ./
+COPY . .
 
-# Build the application
+# Build the application with security optimizations
 RUN npm run build
+
+# Remove source files and dev dependencies after build
+RUN rm -rf src/ node_modules/ package*.json tsconfig.json vite.config.ts
 
 # Production stage with Nginx
 FROM nginx:alpine AS production
@@ -31,9 +34,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Create nginx user and set permissions
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
-    chown -R nginx:nginx /usr/share/nginx/html && \
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chown -R nginx:nginx /var/cache/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
     chown -R nginx:nginx /etc/nginx/conf.d && \
@@ -52,3 +53,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
+
+
+
+
+

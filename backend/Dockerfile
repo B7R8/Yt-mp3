@@ -24,8 +24,11 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 
-# Build the application
+# Build the application with security optimizations
 RUN npm run build
+
+# Remove source files and dev dependencies after build
+RUN rm -rf src/ node_modules/ package*.json tsconfig.json
 
 # Production stage
 FROM node:18-alpine AS production

@@ -7,7 +7,7 @@ import { ConversionJob, ConversionRequest } from '../types';
 import logger from '../config/logger';
 import { db } from '../config/database';
 import { getUserFriendlyError, logTechnicalError } from '../utils/errorHandler';
-import { processVideoTitle, preserveExactTitle, isValidTitle } from '../utils/titleProcessor';
+import { processVideoTitle, preserveExactTitle, isValidTitle, generateFilenameFromTitle } from '../utils/titleProcessor';
 
 export class ConversionService {
   private downloadsDir: string;
@@ -468,14 +468,17 @@ export class ConversionService {
     try {
       await this.updateJobStatus(jobId, 'processing');
       
-      const mp3Filename = `${jobId}.mp3`;
+      // Step 0: Get video metadata for filename and duration
+      logger.info(`[Job ${jobId}] Step 0: Getting video metadata for filename and duration check`);
+      const videoInfo = await this.getVideoMetadata(request.url);
+      const { duration } = videoInfo;
+      
+      // Generate filename from video title
+      const titleBasedFilename = generateFilenameFromTitle(videoInfo.title);
+      const mp3Filename = `${titleBasedFilename}.mp3`;
       const tempFilename = `${jobId}_temp.mp3`;
       const outputPath = path.join(this.downloadsDir, mp3Filename);
       tempAudioPath = path.join(this.downloadsDir, tempFilename);
-
-      // Step 0: Get video metadata to apply 3-hour rule
-      logger.info(`[Job ${jobId}] Step 0: Getting video metadata for duration check`);
-      const { duration } = await this.getVideoMetadata(request.url);
       
       // Apply 3-hour rule for quality
       const qualityResult = this.determineQuality(request.quality || '192k', duration);

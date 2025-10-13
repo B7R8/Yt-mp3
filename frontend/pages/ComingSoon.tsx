@@ -14,7 +14,7 @@ const ComingSoon: React.FC<ComingSoonProps> = ({ navigateTo }) => {
           {/* Icon */}
           <div className="mb-4">
             <div className="w-16 h-16 mx-auto flex items-center justify-center">
-              <img src="/Favicon.png" alt="SaveYTB" className="w-16 h-16" />
+              <img src="/Favicon.webp" alt="SaveYTB" className="w-16 h-16" />
             </div>
           </div>
 

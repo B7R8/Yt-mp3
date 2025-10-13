@@ -18,6 +18,7 @@ const database_1 = require("./config/database");
 // Load environment variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3001;
 // Security middleware
 app.use((0, helmet_1.default)({

@@ -73,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
       <div className="container mx-auto flex justify-between items-center max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl px-2 sm:px-4">
         <button onClick={() => handleNavigate('home')} className="flex items-center" aria-label="Go to homepage">
           <img 
-            src={isDarkMode ? "/logo-dm.png" : "/logo.png"} 
+            src={isDarkMode ? "/logo-dm.webp" : "/logo.webp"} 
             alt="YouTube to MP3 Converter Logo - SaveYTB" 
             className="h-10 sm:h-10 md:h-12 w-auto transition-opacity duration-200" 
           />
