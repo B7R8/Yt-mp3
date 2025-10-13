@@ -422,7 +422,7 @@ router.post('/batch-convert', rateLimiter_1.conversionRateLimit, async (req, res
                 return { success: true, url, jobId };
             }
             catch (error) {
-                return { success: false, url, error: error.message };
+                return { success: false, url, error: error instanceof Error ? error.message : String(error) };
             }
         });
         const results = await Promise.all(promises);

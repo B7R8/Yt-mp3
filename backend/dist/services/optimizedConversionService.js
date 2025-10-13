@@ -313,7 +313,7 @@ class OptimizedConversionService extends events_1.EventEmitter {
         }
         catch (error) {
             logger_1.default.error(`Conversion failed for job ${jobId}:`, error);
-            await this.updateJobStatus(jobId, 'failed', undefined, error.message);
+            await this.updateJobStatus(jobId, 'failed', undefined, error instanceof Error ? error.message : String(error));
         }
     }
     async getJobStatus(jobId) {

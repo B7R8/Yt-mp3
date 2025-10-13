@@ -222,7 +222,7 @@ export class QueueService extends EventEmitter {
       
     } catch (error) {
       logger.error(`Job ${job.id} processing failed:`, error);
-      await this.failJob(job.id, error.message);
+      await this.failJob(job.id, error instanceof Error ? error.message : String(error));
     }
   }
 

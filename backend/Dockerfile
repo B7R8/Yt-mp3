@@ -5,7 +5,7 @@ FROM node:18-alpine AS builder
 RUN apk add --no-cache python3 py3-pip make g++
 
 # Install yt-dlp
-RUN pip3 install yt-dlp
+RUN pip3 install --break-system-packages yt-dlp
 
 # Set working directory
 WORKDIR /app
@@ -14,8 +14,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install ALL dependencies (including dev dependencies for build)
+RUN npm ci && npm cache clean --force
 
 # Copy source code
 COPY src/ ./src/
@@ -31,7 +31,7 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     ffmpeg \
-    && pip3 install yt-dlp
+    && pip3 install yt-dlp --break-system-packages
 
 # Create app user
 RUN addgroup -g 1001 -S nodejs && \
@@ -45,6 +45,9 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
+# Install only production dependencies in production stage
+RUN npm ci --only=production && npm cache clean --force
+
 # Create necessary directories
 RUN mkdir -p downloads cache temp logs && \
     chown -R nodejs:nodejs /app
@@ -53,11 +56,11 @@ RUN mkdir -p downloads cache temp logs && \
 USER nodejs
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+    CMD node -e "require('http').get('http://localhost:3001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the application
 CMD ["npm", "start"]

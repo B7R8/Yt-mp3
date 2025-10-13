@@ -477,7 +477,7 @@ router.post('/batch-convert', conversionRateLimit, async (req: Request, res: Res
         });
         return { success: true, url, jobId };
       } catch (error) {
-        return { success: false, url, error: error.message };
+        return { success: false, url, error: error instanceof Error ? error.message : String(error) };
       }
     });
 

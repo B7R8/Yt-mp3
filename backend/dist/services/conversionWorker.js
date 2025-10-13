@@ -246,7 +246,7 @@ class ConversionWorker {
             this.sendMessage('completed', { filePath: this.outputPath });
         }
         catch (error) {
-            this.sendError(error.message);
+            this.sendError(error instanceof Error ? error.message : String(error));
         }
     }
 }

@@ -172,7 +172,7 @@ class QueueService extends events_1.EventEmitter {
         }
         catch (error) {
             logger_1.default.error(`Job ${job.id} processing failed:`, error);
-            await this.failJob(job.id, error.message);
+            await this.failJob(job.id, error instanceof Error ? error.message : String(error));
         }
     }
     // Get queue statistics
