@@ -27,8 +27,9 @@ COPY tsconfig.json ./
 # Build the application with security optimizations
 RUN npm run build
 
+
 # Remove source files and dev dependencies after build
-RUN rm -rf src/ node_modules/ package*.json tsconfig.json
+#RUN rm -rf src/ node_modules/ package*.json tsconfig.json
 
 # Production stage
 FROM node:18-alpine AS production
@@ -71,3 +72,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the application
 CMD ["npm", "start"]
+

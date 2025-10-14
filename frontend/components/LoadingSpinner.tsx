@@ -1,36 +1,46 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 
 interface LoadingSpinnerProps {
   className?: string;
+  size?: 'small' | 'medium' | 'large';
 }
 
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = 'w-6 h-6' }) => {
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = 'w-6 h-6', size }) => {
+  // Determine size based on prop or className
+  const getSizeClasses = () => {
+    if (size === 'small') return 'w-4 h-4';
+    if (size === 'large') return 'w-8 h-8';
+    return className; // Use className if no size prop
+  };
+
+  const sizeClasses = getSizeClasses();
+  
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${sizeClasses}`}>
       <span className="loader"></span>
       <style jsx>{`
         .loader {
-          width: 48px;
-          height: 48px;
+          width: 100%;
+          height: 100%;
           border-radius: 50%;
           display: inline-block;
-          border-top: 3px solid #000000; /* Black for light mode */
-          border-right: 3px solid transparent;
+          border-top: 2px solid #000000; /* Black for light mode */
+          border-right: 2px solid transparent;
           box-sizing: border-box;
           animation: rotation 1s linear infinite;
         }
         
         @media (prefers-color-scheme: dark) {
           .loader {
-            border-top: 3px solid #FFFFFF; /* White for dark mode */
-            border-right: 3px solid transparent;
+            border-top: 2px solid #FFFFFF; /* White for dark mode */
+            border-right: 2px solid transparent;
           }
         }
         
         .dark .loader {
-          border-top: 3px solid #FFFFFF; /* White for dark mode */
-          border-right: 3px solid transparent;
+          border-top: 2px solid #FFFFFF; /* White for dark mode */
+          border-right: 2px solid transparent;
         }
 
         @keyframes rotation {
@@ -46,4 +56,4 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = 'w-6 h-6' }
   );
 };
 
-export default LoadingSpinner;
+export default memo(LoadingSpinner);

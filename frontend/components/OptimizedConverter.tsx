@@ -109,9 +109,9 @@ export const OptimizedConverter: React.FC<OptimizedConverterProps> = ({
           )}
         </div>
         <div className="video-details">
-          <h3 className="video-title" title={videoInfo.title}>
+          <h2 className="video-title" title={videoInfo.title}>
             {videoInfo.title}
-          </h3>
+          </h2>
           <div className="video-meta">
             <span className="duration">Duration: {videoInfo.durationFormatted}</span>
             {videoInfo.uploader && (
@@ -171,6 +171,7 @@ export const OptimizedConverter: React.FC<OptimizedConverterProps> = ({
             onClick={() => setShowQualityModal(true)}
             className="option-button"
             disabled={isLoading}
+            aria-label={`Select audio quality, current: ${quality}`}
           >
             Quality: {quality}
             <Tooltip content="Select audio quality">
@@ -183,6 +184,7 @@ export const OptimizedConverter: React.FC<OptimizedConverterProps> = ({
             onClick={() => setShowTrimModal(true)}
             className="option-button"
             disabled={isLoading}
+            aria-label={trimEnabled ? `Trim audio from ${trimStart} to ${trimEnd}` : 'Set audio trim settings'}
           >
             {trimEnabled ? `Trim: ${trimStart} - ${trimEnd}` : 'No Trim'}
             <Tooltip content="Set start and end times for audio trimming">

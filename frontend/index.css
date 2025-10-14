@@ -1,5 +1,5 @@
 /* Ensure proper font support for Arabic and Unicode characters */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Google Fonts removed for better performance - using system fonts */
 
 /* Base styles for proper Unicode support */
 * {

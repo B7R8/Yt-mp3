@@ -81,10 +81,10 @@ const Header: React.FC<HeaderProps> = ({ navigateTo }) => {
         
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-4 text-sm font-medium text-gray-600 dark:text-gray-300">
-          <button onClick={() => handleNavigate('faqs')} className="hover:text-red-500 transition-colors">FAQs</button>
-          <button onClick={() => handleNavigate('changelog')} className="hover:text-red-500 transition-colors">Changelog</button>
-          <button onClick={() => handleNavigate('contact')} className="hover:text-red-500 transition-colors">Contact</button>
-          <button onClick={() => handleNavigate('support-us')} className="hover:text-red-500 transition-colors">Support Us</button>
+          <button onClick={() => handleNavigate('faqs')} className="hover:text-red-600 transition-colors">FAQs</button>
+          <button onClick={() => handleNavigate('changelog')} className="hover:text-red-600 transition-colors">Changelog</button>
+          <button onClick={() => handleNavigate('contact')} className="hover:text-red-600 transition-colors">Contact</button>
+          <button onClick={() => handleNavigate('support-us')} className="hover:text-red-600 transition-colors">Support Us</button>
         </nav>
 
         {/* Mobile Menu Button */}

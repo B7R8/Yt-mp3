@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useConverter } from '../hooks/useConverter';
 import { JobStatus, Quality } from '../types';
 import LoadingSpinner from './LoadingSpinner';
@@ -11,6 +11,8 @@ import HeartIcon from './icons/HeartIcon';
 import { sanitizeText, validateInput, logSecurityIncident } from '../utils/securityUtils';
 import AutorenewIcon from './icons/AutorenewIcon';
 import Tooltip from './Tooltip';
+
+// Import modals directly to avoid lazy loading issues
 import TrimAudioModal from './TrimAudioModal';
 import SelectQualityModal from './SelectQualityModal';
 
@@ -94,8 +96,8 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
     }
   };
 
-  // Extract YouTube video ID from URL
-  const extractVideoId = (url: string): string | null => {
+  // Extract YouTube video ID from URL (memoized)
+  const extractVideoId = useCallback((url: string): string | null => {
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([^&\n?#]+)/,
       /^([a-zA-Z0-9_-]{11})$/
@@ -108,32 +110,32 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
       }
     }
     return null;
-  };
+  }, []);
 
-  // Convert seconds to HH:mm:ss string
-  const secondsToTimeString = (seconds: number): string => {
+  // Convert seconds to HH:mm:ss string (memoized)
+  const secondsToTimeString = useCallback((seconds: number): string => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = Math.floor(seconds % 60);
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
+  }, []);
 
-  // Handle URL change - NO auto-fetch, only when user clicks trim
-  const handleUrlChange = (newUrl: string) => {
+  // Handle URL change - NO auto-fetch, only when user clicks trim (memoized)
+  const handleUrlChange = useCallback((newUrl: string) => {
     setUrl(newUrl);
     // Reset duration when URL changes
     if (!newUrl || !extractVideoId(newUrl)) {
       setVideoDuration(undefined);
       setDurationError(null);
     }
-  };
+  }, [extractVideoId]);
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     handleSubmit(url, quality, trimEnabled, trimStart, trimEnd);
-  };
+  }, [url, quality, trimEnabled, trimStart, trimEnd, handleSubmit]);
   
-  const handleClearUrl = () => {
+  const handleClearUrl = useCallback(() => {
     setUrl('');
     setVideoDuration(undefined);
     setIsFetchingDuration(false);
@@ -141,9 +143,9 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
     setTrimEnabled(false);
     setTrimStart('00:00:00');
     setTrimEnd('00:00:00');
-  };
+  }, []);
 
-  const handleTrimClick = () => {
+  const handleTrimClick = useCallback(() => {
     // If no URL, show message and do not open modal
     if (!url || !extractVideoId(url)) {
       showToast('Please insert a valid YouTube video link to enable audio trim feature.', 'info');
@@ -157,16 +159,16 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
     
     // Open modal regardless (will show loading state inside)
     setIsTrimModalOpen(true);
-  };
+  }, [url, extractVideoId, videoDuration, isFetchingDuration, durationError, fetchVideoDuration, showToast]);
 
-  const handleTrimSave = (enabled: boolean, start: string, end: string) => {
+  const handleTrimSave = useCallback((enabled: boolean, start: string, end: string) => {
     setTrimEnabled(enabled);
     setTrimStart(start);
     setTrimEnd(end);
     if (enabled) {
       showToast(`Trim set: ${start} to ${end}`, 'info');
     }
-  };
+  }, [showToast]);
 
   const renderContent = () => {
     if (isLoading && !job) {
@@ -189,7 +191,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
         case JobStatus.PROCESSING:
           return (
             <div className="max-w-lg mx-auto">
-              <h3 className="text-sm font-semibold text-center mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title || 'Processing...'}</h3>
+              <h2 className="text-sm font-semibold text-center mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title || 'Processing...'}</h2>
               <p className="text-center text-gray-600 dark:text-gray-400 mb-6 capitalize font-medium">{job.status}...</p>
               
               {/* Quality Message for 3-hour rule */}
@@ -268,7 +270,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
         case JobStatus.COMPLETED:
           return (
             <div className="text-center">
-              <h3 className="text-sm font-semibold mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title}</h3>
+              <h2 className="text-sm font-semibold mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title}</h2>
               <p className="text-green-500 mb-6 text-sm font-medium">Conversion Complete!</p>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 justify-center items-center">
                 <button
@@ -377,7 +379,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
         case JobStatus.FAILED:
           return (
              <div className="text-center">
-              <h3 className="text-sm font-semibold text-red-500 mb-2">Conversion Failed</h3>
+              <h2 className="text-sm font-semibold text-red-500 mb-2">Conversion Failed</h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">{job.error || 'An unknown error occurred.'}</p>
               <button onClick={resetConverter} className="w-full sm:w-auto px-6 py-3 font-semibold text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-900 transition-colors text-sm">
                 Try Again
@@ -418,12 +420,17 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               <Tooltip text="Trim Audio">
                 <button 
                   type="button" 
-                  onClick={handleTrimClick}
-                  className={`p-1.5 sm:p-2 md:p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-white transition-colors relative ${isFetchingDuration ? 'animate-pulse' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleTrimClick();
+                  }}
+                  className={`p-1.5 sm:p-2 md:p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-white transition-colors relative z-10 ${isFetchingDuration ? 'animate-pulse' : ''}`}
                   disabled={isFetchingDuration}
+                  aria-label="Open trim audio settings modal"
                 >
                     {isFetchingDuration ? (
-                      <LoadingSpinner className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                      <LoadingSpinner size="small" />
                     ) : (
                       <ScissorsIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
                     )}
@@ -435,6 +442,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
                   type="button"
                   onClick={() => setIsQualityModalOpen(true)}
                   className="px-2 sm:px-2.5 md:px-3 py-2 sm:py-2.5 md:py-3 rounded-md font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm hover:bg-gray-200 dark:hover:bg-gray-700"
+                  aria-label={`Select audio quality, current: ${quality}`}
                 >
                     {quality}
                 </button>
@@ -463,6 +471,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               className={`relative inline-flex h-4 w-8 sm:h-5 sm:w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 ${
                 autoDownload ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
               }`}
+              aria-label={`Toggle auto download - currently ${autoDownload ? 'enabled' : 'disabled'}`}
             >
               <span
                 className={`inline-block h-2.5 w-2.5 sm:h-3 sm:w-3 transform rounded-full bg-white transition-transform ${
@@ -473,22 +482,26 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
           </div>
         </div>
         
-        <TrimAudioModal 
-            isOpen={isTrimModalOpen} 
-            onClose={() => setIsTrimModalOpen(false)}
-            videoDuration={videoDuration}
-            isFetchingDuration={isFetchingDuration}
-            onSave={handleTrimSave}
-            initialEnabled={trimEnabled}
-            initialStart={trimStart}
-            initialEnd={trimEnd}
-        />
-        <SelectQualityModal 
-            isOpen={isQualityModalOpen} 
-            onClose={() => setIsQualityModalOpen(false)}
-            currentQuality={quality}
-            onSave={setQuality}
-        />
+        {isTrimModalOpen && (
+          <TrimAudioModal 
+              isOpen={isTrimModalOpen} 
+              onClose={() => setIsTrimModalOpen(false)}
+              videoDuration={videoDuration}
+              isFetchingDuration={isFetchingDuration}
+              onSave={handleTrimSave}
+              initialEnabled={trimEnabled}
+              initialStart={trimStart}
+              initialEnd={trimEnd}
+          />
+        )}
+        {isQualityModalOpen && (
+          <SelectQualityModal 
+              isOpen={isQualityModalOpen} 
+              onClose={() => setIsQualityModalOpen(false)}
+              currentQuality={quality}
+              onSave={setQuality}
+          />
+        )}
       </>
     );
   };
@@ -502,4 +515,4 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   );
 };
 
-export default Converter;
+export default memo(Converter);

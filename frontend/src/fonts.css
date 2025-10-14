@@ -1,0 +1,8 @@
+/* System fonts for maximum performance - no external font loading */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: local('Inter'), local('Inter-Regular'), local('system-ui'), local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI'), local('Roboto'), local('Oxygen'), local('Ubuntu'), local('Cantarell'), local('Fira Sans'), local('Droid Sans'), local('Helvetica Neue'), local('sans-serif');
+}

@@ -8,12 +8,12 @@ interface HowToProps {
 
 const HowToSection: React.FC<HowToProps> = ({ navigateTo }) => {
   return (
-    <section id="how-to" className="py-8 sm:py-12 md:py-16 text-gray-700 dark:text-gray-300">
+    <section id="how-to" className="pt-8 sm:pt-12 md:pt-16 pb-4 sm:pb-6 md:pb-8 text-gray-700 dark:text-gray-300">
       <div className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6 md:space-y-8 px-2 sm:px-3 md:px-4">
         <div className="text-center">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3">YouTube to MP3 Converter</h2>
           <p className="text-sm leading-relaxed">
-            Convert any YouTube video to MP3 in a few seconds with SaveYTB - the best free YouTube to MP3 converter. SaveYTB is completely ad-free with no annoying pop-ups or third-party scripts. Our YouTube to MP3 downloader features auto-download, audio trimming, quality selection (64kbps to 320kbps), and works on any device without software installation. Convert YouTube to MP3, YouTube video to MP3, YT to MP3, and YouTube MP3 downloads with our advanced features - all completely free!
+            Convert any YouTube video to MP3 in a few seconds with SaveYTB - the best free YouTube to MP3 converter. SaveYTB is completely ad-free with no annoying pop-ups or third-party scripts. Our YouTube to MP3 downloader features auto-download, audio trimming, quality selection (64kbps to 320kbps), and works on any device without software installation. Convert YouTube to MP3, YouTube video to MP3, YT to MP3, and YouTube MP3 downloads with our advanced features. Download YT MP3 files instantly with our YouTube to MP3 converter - all completely free!
           </p>
         </div>
 
@@ -52,9 +52,6 @@ const HowToSection: React.FC<HowToProps> = ({ navigateTo }) => {
             </li>
           </ol>
         </div>
-        <p className="text-center text-md text-gray-600 dark:text-gray-400 pt-4">
-          By using SaveYTB, you agree to our <button onClick={() => navigateTo('terms')} className="text-red-500 hover:underline">terms of use</button>.
-        </p>
       </div>
     </section>
   );

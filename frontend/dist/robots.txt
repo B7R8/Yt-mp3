@@ -4,5 +4,5 @@ Allow: /
 # Sitemap
 Sitemap: https://saveytb.com/sitemap.xml
 
-# Crawl-delay
+# Crawl-delay for respectful crawling
 Crawl-delay: 1

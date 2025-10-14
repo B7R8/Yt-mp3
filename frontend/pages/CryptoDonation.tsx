@@ -289,12 +289,12 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                   copiedAddress === `${selectedCrypto}-${selectedNetwork}`
                     ? 'bg-green-500 text-white'
-                    : selectedCrypto === 'bitcoin' ? 'bg-orange-500 hover:bg-orange-600 text-white' :
+                    : selectedCrypto === 'bitcoin' ? 'bg-orange-600 hover:bg-orange-700 text-white' :
                       selectedCrypto === 'usdt' ? 'bg-green-500 hover:bg-green-600 text-white' :
                       selectedCrypto === 'ethereum' ? 'bg-blue-500 hover:bg-blue-600 text-white' :
                       selectedCrypto === 'bnb' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' :
                       selectedCrypto === 'solana' ? 'bg-purple-500 hover:bg-purple-600 text-white' :
-                      'bg-orange-500 hover:bg-orange-600 text-white'
+                      'bg-orange-600 hover:bg-orange-700 text-white'
                 }`}
               >
                 {copiedAddress === `${selectedCrypto}-${selectedNetwork}` ? (

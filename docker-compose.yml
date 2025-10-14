@@ -4,8 +4,6 @@ services:
   redis:
     image: redis:7-alpine
     container_name: yt-mp3-redis
-    # ports:
-    #   - "6379:6379" # Ma m7tajinch n'exposewh ila ghir l'backend li kayhder m3ah
     volumes:
       - redis_data:/data
     command: >
@@ -28,20 +26,17 @@ services:
       - app-network
     deploy:
       resources:
-      limits:
-      cpus: '0.5'
-      memory: 2.5G
-      reservations:
-        cpus: '0.25'
-        memory: 1G
+        limits:
+          cpus: '0.5'
+          memory: 2.5G
+        reservations:
+          cpus: '0.25'
+          memory: 1G
 
   backend:
     build: 
       context: ./backend
       dockerfile: Dockerfile
-    # L'ports T7EYYDAT: Hada howa ahem correction. Daba replicas: 2 ghadi tkhdem
-    # ports:
-    #   - "3001:3001"
     environment:
       - NODE_ENV=production
       - REDIS_HOST=redis
@@ -58,7 +53,6 @@ services:
       - RATE_LIMIT_MAX_REQUESTS=20
       - LOG_LEVEL=info
       - ENABLE_METRICS=true
-      # Security settings
       - DISABLE_SOURCE_MAPS=true
       - HIDE_SERVER_INFO=true
       - SECURE_HEADERS=true
@@ -92,17 +86,11 @@ services:
     build: 
       context: ./frontend
       dockerfile: Dockerfile
-    # container_name T7EYYDAT: A7ssan nkhlliw Docker ysmmih
-    # L'ports T7EYYDAT: Nginx howa li khasso ywelli l'bawwaba l'wa7ida
-    # ports:
-    #   - "3000:80"
     environment:
-      # Security settings
       - NODE_ENV=production
       - DISABLE_SOURCE_MAPS=true
       - SECURE_HEADERS=true
     restart: unless-stopped
-    # depends_on backend ma mohimch hna 7it Nginx howa li kay'dependi 3lihom bjouj
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
       interval: 30s
@@ -125,7 +113,7 @@ services:
       - backend
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "nginx", "-t"] # A7ssan healthcheck l Nginx howa nchoufo l'config s7i7a
+      test: ["CMD", "nginx", "-t"]
       interval: 60s
       timeout: 10s
       retries: 3
@@ -173,5 +161,7 @@ networks:
   app-network:
     driver: bridge
     ipam:
-    config:
-    - subnet: 172.20.0.0/24
+      config:
+        - subnet: 172.20.0.0/24
+
+ 
