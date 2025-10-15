@@ -8,9 +8,9 @@ const dbPath = process.env.SQLITE_DB_PATH || './conversions.db';
 const db = new sqlite3.Database(dbPath);
 
 // Promisify database methods for async/await usage
-const dbRun = promisify(db.run.bind(db));
-const dbGet = promisify(db.get.bind(db));
-const dbAll = promisify(db.all.bind(db));
+const dbRun = promisify(db.run.bind(db)) as (sql: string, params?: any[]) => Promise<any>;
+const dbGet = promisify(db.get.bind(db)) as (sql: string, params?: any[]) => Promise<any>;
+const dbAll = promisify(db.all.bind(db)) as (sql: string, params?: any[]) => Promise<any[]>;
 
 // Initialize database tables
 export async function initializeDatabase() {
@@ -58,7 +58,7 @@ export async function initializeDatabase() {
 export async function query(text: string, params: unknown[] = []) {
   const start = Date.now();
   try {
-    const res = await dbAll(text, params);
+    const res = await dbAll(text, params) as any[];
     const duration = Date.now() - start;
     console.log('Executed query', { text, duration, rows: res.length });
     return { rows: res, rowCount: res.length };
@@ -72,7 +72,7 @@ export async function query(text: string, params: unknown[] = []) {
 export async function getRow(text: string, params: unknown[] = []) {
   const start = Date.now();
   try {
-    const res = await dbGet(text, params);
+    const res = await dbGet(text, params) as any;
     const duration = Date.now() - start;
     console.log('Executed query', { text, duration, rows: res ? 1 : 0 });
     return { rows: res ? [res] : [], rowCount: res ? 1 : 0 };
@@ -86,7 +86,7 @@ export async function getRow(text: string, params: unknown[] = []) {
 export async function runQuery(text: string, params: unknown[] = []) {
   const start = Date.now();
   try {
-    const res = await dbRun(text, params);
+    const res = await dbRun(text, params) as any;
     const duration = Date.now() - start;
     console.log('Executed query', { text, duration, changes: res.changes });
     return { rowCount: res.changes };

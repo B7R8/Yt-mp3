@@ -18,7 +18,7 @@ dotenv.config();
 
 const app = express();
 app.set('trust proxy', 1);
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
 
 // Security middleware
 app.use(helmet({
@@ -89,7 +89,11 @@ app.use('*', (req, res) => {
 // Initialize database and start server
 async function startServer() {
   try {
+    logger.info('Starting server initialization...');
+    logger.info(`Environment variables: NODE_ENV=${process.env.NODE_ENV}, DB_HOST=${process.env.DB_HOST}, PORT=${process.env.PORT}`);
+    
     await initializeDatabase();
+    logger.info('Database initialized successfully');
     
     // Start cleanup cron job
     const conversionService = new ConversionService();
@@ -99,13 +103,26 @@ async function startServer() {
         logger.error('Cleanup job failed:', error);
       });
     });
+    logger.info('Cleanup cron job scheduled');
 
     // Start server
-    app.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      logger.info(`✅ Server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      logger.info('Using SQLite database for development');
+      logger.info(`Database: ${process.env.NODE_ENV === 'development' && !process.env.DB_HOST ? 'SQLite' : 'PostgreSQL'}`);
+      logger.info(`Redis: ${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}`);
+      logger.info('🚀 Backend is ready to accept connections!');
     });
+
+    // Handle server errors
+    server.on('error', (error: any) => {
+      logger.error('Server error:', error);
+      if (error.code === 'EADDRINUSE') {
+        logger.error(`Port ${PORT} is already in use`);
+      }
+      process.exit(1);
+    });
+
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

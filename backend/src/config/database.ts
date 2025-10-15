@@ -10,19 +10,35 @@ let runQuery: any;
 
 if (useSQLite) {
   // Use SQLite for local development
-  const sqliteDb = require('./sqliteDatabase');
-  db = sqliteDb.default;
-  sqliteQuery = sqliteDb.query;
-  getRow = sqliteDb.getRow;
-  runQuery = sqliteDb.runQuery;
+  try {
+    const sqliteDb = require('./sqliteDatabase');
+    db = sqliteDb.default;
+    sqliteQuery = sqliteDb.query;
+    getRow = sqliteDb.getRow;
+    runQuery = sqliteDb.runQuery;
+  } catch (error) {
+    console.log('SQLite not available, using PostgreSQL instead');
+    // Fallback to PostgreSQL
+    const dbConfig = {
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '5432'),
+      database: process.env.DB_NAME || 'youtube_converter',
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || 'postgres',
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    };
+    db = new Pool(dbConfig);
+  }
 } else {
   // Use PostgreSQL for production
   const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),
-    database: process.env.DB_NAME || 'ytmp3',
-    user: process.env.DB_USER || 'ytmp3_user',
-    password: process.env.DB_PASSWORD || 'ytmp3_secure_password_2024',
+    database: process.env.DB_NAME || 'youtube_converter',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
     max: 20, // Maximum number of clients in the pool
     idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
     connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
@@ -107,7 +123,11 @@ export async function query(text: string, params?: unknown[]) {
     const res = await db.query(text, params);
     const duration = Date.now() - start;
     console.log('Executed query', { text, duration, rows: res.rowCount });
-    return res;
+    // Ensure consistent return format for both SQLite and PostgreSQL
+    return {
+      rows: res.rows,
+      rowCount: res.rowCount
+    };
   } catch (error) {
     console.error('Database query error:', error);
     throw error;

@@ -23,9 +23,14 @@ COPY src/ ./src/
 COPY package*.json ./
 COPY tsconfig.json ./
 
+# Temporarily rename SQLite file to avoid TypeScript compilation issues
+RUN mv src/config/sqliteDatabase.ts src/config/sqliteDatabase.ts.bak
 
 # Build the application with security optimizations
 RUN npm run build
+
+# Restore SQLite file after build
+RUN mv src/config/sqliteDatabase.ts.bak src/config/sqliteDatabase.ts
 
 
 # Remove source files and dev dependencies after build

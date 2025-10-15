@@ -21,9 +21,9 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Check if env.production file exists
-if not exist "env.production" (
-    echo [ERROR] env.production file not found. Please create it first.
+REM Check if .env file exists
+if not exist ".env" (
+    echo [ERROR] .env file not found. Please create it first.
     pause
     exit /b 1
 )
@@ -70,7 +70,7 @@ echo    Grafana: http://31.97.149.135:3002 (admin/admin)
 echo    Health check: https://saveytb.com/api/health
 echo.
 echo [WARNING] Remember to:
-echo    1. Change default passwords in env.production
+echo    1. Change default passwords in .env
 echo    2. Set up SSL certificates for production
 echo    3. Configure firewall rules
 echo    4. Set up regular backups

@@ -45,8 +45,8 @@ if ! command -v docker-compose &> /dev/null; then
 fi
 
 # Check if .env file exists
-if [ ! -f "env.production" ]; then
-    print_error "env.production file not found. Please create it first."
+if [ ! -f ".env" ]; then
+    print_error ".env file not found. Please create it first."
     exit 1
 fi
 
@@ -83,7 +83,7 @@ sleep 30
 print_status "Performing health checks..."
 
 # Check PostgreSQL
-if docker-compose exec -T postgres pg_isready -U ytmp3_user -d ytmp3 > /dev/null 2>&1; then
+if docker-compose exec -T postgres pg_isready -U postgres -d youtube_converter > /dev/null 2>&1; then
     print_success "PostgreSQL is healthy"
 else
     print_error "PostgreSQL health check failed"
@@ -146,7 +146,7 @@ echo "   Grafana: http://31.97.149.135:3002 (admin/admin)"
 echo "   Health check: https://saveytb.com/api/health"
 echo ""
 print_warning "Remember to:"
-echo "   1. Change default passwords in env.production"
+echo "   1. Change default passwords in .env"
 echo "   2. Set up SSL certificates for production"
 echo "   3. Configure firewall rules"
 echo "   4. Set up regular backups"

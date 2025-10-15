@@ -3,7 +3,7 @@ import { query } from '../config/database';
 
 const router = express.Router();
 
-// GET /api/health - Health check endpoint
+// GET /health - Health check endpoint
 router.get('/health', async (req, res) => {
   try {
     // Check database connection
