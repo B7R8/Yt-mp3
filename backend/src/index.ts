@@ -25,13 +25,15 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// CORS configuration - More permissive for debugging
-app.use(cors({
-  origin: true, // Allow all origins for debugging
+// CORS configuration
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? 'https://saveytb.com' : true),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'Cache-Control', 'X-Streaming-Request']
-}));
+};
+
+app.use(cors(corsOptions));
 
 // Body parsing middleware with UTF-8 support
 app.use(express.json({ 

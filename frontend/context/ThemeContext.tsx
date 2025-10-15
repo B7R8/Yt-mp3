@@ -20,11 +20,17 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   useEffect(() => {
     const root = window.document.documentElement;
+    
+    // Apply theme class with smooth transition
     if (theme === Theme.DARK) {
       root.classList.add('dark');
+      document.body.style.backgroundColor = '#1a1a1a';
     } else {
       root.classList.remove('dark');
+      document.body.style.backgroundColor = '#f9fafb';
     }
+    
+    // Save to localStorage
     localStorage.setItem('theme', theme);
   }, [theme]);
 

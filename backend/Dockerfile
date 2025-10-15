@@ -39,6 +39,8 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     ffmpeg \
+    postgresql-client \
+    curl \
     && pip3 install yt-dlp --break-system-packages
 
 # Create app user
@@ -53,7 +55,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
-# Install only production dependencies in production stage
+# Install production dependencies (including pg for PostgreSQL)
 RUN npm ci --only=production && npm cache clean --force
 
 # Create necessary directories

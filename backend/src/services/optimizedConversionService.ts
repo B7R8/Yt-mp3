@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import ffmpeg from 'fluent-ffmpeg';
 import { ConversionJob, ConversionRequest } from '../types';
 import logger from '../config/logger';
-import { db } from '../config/database';
+import { optimizedDb as db } from '../config/optimizedDatabase';
 import { getUserFriendlyError, logTechnicalError } from '../utils/errorHandler';
 import { processVideoTitle, preserveExactTitle, isValidTitle, generateFilenameFromTitle } from '../utils/titleProcessor';
 import { Worker } from 'worker_threads';

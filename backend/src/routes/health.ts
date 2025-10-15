@@ -1,14 +1,13 @@
 import express from 'express';
-import { db } from '../config/database';
+import { query } from '../config/database';
 
 const router = express.Router();
 
 // GET /api/health - Health check endpoint
 router.get('/health', async (req, res) => {
   try {
-    // Check SQLite database connection
-    const database = await db;
-    await database.get('SELECT 1 as test');
+    // Check database connection
+    const result = await query('SELECT 1 as test');
     
     res.json({
       success: true,
