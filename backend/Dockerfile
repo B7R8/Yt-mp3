@@ -29,8 +29,8 @@ RUN npm run build
 # Restore SQLite file after build
 RUN mv src/config/sqliteDatabase.ts.bak src/config/sqliteDatabase.ts
 
-# Remove source files and dev dependencies after build
-RUN rm -rf src/ node_modules/ package*.json tsconfig.json
+# Remove source files after build (keep node_modules for production stage)
+RUN rm -rf src/ package*.json tsconfig.json
 
 # Production stage
 FROM node:18-alpine AS production
@@ -51,16 +51,21 @@ RUN addgroup -g 1001 -S nodejs && \
 # Set working directory
 WORKDIR /app
 
-# Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
+# Copy package files first
+COPY package*.json ./
 
-# Install production dependencies (including pg for PostgreSQL)
+# Install production dependencies only
 RUN npm ci --only=production --frozen-lockfile && npm cache clean --force
 
+# Copy built application from builder stage
+COPY --from=builder /app/dist ./dist
+
+# Copy cookie scripts
+COPY scripts/ ./scripts/
+
 # Create necessary directories
-RUN mkdir -p downloads cache temp logs && \
+RUN mkdir -p downloads cache temp logs cookies && \
+    chmod +x scripts/*.sh scripts/*.py && \
     chown -R nodejs:nodejs /app
 
 # Switch to non-root user

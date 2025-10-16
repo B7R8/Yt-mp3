@@ -32,6 +32,8 @@ export class ConversionService {
         '--no-playlist',
         '--no-warnings',
         '--extractor-args', 'youtube:player_client=android',
+        '--cookies', path.join(__dirname, '../../cookies/youtube_cookies.txt'), // Use exported Firefox cookies
+        '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         url
       ], {
         env: {
@@ -245,10 +247,11 @@ export class ConversionService {
         '--fragment-retries', '3',                   // Retry failed fragments
         '--retries', '3',                            // Total retries
         '--socket-timeout', '30',                    // Socket timeout
+        '--cookies', path.join(__dirname, '../../cookies/youtube_cookies.txt'), // Use exported Firefox cookies
+        '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         '--extractor-retries', '2',                  // Extractor retries
         '--http-chunk-size', '10485760',             // 10MB chunks for faster processing
         '--postprocessor-args', 'ffmpeg:-vn',        // Force no video stream in output
-        '--cookies', path.join(__dirname, '../../cookies.txt'), // Use cookies to bypass robot verification
         '--extractor-args', 'youtube:player_client=android', // Use mobile client for faster access
         url
       ];

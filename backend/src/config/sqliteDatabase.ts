@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { promisify } from 'util';
+import logger from './logger';
 
 // SQLite database configuration for local development
 const dbPath = process.env.SQLITE_DB_PATH || './conversions.db';
@@ -60,7 +61,9 @@ export async function query(text: string, params: unknown[] = []) {
   try {
     const res = await dbAll(text, params) as any[];
     const duration = Date.now() - start;
-    console.log('Executed query', { text, duration, rows: res.length });
+    if (process.env.LOG_LEVEL === 'debug') {
+      logger.debug('Executed query', { text, duration, rows: res.length });
+    }
     return { rows: res, rowCount: res.length };
   } catch (error) {
     console.error('Database query error:', error);
@@ -74,7 +77,9 @@ export async function getRow(text: string, params: unknown[] = []) {
   try {
     const res = await dbGet(text, params) as any;
     const duration = Date.now() - start;
-    console.log('Executed query', { text, duration, rows: res ? 1 : 0 });
+    if (process.env.LOG_LEVEL === 'debug') {
+      logger.debug('Executed query', { text, duration, rows: res ? 1 : 0 });
+    }
     return { rows: res ? [res] : [], rowCount: res ? 1 : 0 };
   } catch (error) {
     console.error('Database query error:', error);
@@ -88,7 +93,9 @@ export async function runQuery(text: string, params: unknown[] = []) {
   try {
     const res = await dbRun(text, params) as any;
     const duration = Date.now() - start;
-    console.log('Executed query', { text, duration, changes: res.changes });
+    if (process.env.LOG_LEVEL === 'debug') {
+      logger.debug('Executed query', { text, duration, changes: res.changes });
+    }
     return { rowCount: res.changes };
   } catch (error) {
     console.error('Database query error:', error);

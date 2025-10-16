@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import logger from './logger';
 
 // Check if we should use SQLite for local development
 const useSQLite = process.env.NODE_ENV === 'development' && !process.env.DB_HOST;
@@ -127,7 +128,9 @@ export async function query(text: string, params?: unknown[]) {
   try {
     const res = await db.query(text, params);
     const duration = Date.now() - start;
-    console.log('Executed query', { text, duration, rows: res.rowCount });
+    if (process.env.LOG_LEVEL === 'debug') {
+      logger.debug('Executed query', { text, duration, rows: res.rowCount });
+    }
     // Ensure consistent return format for both SQLite and PostgreSQL
     return {
       rows: res.rows,
