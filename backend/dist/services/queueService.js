@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.queueService = exports.QueueService = void 0;
 const events_1 = require("events");
-const redis_1 = require("../config/redis");
+const memoryCache_1 = require("../config/memoryCache");
 const logger_1 = __importDefault(require("../config/logger"));
 class QueueService extends events_1.EventEmitter {
     constructor(queueName = 'conversion_queue') {
@@ -31,7 +31,7 @@ class QueueService extends events_1.EventEmitter {
         };
         try {
             // Add to queue with priority (higher priority = lower score for sorted set)
-            await redis_1.redisManager.getClient().zadd(this.queueName, priority, JSON.stringify(job));
+            await memoryCache_1.memoryCache.lpush(this.queueName, job);
             // Update stats
             await this.incrementStats('pending');
             logger_1.default.info(`Job ${jobId} added to queue with priority ${priority}`);
@@ -45,14 +45,13 @@ class QueueService extends events_1.EventEmitter {
     // Get next job from queue
     async getNextJob() {
         try {
-            // Get job with highest priority (lowest score)
-            const result = await redis_1.redisManager.getClient().zpopmin(this.queueName, 1);
-            if (result.length === 0) {
+            // Get job with highest priority (FIFO for now)
+            const job = await memoryCache_1.memoryCache.rpop(this.queueName);
+            if (!job) {
                 return null;
             }
-            const job = JSON.parse(result[0]);
             // Add to processing set
-            await redis_1.redisManager.sadd(this.processingSet, job.id);
+            await memoryCache_1.memoryCache.sadd(this.processingSet, job.id);
             // Update stats
             await this.decrementStats('pending');
             await this.incrementStats('processing');
@@ -68,9 +67,9 @@ class QueueService extends events_1.EventEmitter {
     async completeJob(jobId, result) {
         try {
             // Remove from processing set
-            await redis_1.redisManager.srem(this.processingSet, jobId);
+            await memoryCache_1.memoryCache.srem(this.processingSet, jobId);
             // Add to completed set
-            await redis_1.redisManager.sadd(this.completedSet, jobId);
+            await memoryCache_1.memoryCache.sadd(this.completedSet, jobId);
             // Update stats
             await this.decrementStats('processing');
             await this.incrementStats('completed');
@@ -93,9 +92,9 @@ class QueueService extends events_1.EventEmitter {
                 job.attempts++;
                 job.priority += 1000; // Lower priority for retries
                 // Add back to queue
-                await redis_1.redisManager.getClient().zadd(this.queueName, job.priority, JSON.stringify(job));
+                await memoryCache_1.memoryCache.lpush(this.queueName, job);
                 // Remove from processing set
-                await redis_1.redisManager.srem(this.processingSet, jobId);
+                await memoryCache_1.memoryCache.srem(this.processingSet, jobId);
                 // Update stats
                 await this.decrementStats('processing');
                 await this.incrementStats('pending');
@@ -104,8 +103,8 @@ class QueueService extends events_1.EventEmitter {
             }
             else {
                 // Mark as permanently failed
-                await redis_1.redisManager.srem(this.processingSet, jobId);
-                await redis_1.redisManager.sadd(this.failedSet, jobId);
+                await memoryCache_1.memoryCache.srem(this.processingSet, jobId);
+                await memoryCache_1.memoryCache.sadd(this.failedSet, jobId);
                 // Update stats
                 await this.decrementStats('processing');
                 await this.incrementStats('failed');
@@ -178,7 +177,7 @@ class QueueService extends events_1.EventEmitter {
     // Get queue statistics
     async getStats() {
         try {
-            const stats = await redis_1.redisManager.get(this.statsKey);
+            const stats = await memoryCache_1.memoryCache.get(this.statsKey);
             return stats || {
                 pending: 0,
                 processing: 0,
@@ -201,7 +200,7 @@ class QueueService extends events_1.EventEmitter {
     // Get queue length
     async getQueueLength() {
         try {
-            return await redis_1.redisManager.getClient().zcard(this.queueName);
+            return await memoryCache_1.memoryCache.llen(this.queueName);
         }
         catch (error) {
             logger_1.default.error('Failed to get queue length:', error);
@@ -211,7 +210,7 @@ class QueueService extends events_1.EventEmitter {
     // Get processing jobs count
     async getProcessingCount() {
         try {
-            return await redis_1.redisManager.getClient().scard(this.processingSet);
+            return await memoryCache_1.memoryCache.llen(this.processingSet);
         }
         catch (error) {
             logger_1.default.error('Failed to get processing count:', error);
@@ -222,11 +221,11 @@ class QueueService extends events_1.EventEmitter {
     async clearQueue() {
         try {
             await Promise.all([
-                redis_1.redisManager.getClient().del(this.queueName),
-                redis_1.redisManager.getClient().del(this.processingSet),
-                redis_1.redisManager.getClient().del(this.completedSet),
-                redis_1.redisManager.getClient().del(this.failedSet),
-                redis_1.redisManager.getClient().del(this.statsKey)
+                memoryCache_1.memoryCache.del(this.queueName),
+                memoryCache_1.memoryCache.del(this.processingSet),
+                memoryCache_1.memoryCache.del(this.completedSet),
+                memoryCache_1.memoryCache.del(this.failedSet),
+                memoryCache_1.memoryCache.del(this.statsKey)
             ]);
             this.currentJobs.clear();
             logger_1.default.info('Queue cleared');
@@ -241,14 +240,14 @@ class QueueService extends events_1.EventEmitter {
             const cutoffTime = Date.now() - (maxAgeHours * 60 * 60 * 1000);
             let cleaned = 0;
             // Clean completed jobs
-            const completedJobs = await redis_1.redisManager.smembers(this.completedSet);
+            const completedJobs = await memoryCache_1.memoryCache.smembers(this.completedSet);
             for (const jobId of completedJobs) {
                 // Here you would check job creation time and remove old ones
                 // For now, we'll just count them
                 cleaned++;
             }
             // Clean failed jobs
-            const failedJobs = await redis_1.redisManager.smembers(this.failedSet);
+            const failedJobs = await memoryCache_1.memoryCache.smembers(this.failedSet);
             for (const jobId of failedJobs) {
                 // Here you would check job creation time and remove old ones
                 cleaned++;
@@ -264,7 +263,9 @@ class QueueService extends events_1.EventEmitter {
     // Private helper methods
     async incrementStats(field) {
         try {
-            await redis_1.redisManager.getClient().hincrby(this.statsKey, field, 1);
+            const stats = await memoryCache_1.memoryCache.get(this.statsKey) || { pending: 0, processing: 0, completed: 0, failed: 0, totalProcessed: 0 };
+            stats[field]++;
+            await memoryCache_1.memoryCache.set(this.statsKey, stats);
         }
         catch (error) {
             logger_1.default.error(`Failed to increment stats for ${field}:`, error);
@@ -272,7 +273,11 @@ class QueueService extends events_1.EventEmitter {
     }
     async decrementStats(field) {
         try {
-            await redis_1.redisManager.getClient().hincrby(this.statsKey, field, -1);
+            const stats = await memoryCache_1.memoryCache.get(this.statsKey) || { pending: 0, processing: 0, completed: 0, failed: 0, totalProcessed: 0 };
+            if (stats[field] > 0) {
+                stats[field]--;
+                await memoryCache_1.memoryCache.set(this.statsKey, stats);
+            }
         }
         catch (error) {
             logger_1.default.error(`Failed to decrement stats for ${field}:`, error);
@@ -281,8 +286,8 @@ class QueueService extends events_1.EventEmitter {
     // Health check
     async isHealthy() {
         try {
-            const isRedisHealthy = await redis_1.redisManager.ping();
-            return isRedisHealthy && this.isProcessing;
+            const isCacheHealthy = await memoryCache_1.memoryCache.ping();
+            return isCacheHealthy && this.isProcessing;
         }
         catch (error) {
             logger_1.default.error('Queue health check failed:', error);

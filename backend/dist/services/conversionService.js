@@ -73,12 +73,12 @@ class ConversionService {
     }
     async checkBlacklist(url) {
         try {
-            const database = await database_1.db;
             // Extract video ID from URL
             const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
             const videoId = videoIdMatch ? videoIdMatch[1] : null;
             // Check for exact URL match
-            const urlMatch = await database.get('SELECT reason FROM blacklist WHERE type = ? AND value = ?', ['url', url]);
+            const urlResult = await (0, database_1.query)('SELECT reason FROM blacklist WHERE type = $1 AND value = $2', ['url', url]);
+            const urlMatch = urlResult.rows[0];
             if (urlMatch) {
                 logger_1.default.info(`URL blacklisted: ${url}`);
                 return {
@@ -89,7 +89,8 @@ class ConversionService {
             }
             // Check for video ID match
             if (videoId) {
-                const videoIdMatch = await database.get('SELECT reason FROM blacklist WHERE type = ? AND value = ?', ['video_id', videoId]);
+                const videoIdResult = await (0, database_1.query)('SELECT reason FROM blacklist WHERE type = $1 AND value = $2', ['video_id', videoId]);
+                const videoIdMatch = videoIdResult.rows[0];
                 if (videoIdMatch) {
                     logger_1.default.info(`Video ID blacklisted: ${videoId}`);
                     return {
@@ -103,12 +104,13 @@ class ConversionService {
             const channelMatch = url.match(/youtube\.com\/channel\/([^&\n?#]+)/);
             if (channelMatch) {
                 const channelId = channelMatch[1];
-                const channelMatchResult = await database.get('SELECT reason FROM blacklist WHERE type = ? AND value = ?', ['channel', channelId]);
-                if (channelMatchResult) {
+                const channelMatchResult = await (0, database_1.query)('SELECT reason FROM blacklist WHERE type = $1 AND value = $2', ['channel', channelId]);
+                if (channelMatchResult.rows && channelMatchResult.rows.length > 0) {
+                    const channelRow = channelMatchResult.rows[0];
                     logger_1.default.info(`Channel blacklisted: ${channelId}`);
                     return {
                         isBlacklisted: true,
-                        reason: channelMatchResult.reason || 'This channel has been blocked by the content owner or administrator',
+                        reason: channelRow.reason || 'This channel has been blocked by the content owner or administrator',
                         type: 'Channel'
                     };
                 }
@@ -122,7 +124,6 @@ class ConversionService {
     }
     async createJob(request) {
         const jobId = (0, uuid_1.v4)();
-        const database = await database_1.db;
         try {
             // Check if URL is blacklisted
             const blacklistResult = await this.checkBlacklist(request.url);
@@ -131,8 +132,8 @@ class ConversionService {
             }
             // First, extract video title using yt-dlp
             const videoTitle = await this.extractVideoTitle(request.url);
-            await database.run(`INSERT INTO conversions (id, youtube_url, video_title, status, created_at, updated_at) 
-         VALUES (?, ?, ?, 'pending', datetime('now'), datetime('now'))`, [jobId, request.url, videoTitle]);
+            await (0, database_1.query)(`INSERT INTO conversions (id, youtube_url, video_title, status, created_at, updated_at) 
+         VALUES ($1, $2, $3, 'pending', NOW(), NOW())`, [jobId, request.url, videoTitle]);
             // Start conversion process asynchronously
             this.processConversion(jobId, request).catch(error => {
                 logger_1.default.error(`Conversion failed for job ${jobId}:`, error);
@@ -146,22 +147,22 @@ class ConversionService {
         }
     }
     async getJobStatus(jobId) {
-        const database = await database_1.db;
         try {
-            const result = await database.get('SELECT * FROM conversions WHERE id = ?', [jobId]);
-            if (!result) {
+            const result = await (0, database_1.query)('SELECT * FROM conversions WHERE id = $1', [jobId]);
+            if (!result.rows || result.rows.length === 0) {
                 return null;
             }
+            const row = result.rows[0];
             return {
-                id: result.id,
-                youtube_url: result.youtube_url,
-                video_title: result.video_title,
-                status: result.status,
-                mp3_filename: result.mp3_filename,
-                error_message: result.error_message,
-                quality_message: result.quality_message,
-                created_at: new Date(result.created_at),
-                updated_at: new Date(result.updated_at)
+                id: row.id,
+                youtube_url: row.youtube_url,
+                video_title: row.video_title,
+                status: row.status,
+                mp3_filename: row.mp3_filename,
+                error_message: row.error_message,
+                quality_message: row.quality_message,
+                created_at: new Date(row.created_at),
+                updated_at: new Date(row.updated_at)
             };
         }
         catch (error) {
@@ -170,11 +171,10 @@ class ConversionService {
         }
     }
     async updateJobStatus(jobId, status, mp3Filename, errorMessage, qualityMessage) {
-        const database = await database_1.db;
         try {
-            await database.run(`UPDATE conversions 
-         SET status = ?, mp3_filename = ?, error_message = ?, quality_message = ?, updated_at = datetime('now') 
-         WHERE id = ?`, [status, mp3Filename, errorMessage, qualityMessage, jobId]);
+            await (0, database_1.query)(`UPDATE conversions 
+         SET status = $1, mp3_filename = $2, error_message = $3, quality_message = $4, updated_at = NOW() 
+         WHERE id = $5`, [status, mp3Filename, errorMessage, qualityMessage, jobId]);
         }
         catch (error) {
             logger_1.default.error('Failed to update job status:', error);
@@ -474,12 +474,11 @@ class ConversionService {
         const maxAgeHours = parseInt(process.env.MAX_FILE_AGE_HOURS || '1');
         const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
         const cutoffTime = new Date(Date.now() - maxAgeMs);
-        const database = await database_1.db;
         try {
             // Get old completed jobs
-            const result = await database.all(`SELECT id, mp3_filename FROM conversions 
-         WHERE status = 'completed' AND created_at < ?`, [cutoffTime.toISOString()]);
-            for (const row of result) {
+            const result = await (0, database_1.query)(`SELECT id, mp3_filename FROM conversions 
+         WHERE status = 'completed' AND created_at < $1`, [cutoffTime.toISOString()]);
+            for (const row of result.rows) {
                 if (row.mp3_filename) {
                     const filePath = path_1.default.join(this.downloadsDir, row.mp3_filename);
                     try {
@@ -491,9 +490,9 @@ class ConversionService {
                     }
                 }
                 // Mark job as cleaned up
-                await database.run('UPDATE conversions SET status = ? WHERE id = ?', ['cleaned', row.id]);
+                await (0, database_1.query)('UPDATE conversions SET status = $1 WHERE id = $2', ['cleaned', row.id]);
             }
-            logger_1.default.info(`Cleanup completed. Processed ${result.length} old jobs.`);
+            logger_1.default.info(`Cleanup completed. Processed ${result.rows.length} old jobs.`);
         }
         catch (error) {
             logger_1.default.error('Cleanup failed:', error);

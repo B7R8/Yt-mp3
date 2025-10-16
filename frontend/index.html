@@ -64,20 +64,35 @@
       (function() {
         const savedTheme = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+        
+        // Determine effective theme
+        let effectiveTheme;
+        if (savedTheme === 'system' || !savedTheme) {
+          effectiveTheme = prefersDark ? 'dark' : 'light';
+        } else {
+          effectiveTheme = savedTheme;
+        }
         
         // Apply theme class immediately
-        if (theme === 'dark') {
+        if (effectiveTheme === 'dark') {
           document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
         } else {
           document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
         }
         
         // Set body background color immediately to prevent flash
-        if (theme === 'dark') {
+        if (effectiveTheme === 'dark') {
           document.body.style.backgroundColor = '#1a1a1a';
         } else {
           document.body.style.backgroundColor = '#f9fafb';
+        }
+        
+        // Set meta theme-color for mobile browsers
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+          metaThemeColor.setAttribute('content', effectiveTheme === 'dark' ? '#1a1a1a' : '#f9fafb');
         }
       })();
     </script>

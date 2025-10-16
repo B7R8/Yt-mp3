@@ -9,7 +9,7 @@ const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const uuid_1 = require("uuid");
 const logger_1 = __importDefault(require("../config/logger"));
-const database_1 = require("../config/database");
+const optimizedDatabase_1 = require("../config/optimizedDatabase");
 const titleProcessor_1 = require("../utils/titleProcessor");
 const worker_threads_1 = require("worker_threads");
 const events_1 = require("events");
@@ -200,7 +200,7 @@ class OptimizedConversionService extends events_1.EventEmitter {
     }
     async checkBlacklist(url) {
         try {
-            const database = await database_1.db;
+            const database = await optimizedDatabase_1.optimizedDb;
             const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
             const videoId = videoIdMatch ? videoIdMatch[1] : null;
             // Check for exact URL match
@@ -232,7 +232,7 @@ class OptimizedConversionService extends events_1.EventEmitter {
     }
     async createJob(request) {
         const jobId = (0, uuid_1.v4)();
-        const database = await database_1.db;
+        const database = await optimizedDatabase_1.optimizedDb;
         try {
             // Check if URL is blacklisted
             const blacklistResult = await this.checkBlacklist(request.url);
@@ -322,7 +322,7 @@ class OptimizedConversionService extends events_1.EventEmitter {
         }
     }
     async getJobStatus(jobId) {
-        const database = await database_1.db;
+        const database = await optimizedDatabase_1.optimizedDb;
         try {
             const result = await database.get('SELECT * FROM conversions WHERE id = ?', [jobId]);
             if (!result) {
@@ -346,7 +346,7 @@ class OptimizedConversionService extends events_1.EventEmitter {
         }
     }
     async updateJobStatus(jobId, status, mp3Filename, errorMessage, qualityMessage) {
-        const database = await database_1.db;
+        const database = await optimizedDatabase_1.optimizedDb;
         try {
             await database.run(`UPDATE conversions 
          SET status = ?, mp3_filename = ?, error_message = ?, quality_message = ?, updated_at = datetime('now') 
@@ -392,7 +392,7 @@ class OptimizedConversionService extends events_1.EventEmitter {
         const maxAgeHours = parseInt(process.env.MAX_FILE_AGE_HOURS || '1');
         const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
         const cutoffTime = new Date(Date.now() - maxAgeMs);
-        const database = await database_1.db;
+        const database = await optimizedDatabase_1.optimizedDb;
         try {
             const result = await database.all(`SELECT id, mp3_filename FROM conversions 
          WHERE status = 'completed' AND created_at < ?`, [cutoffTime.toISOString()]);

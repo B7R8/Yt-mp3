@@ -19,18 +19,19 @@ const database_1 = require("./config/database");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.set('trust proxy', 1);
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
 // Security middleware
 app.use((0, helmet_1.default)({
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
-// CORS configuration - More permissive for debugging
-app.use((0, cors_1.default)({
-    origin: true, // Allow all origins for debugging
+// CORS configuration
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? 'https://saveytb.com' : true),
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'Cache-Control', 'X-Streaming-Request']
-}));
+};
+app.use((0, cors_1.default)(corsOptions));
 // Body parsing middleware with UTF-8 support
 app.use(express_1.default.json({
     limit: '10mb',
@@ -77,7 +78,10 @@ app.use('*', (req, res) => {
 // Initialize database and start server
 async function startServer() {
     try {
+        logger_1.default.info('Starting server initialization...');
+        logger_1.default.info(`Environment variables: NODE_ENV=${process.env.NODE_ENV}, DB_HOST=${process.env.DB_HOST}, PORT=${process.env.PORT}`);
         await (0, database_1.initializeDatabase)();
+        logger_1.default.info('Database initialized successfully');
         // Start cleanup cron job
         const conversionService = new conversionService_1.ConversionService();
         node_cron_1.default.schedule('0 */1 * * *', () => {
@@ -86,11 +90,22 @@ async function startServer() {
                 logger_1.default.error('Cleanup job failed:', error);
             });
         });
+        logger_1.default.info('Cleanup cron job scheduled');
         // Start server
-        app.listen(PORT, () => {
-            logger_1.default.info(`Server running on port ${PORT}`);
+        const server = app.listen(PORT, '0.0.0.0', () => {
+            logger_1.default.info(`✅ Server running on port ${PORT}`);
             logger_1.default.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-            logger_1.default.info('Using SQLite database for development');
+            logger_1.default.info(`Database: ${process.env.NODE_ENV === 'development' && !process.env.DB_HOST ? 'SQLite' : 'PostgreSQL'}`);
+            logger_1.default.info(`Cache: In-memory cache enabled`);
+            logger_1.default.info('🚀 Backend is ready to accept connections!');
+        });
+        // Handle server errors
+        server.on('error', (error) => {
+            logger_1.default.error('Server error:', error);
+            if (error.code === 'EADDRINUSE') {
+                logger_1.default.error(`Port ${PORT} is already in use`);
+            }
+            process.exit(1);
         });
     }
     catch (error) {

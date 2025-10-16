@@ -52,10 +52,15 @@ export default defineConfig(({ mode }) => {
           compress: {
             drop_console: true,
             drop_debugger: true,
+            pure_funcs: ['console.log', 'console.info', 'console.debug'],
+            passes: 2,
           },
           format: {
             comments: false,
-          }
+          },
+          mangle: {
+            safari10: true,
+          },
         },
         // Optimize chunk splitting
         rollupOptions: {
@@ -65,9 +70,15 @@ export default defineConfig(({ mode }) => {
             assetFileNames: 'assets/[hash:8].[ext]',
             manualChunks: {
               vendor: ['react', 'react-dom'],
+              query: ['@tanstack/react-query'],
+              utils: ['swr'],
             },
           },
         },
+        // Enable compression
+        reportCompressedSize: true,
+        // Optimize for production
+        assetsInlineLimit: 4096,
       },
     };
 });

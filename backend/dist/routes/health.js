@@ -6,12 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const database_1 = require("../config/database");
 const router = express_1.default.Router();
-// GET /api/health - Health check endpoint
+// GET /health - Health check endpoint
 router.get('/health', async (req, res) => {
     try {
-        // Check SQLite database connection
-        const database = await database_1.db;
-        await database.get('SELECT 1 as test');
+        // Check database connection
+        const result = await (0, database_1.query)('SELECT 1 as test');
         res.json({
             success: true,
             status: 'healthy',

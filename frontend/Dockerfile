@@ -10,7 +10,7 @@ COPY tsconfig.json ./
 COPY vite.config.ts ./
 
 # Install dependencies
-RUN npm ci && npm cache clean --force
+RUN npm ci --frozen-lockfile && npm cache clean --force
 
 # Copy source code (no src folder in this project)
 COPY . .

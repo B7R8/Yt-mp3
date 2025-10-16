@@ -19,6 +19,7 @@ export interface Job {
 export enum Theme {
   LIGHT = 'light',
   DARK = 'dark',
+  SYSTEM = 'system',
 }
 
 export interface ToastData {

@@ -29,41 +29,6 @@ services:
           cpus: '0.5'
           memory: 512M
 
-  redis:
-    image: redis:7-alpine
-    container_name: yt-mp3-redis
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-    volumes:
-      - redis_data:/data
-    command: >
-      redis-server 
-      --appendonly yes 
-      --maxmemory ${REDIS_MAX_MEMORY:-2gb}
-      --maxmemory-policy allkeys-lru
-      --save 900 1
-      --save 300 10
-      --save 60 10000
-      --tcp-keepalive 60
-      --timeout 300
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - app-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 2.5G
-        reservations:
-          cpus: '0.25'
-          memory: 1G
 
   backend:
     build: 
@@ -73,8 +38,6 @@ services:
       - ./.env
     environment:
       - NODE_ENV=${NODE_ENV:-production}
-      - REDIS_HOST=${REDIS_HOST:-redis}
-      - REDIS_PORT=${REDIS_PORT:-6379}
       - DB_HOST=${DB_HOST:-postgres}
       - DB_PORT=${DB_PORT:-5432}
       - DB_NAME=${DB_NAME:-youtube_converter}
@@ -105,11 +68,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     restart: unless-stopped
     deploy:
-      replicas: 2
+      replicas: 1
       resources:
         limits:
           cpus: '1.5'
@@ -176,35 +137,9 @@ services:
           cpus: '0.25'
           memory: 256M
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: yt-mp3-grafana
-    ports:
-      - "3002:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
-    restart: unless-stopped
-    networks:
-      - app-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
-        reservations:
-          cpus: '0.1'
-          memory: 128M
 
 volumes:
   postgres_data:
-    driver: local
-  redis_data:
-    driver: local
-  grafana_data:
     driver: local
 
 networks:

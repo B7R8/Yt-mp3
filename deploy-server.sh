@@ -91,14 +91,7 @@ else
     exit 1
 fi
 
-# Check Redis
-if docker-compose exec -T redis redis-cli ping > /dev/null 2>&1; then
-    print_success "Redis is healthy"
-else
-    print_error "Redis health check failed"
-    docker-compose logs redis
-    exit 1
-fi
+# Redis removed - using in-memory cache
 
 # Check Backend
 if curl -f http://localhost:3001/api/health > /dev/null 2>&1; then
@@ -132,7 +125,6 @@ echo ""
 echo "📋 Service URLs:"
 echo "   Frontend: https://saveytb.com"
 echo "   Backend API: https://saveytb.com/api"
-echo "   Grafana: http://31.97.149.135:3002"
 echo "   Nginx: https://saveytb.com"
 echo ""
 echo "🔧 Management Commands:"
@@ -142,7 +134,6 @@ echo "   Restart services: docker-compose restart"
 echo "   Update services: docker-compose pull && docker-compose up -d"
 echo ""
 echo "📊 Monitoring:"
-echo "   Grafana: http://31.97.149.135:3002 (admin/admin)"
 echo "   Health check: https://saveytb.com/api/health"
 echo ""
 print_warning "Remember to:"

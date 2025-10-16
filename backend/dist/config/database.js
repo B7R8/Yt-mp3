@@ -1,73 +1,159 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.db = void 0;
 exports.initializeDatabase = initializeDatabase;
-const sqlite3_1 = __importDefault(require("sqlite3"));
-const sqlite_1 = require("sqlite");
-const path_1 = __importDefault(require("path"));
-// Create SQLite database connection
-const dbPath = path_1.default.join(process.cwd(), 'conversions.db');
-exports.db = (0, sqlite_1.open)({
-    filename: dbPath,
-    driver: sqlite3_1.default.Database,
-    // Ensure UTF-8 support for SQLite
-    mode: sqlite3_1.default.OPEN_READWRITE | sqlite3_1.default.OPEN_CREATE
-});
+exports.query = query;
+const pg_1 = require("pg");
+// Check if we should use SQLite for local development
+const useSQLite = process.env.NODE_ENV === 'development' && !process.env.DB_HOST;
+let db;
+let sqliteQuery;
+let getRow;
+let runQuery;
+if (useSQLite) {
+    // Use SQLite for local development
+    try {
+        const sqliteDb = require('./sqliteDatabase');
+        db = sqliteDb.default;
+        sqliteQuery = sqliteDb.query;
+        getRow = sqliteDb.getRow;
+        runQuery = sqliteDb.runQuery;
+    }
+    catch (error) {
+        console.log('SQLite not available, using PostgreSQL instead');
+        // Fallback to PostgreSQL
+        const dbConfig = {
+            host: process.env.DB_HOST || 'localhost',
+            port: parseInt(process.env.DB_PORT || '5432'),
+            database: process.env.DB_NAME || 'youtube_converter',
+            user: process.env.DB_USER || 'postgres',
+            password: process.env.DB_PASSWORD || 'postgres',
+            max: 20,
+            idleTimeoutMillis: 30000,
+            connectionTimeoutMillis: 2000,
+        };
+        db = new pg_1.Pool(dbConfig);
+    }
+}
+else {
+    // Use PostgreSQL for production
+    const dbConfig = {
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '5432'),
+        database: process.env.DB_NAME || 'youtube_converter',
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres',
+        max: parseInt(process.env.DB_MAX_CONNECTIONS || '20'), // Maximum number of clients in the pool
+        min: parseInt(process.env.DB_MIN_CONNECTIONS || '2'), // Minimum number of clients in the pool
+        idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'), // Close idle clients after 30 seconds
+        connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '2000'), // Return an error after 2 seconds if connection could not be established
+        acquireTimeoutMillis: parseInt(process.env.DB_ACQUIRE_TIMEOUT || '60000'), // Maximum time to wait for a connection
+        allowExitOnIdle: true, // Allow the pool to close all connections and exit when idle
+        statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT || '30000'), // Statement timeout in milliseconds
+        query_timeout: parseInt(process.env.DB_QUERY_TIMEOUT || '30000'), // Query timeout in milliseconds
+    };
+    // Create PostgreSQL connection pool
+    db = new pg_1.Pool(dbConfig);
+}
 // Initialize database tables
 async function initializeDatabase() {
-    const database = await exports.db;
-    // Set UTF-8 encoding for the database
-    await database.exec(`PRAGMA encoding = "UTF-8"`);
-    await database.exec(`PRAGMA foreign_keys = ON`);
-    await database.exec(`
-    CREATE TABLE IF NOT EXISTS conversions (
-      id TEXT PRIMARY KEY,
-      youtube_url TEXT NOT NULL,
-      video_title TEXT,
-      status TEXT NOT NULL DEFAULT 'pending',
-      progress INTEGER DEFAULT 0,
-      mp3_filename TEXT,
-      error_message TEXT,
-      quality_message TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-    // Create blacklist table
-    await database.exec(`
-    CREATE TABLE IF NOT EXISTS blacklist (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      type TEXT NOT NULL CHECK (type IN ('channel', 'url', 'video_id')),
-      value TEXT NOT NULL,
-      reason TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      created_by TEXT DEFAULT 'admin'
-    )
-  `);
-    // Add progress column if it doesn't exist (for existing databases)
-    await database.exec(`
-    ALTER TABLE conversions ADD COLUMN progress INTEGER DEFAULT 0
-  `).catch(() => {
-        // Column already exists, ignore error
-    });
-    // Add quality_message column if it doesn't exist (for existing databases)
-    await database.exec(`
-    ALTER TABLE conversions ADD COLUMN quality_message TEXT
-  `).catch(() => {
-        // Column already exists, ignore error
-    });
-    console.log('SQLite database initialized');
+    if (useSQLite) {
+        // SQLite initialization is handled in sqliteDatabase.ts
+        console.log('SQLite database will be initialized automatically');
+        return;
+    }
+    try {
+        // Test PostgreSQL database connection
+        const client = await db.connect();
+        // Check if tables exist, if not, they will be created by the init.sql script
+        const result = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_name IN ('conversions', 'blacklist')
+    `);
+        client.release();
+        if (result.rows.length === 2) {
+            console.log('PostgreSQL database tables already exist');
+        }
+        else {
+            console.log('PostgreSQL database tables will be created by init.sql');
+        }
+        console.log('PostgreSQL database initialized successfully');
+    }
+    catch (error) {
+        console.error('Database initialization error:', error);
+        throw error;
+    }
 }
-// Test database connection
-exports.db.then(() => {
-    console.log('Connected to SQLite database');
-    initializeDatabase();
-}).catch((err) => {
-    console.error('Database connection error:', err);
-    process.exit(-1);
+// Test database connection and initialize
+async function testConnection() {
+    if (useSQLite) {
+        console.log('Using SQLite database for local development');
+        await initializeDatabase();
+        return;
+    }
+    try {
+        const client = await db.connect();
+        console.log('Connected to PostgreSQL database');
+        client.release();
+        // Initialize database after successful connection
+        await initializeDatabase();
+    }
+    catch (error) {
+        console.error('PostgreSQL database connection error:', error);
+        process.exit(-1);
+    }
+}
+// Handle database errors (only for PostgreSQL)
+if (!useSQLite) {
+    db.on('error', (err) => {
+        console.error('PostgreSQL database error:', err);
+        process.exit(-1);
+    });
+}
+// Database query helper function
+async function query(text, params) {
+    if (useSQLite) {
+        return await sqliteQuery(text, params || []);
+    }
+    const start = Date.now();
+    try {
+        const res = await db.query(text, params);
+        const duration = Date.now() - start;
+        console.log('Executed query', { text, duration, rows: res.rowCount });
+        // Ensure consistent return format for both SQLite and PostgreSQL
+        return {
+            rows: res.rows,
+            rowCount: res.rowCount
+        };
+    }
+    catch (error) {
+        console.error('Database query error:', error);
+        throw error;
+    }
+}
+// Graceful shutdown
+process.on('SIGINT', async () => {
+    console.log('Shutting down database connection...');
+    if (!useSQLite) {
+        await db.end();
+    }
+    else {
+        db.close();
+    }
+    process.exit(0);
 });
-exports.default = exports.db;
+process.on('SIGTERM', async () => {
+    console.log('Shutting down database connection...');
+    if (!useSQLite) {
+        await db.end();
+    }
+    else {
+        db.close();
+    }
+    process.exit(0);
+});
+// Test connection on startup
+testConnection();
+exports.default = db;
 //# sourceMappingURL=database.js.map

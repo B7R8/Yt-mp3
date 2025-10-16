@@ -10,18 +10,15 @@ RUN pip3 install --break-system-packages yt-dlp
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better layer caching
 COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install ALL dependencies (including dev dependencies for build)
-RUN npm ci && npm cache clean --force
-
+RUN npm ci --frozen-lockfile && npm cache clean --force
 
 # Copy source code
 COPY src/ ./src/
-COPY package*.json ./
-COPY tsconfig.json ./
 
 # Temporarily rename SQLite file to avoid TypeScript compilation issues
 RUN mv src/config/sqliteDatabase.ts src/config/sqliteDatabase.ts.bak
@@ -32,9 +29,8 @@ RUN npm run build
 # Restore SQLite file after build
 RUN mv src/config/sqliteDatabase.ts.bak src/config/sqliteDatabase.ts
 
-
 # Remove source files and dev dependencies after build
-#RUN rm -rf src/ node_modules/ package*.json tsconfig.json
+RUN rm -rf src/ node_modules/ package*.json tsconfig.json
 
 # Production stage
 FROM node:18-alpine AS production
@@ -61,7 +57,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
 # Install production dependencies (including pg for PostgreSQL)
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --only=production --frozen-lockfile && npm cache clean --force
 
 # Create necessary directories
 RUN mkdir -p downloads cache temp logs && \

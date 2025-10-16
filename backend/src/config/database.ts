@@ -39,9 +39,14 @@ if (useSQLite) {
     database: process.env.DB_NAME || 'youtube_converter',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
-    max: 20, // Maximum number of clients in the pool
-    idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-    connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+    max: parseInt(process.env.DB_MAX_CONNECTIONS || '20'), // Maximum number of clients in the pool
+    min: parseInt(process.env.DB_MIN_CONNECTIONS || '2'), // Minimum number of clients in the pool
+    idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'), // Close idle clients after 30 seconds
+    connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '2000'), // Return an error after 2 seconds if connection could not be established
+    acquireTimeoutMillis: parseInt(process.env.DB_ACQUIRE_TIMEOUT || '60000'), // Maximum time to wait for a connection
+    allowExitOnIdle: true, // Allow the pool to close all connections and exit when idle
+    statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT || '30000'), // Statement timeout in milliseconds
+    query_timeout: parseInt(process.env.DB_QUERY_TIMEOUT || '30000'), // Query timeout in milliseconds
   };
 
   // Create PostgreSQL connection pool

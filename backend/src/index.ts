@@ -110,7 +110,7 @@ async function startServer() {
       logger.info(`✅ Server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`Database: ${process.env.NODE_ENV === 'development' && !process.env.DB_HOST ? 'SQLite' : 'PostgreSQL'}`);
-      logger.info(`Redis: ${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}`);
+      logger.info(`Cache: In-memory cache enabled`);
       logger.info('🚀 Backend is ready to accept connections!');
     });
 
