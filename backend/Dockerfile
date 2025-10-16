@@ -2,10 +2,7 @@
 FROM node:18-alpine AS builder
 
 # Install build dependencies
-RUN apk add --no-cache python3 py3-pip make g++
-
-# Install yt-dlp
-RUN pip3 install --break-system-packages yt-dlp
+RUN apk add --no-cache make g++
 
 # Set working directory
 WORKDIR /app
@@ -37,12 +34,8 @@ FROM node:18-alpine AS production
 
 # Install runtime dependencies
 RUN apk add --no-cache \
-    python3 \
-    py3-pip \
-    ffmpeg \
     postgresql-client \
-    curl \
-    && pip3 install yt-dlp --break-system-packages
+    curl
 
 # Create app user
 RUN addgroup -g 1001 -S nodejs && \
@@ -60,12 +53,8 @@ RUN npm ci --only=production --frozen-lockfile && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Copy cookie scripts
-COPY scripts/ ./scripts/
-
 # Create necessary directories
-RUN mkdir -p downloads cache temp logs cookies && \
-    chmod +x scripts/*.sh scripts/*.py && \
+RUN mkdir -p downloads cache temp logs && \
     chown -R nodejs:nodejs /app
 
 # Switch to non-root user

@@ -60,6 +60,7 @@ services:
       - DISABLE_SOURCE_MAPS=${DISABLE_SOURCE_MAPS:-true}
       - HIDE_SERVER_INFO=${HIDE_SERVER_INFO:-true}
       - SECURE_HEADERS=${SECURE_HEADERS:-true}
+      - RAPIDAPI_KEY=${RAPIDAPI_KEY:-546e353d67msha411dc0cd0b0b7dp153e93jsn651c16a2c85b}
     volumes:
       - ./downloads:/app/downloads
       - ./cache:/app/cache

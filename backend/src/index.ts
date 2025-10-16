@@ -5,11 +5,11 @@ import dotenv from 'dotenv';
 import path from 'path';
 import cron from 'node-cron';
 
-import conversionRoutes from './routes/conversion';
+import simpleConversionRoutes from './routes/simpleConversion';
 import healthRoutes from './routes/health';
 import secureWalletRoutes from './routes/secureWallet';
 import contactRoutes from './routes/contact';
-import { ConversionService } from './services/conversionService';
+import { SimpleConversionService } from './services/simpleConversionService';
 import logger from './config/logger';
 import { initializeDatabase } from './config/database';
 
@@ -59,7 +59,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api', healthRoutes);
-app.use('/api', conversionRoutes);
+app.use('/api', simpleConversionRoutes);
 app.use('/api', contactRoutes);
 app.use('/api/secure-wallet', secureWalletRoutes);
 
@@ -96,7 +96,7 @@ async function startServer() {
     logger.info('Database initialized successfully');
     
     // Start cleanup cron job
-    const conversionService = new ConversionService();
+    const conversionService = new SimpleConversionService();
     cron.schedule('0 */1 * * *', () => {
       logger.info('Running cleanup job...');
       conversionService.cleanupOldFiles().catch(error => {

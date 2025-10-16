@@ -8,11 +8,11 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const node_cron_1 = __importDefault(require("node-cron"));
-const conversion_1 = __importDefault(require("./routes/conversion"));
+const simpleConversion_1 = __importDefault(require("./routes/simpleConversion"));
 const health_1 = __importDefault(require("./routes/health"));
 const secureWallet_1 = __importDefault(require("./routes/secureWallet"));
 const contact_1 = __importDefault(require("./routes/contact"));
-const conversionService_1 = require("./services/conversionService");
+const simpleConversionService_1 = require("./services/simpleConversionService");
 const logger_1 = __importDefault(require("./config/logger"));
 const database_1 = require("./config/database");
 // Load environment variables
@@ -53,7 +53,7 @@ app.use((req, res, next) => {
 });
 // Routes
 app.use('/api', health_1.default);
-app.use('/api', conversion_1.default);
+app.use('/api', simpleConversion_1.default);
 app.use('/api', contact_1.default);
 app.use('/api/secure-wallet', secureWallet_1.default);
 // Debug: Log all registered routes
@@ -83,7 +83,7 @@ async function startServer() {
         await (0, database_1.initializeDatabase)();
         logger_1.default.info('Database initialized successfully');
         // Start cleanup cron job
-        const conversionService = new conversionService_1.ConversionService();
+        const conversionService = new simpleConversionService_1.SimpleConversionService();
         node_cron_1.default.schedule('0 */1 * * *', () => {
             logger_1.default.info('Running cleanup job...');
             conversionService.cleanupOldFiles().catch(error => {

@@ -1,8 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializeDatabase = initializeDatabase;
 exports.query = query;
 const pg_1 = require("pg");
+const logger_1 = __importDefault(require("./logger"));
 // Check if we should use SQLite for local development
 const useSQLite = process.env.NODE_ENV === 'development' && !process.env.DB_HOST;
 let db;
@@ -120,7 +124,9 @@ async function query(text, params) {
     try {
         const res = await db.query(text, params);
         const duration = Date.now() - start;
-        console.log('Executed query', { text, duration, rows: res.rowCount });
+        if (process.env.LOG_LEVEL === 'debug') {
+            logger_1.default.debug('Executed query', { text, duration, rows: res.rowCount });
+        }
         // Ensure consistent return format for both SQLite and PostgreSQL
         return {
             rows: res.rows,

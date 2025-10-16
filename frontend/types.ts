@@ -16,11 +16,7 @@ export interface Job {
   quality_message?: string;
 }
 
-export enum Theme {
-  LIGHT = 'light',
-  DARK = 'dark',
-  SYSTEM = 'system',
-}
+// Theme is now a simple string type: 'light' | 'dark'
 
 export interface ToastData {
   id: number;
