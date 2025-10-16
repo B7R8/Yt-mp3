@@ -32,7 +32,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   const [trimStart, setTrimStart] = useState('00:00:00');
   const [trimEnd, setTrimEnd] = useState('00:00:00');
   const [autoDownload, setAutoDownload] = useState(false);
-  const { job, isLoading, handleSubmit, resetConverter } = useConverter(showToast, autoDownload);
+  const { job, isLoading, handleSubmit, resetConverter, downloadFile } = useConverter(showToast, autoDownload);
 
   // Load preferred quality from localStorage on component mount
   useEffect(() => {
@@ -96,19 +96,50 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
     }
   };
 
-  // Extract YouTube video ID from URL (memoized)
+  // Extract YouTube video ID from URL (memoized) - Enhanced to support all formats
   const extractVideoId = useCallback((url: string): string | null => {
     const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([^&\n?#]+)/,
+      // Standard watch URLs
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+      
+      // Short URLs
+      /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+      
+      // Embed URLs
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+      
+      // Direct video URLs
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+      
+      // Shorts URLs
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+      
+      // Mobile URLs
+      /(?:https?:\/\/)?m\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?m\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+      
+      // Music URLs
+      /(?:https?:\/\/)?(?:www\.)?music\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?music\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+      
+      // Gaming URLs
+      /(?:https?:\/\/)?(?:www\.)?gaming\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?gaming\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+      
+      // Just the video ID (11 characters)
       /^([a-zA-Z0-9_-]{11})$/
     ];
     
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match && match[1]) {
+        console.log(`🎯 Extracted video ID: ${match[1]} from URL: ${url}`);
         return match[1];
       }
     }
+    
+    console.warn(`❌ Could not extract video ID from URL: ${url}`);
     return null;
   }, []);
 
@@ -188,7 +219,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
     if (job) {
       switch (job.status) {
         case JobStatus.PENDING:
-        case JobStatus.PROCESSING:
+        case 'processing':
           return (
             <div className="max-w-lg mx-auto">
               <h2 className="text-sm font-semibold text-center mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title || 'Processing...'}</h2>
@@ -278,29 +309,8 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
                   e.preventDefault();
                   e.stopPropagation();
                   
-                  try {
-                    // Use direct download approach - let the browser handle the redirect
-                    const downloadUrl = `/api/download/${job.id}`;
-                    
-                    // Create a hidden download link that will follow the redirect to the direct API URL
-                    const link = document.createElement('a');
-                    link.href = downloadUrl;
-                    link.download = `${job.title || 'converted'}.mp3`;
-                    link.style.display = 'none';
-                    
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                  } catch (error) {
-                    console.error('Download error:', error);
-                    // Fallback: try direct window.open
-                    try {
-                      window.open(`/api/download/${job.id}`, '_blank');
-                    } catch (fallbackError) {
-                      console.error('Fallback download also failed:', fallbackError);
-                    }
-                  }
+                  // Use the hidden anchor tag download method
+                  downloadFile(job.id, job.title || 'converted');
                 }}
                 className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-black rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-xs sm:text-sm w-full sm:w-auto"
               >

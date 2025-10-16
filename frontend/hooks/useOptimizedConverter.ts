@@ -38,9 +38,9 @@ export const useOptimizedConverter = (showToast: (message: string, type: 'succes
   const videoInfoCache = useRef<Map<string, VideoInfo>>(new Map());
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Memoized URL validation
+  // Memoized URL validation - Enhanced to support all YouTube URL formats
   const validateYouTubeUrl = useCallback((url: string): boolean => {
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)[\w-]+/;
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/|m\.youtube\.com\/watch\?v=|music\.youtube\.com\/watch\?v=|gaming\.youtube\.com\/watch\?v=)[\w-]+/;
     return youtubeRegex.test(url);
   }, []);
 
@@ -145,6 +145,9 @@ export const useOptimizedConverter = (showToast: (message: string, type: 'succes
         showToast(`Conversion failed: ${currentJob.error || 'Unknown error'}`, 'error');
         clearPolling();
         setConversionProgress(null);
+      } else if (currentJob.status === 'processing') {
+        // Continue polling for processing status
+        console.log(`⏳ Conversion still processing for job: ${id}`);
       }
     } catch (error) {
       console.error('Error polling job status:', error);
@@ -154,27 +157,37 @@ export const useOptimizedConverter = (showToast: (message: string, type: 'succes
     }
   }, [autoDownload, clearPolling, showToast]);
 
-  // Optimized file download - Direct download approach
+  // Hidden anchor tag download method - Enhanced with logging
   const downloadFile = useCallback(async (jobId: string, filename: string) => {
     try {
+      console.log(`🎵 Starting download for: ${filename}`);
+      
       const downloadUrl = `/api/download/${jobId}`;
       
-      // Create a hidden download link that will follow the redirect to the direct API URL
+      // Create a hidden download link
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = `${filename}.mp3`;
       link.style.display = 'none';
       
+      // Add to DOM, click, and remove
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
+      console.log(`✅ Download triggered successfully for: ${filename}`);
     } catch (error) {
-      console.error('Download error:', error);
+      console.error('❌ Download error:', error);
+      showToast('Download failed. Please try again.', 'error');
+      
       // Fallback: try direct window.open
-      window.open(`/api/download/${jobId}`, '_blank');
+      try {
+        window.open(`/api/download/${jobId}`, '_blank');
+      } catch (fallbackError) {
+        console.error('❌ Fallback download also failed:', fallbackError);
+      }
     }
-  }, []);
+  }, [showToast]);
 
   const handleSubmit = useCallback(async (
     url: string,

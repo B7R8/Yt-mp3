@@ -47,20 +47,52 @@ export class YouTubeMp3ApiService {
   }
 
   /**
-   * Extract video ID from YouTube URL
+   * Extract video ID from YouTube URL - Enhanced to support all formats
    */
   private extractVideoId(url: string): string | null {
+    // Comprehensive patterns for all YouTube URL formats
     const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
-      /youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/
+      // Standard watch URLs
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+      
+      // Short URLs
+      /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+      
+      // Embed URLs
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+      
+      // Direct video URLs
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+      
+      // Shorts URLs
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+      
+      // Mobile URLs
+      /(?:https?:\/\/)?m\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?m\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+      
+      // Music URLs
+      /(?:https?:\/\/)?(?:www\.)?music\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?music\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+      
+      // Gaming URLs
+      /(?:https?:\/\/)?(?:www\.)?gaming\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?gaming\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+      
+      // Just the video ID (11 characters)
+      /^([a-zA-Z0-9_-]{11})$/
     ];
 
     for (const pattern of patterns) {
       const match = url.match(pattern);
-      if (match) {
+      if (match && match[1]) {
+        logger.info(`🎯 Extracted video ID: ${match[1]} from URL: ${url}`);
         return match[1];
       }
     }
+    
+    logger.warn(`❌ Could not extract video ID from URL: ${url}`);
     return null;
   }
 
@@ -151,39 +183,48 @@ export class YouTubeMp3ApiService {
   async convertToMp3(url: string, quality: string = '192k'): Promise<ConversionResult> {
     const videoId = this.extractVideoId(url);
     if (!videoId) {
+      logger.error(`❌ Invalid YouTube URL - could not extract video ID from: ${url}`);
       return {
         success: false,
         error: 'Invalid YouTube URL - could not extract video ID'
       };
     }
 
+    logger.info(`🎵 Starting MP3 conversion for video ID: ${videoId} with quality: ${quality}`);
+
     try {
       // Get download link directly from API
+      logger.info(`🔗 Fetching download link from primary API for video: ${videoId}`);
       let downloadResult = await this.getDownloadLink(videoId);
       
       // If primary API fails, try alternative API
       if (!downloadResult.success || !downloadResult.downloadUrl) {
-        logger.info(`Primary API failed for ${videoId}, trying alternative API`);
+        logger.warn(`⚠️ Primary API failed for ${videoId}, trying alternative API`);
         downloadResult = await this.tryAlternativeApi(videoId);
       }
       
       if (!downloadResult.success || !downloadResult.downloadUrl) {
+        logger.error(`❌ All APIs failed for video ${videoId}: ${downloadResult.error}`);
         return {
           success: false,
           error: downloadResult.error || 'Failed to get download link from all available APIs'
         };
       }
 
+      logger.info(`✅ Download URL obtained for video ${videoId}: ${downloadResult.downloadUrl}`);
+
       // Get video info for title
       let title = `YouTube Video ${videoId}`;
       try {
+        logger.info(`📝 Fetching video info for title: ${videoId}`);
         const videoInfo = await this.getVideoInfo(url);
         title = videoInfo.title;
+        logger.info(`📝 Video title: ${title}`);
       } catch (error) {
-        logger.warn('Failed to get video info, using default title:', error);
+        logger.warn(`⚠️ Failed to get video info for ${videoId}, using default title:`, error);
       }
 
-      logger.info(`Direct download approach: Returning API download URL for ${videoId}: ${downloadResult.downloadUrl}`);
+      logger.info(`🎵 Conversion completed successfully for ${videoId}: ${title}`);
 
       return {
         success: true,
@@ -193,6 +234,7 @@ export class YouTubeMp3ApiService {
       };
 
     } catch (error) {
+      logger.error(`❌ Conversion failed for video ${videoId}:`, error);
       logTechnicalError(error, 'YouTube MP3 API Conversion');
       return {
         success: false,

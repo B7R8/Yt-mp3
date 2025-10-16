@@ -22,12 +22,12 @@ router.post('/check-url', async (req: Request, res: Response) => {
       });
     }
 
-    // Enhanced URL validation
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)[\w-]+/;
+    // Enhanced URL validation - supports all YouTube URL formats
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/|m\.youtube\.com\/watch\?v=|music\.youtube\.com\/watch\?v=|gaming\.youtube\.com\/watch\?v=)[\w-]+/;
     if (!youtubeRegex.test(url)) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Please provide a valid YouTube URL' 
+        message: 'Please provide a valid YouTube URL (supports youtube.com, youtu.be, and all YouTube variants)' 
       });
     }
 
@@ -124,15 +124,15 @@ router.get('/status/:id', statusRateLimit, validateJobId, async (req: Request, r
   }
 });
 
-// GET /api/download/:id - Redirect to direct download URL
+// GET /api/download/:id - Stream file with proper headers (no source domain exposure)
 router.get('/download/:id', validateJobId, async (req: Request, res: Response) => {
   try {
     const jobId = req.params.id;
-    logger.info(`Download request for job: ${jobId}`);
+    logger.info(`🎵 Download request for job: ${jobId}`);
     
     const job = await conversionService.getJobStatus(jobId);
     if (!job) {
-      logger.warn(`Job not found: ${jobId}`);
+      logger.warn(`❌ Job not found: ${jobId}`);
       return res.status(404).json({
         success: false,
         message: 'Job not found'
@@ -140,7 +140,7 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
     }
     
     if (job.status !== 'completed') {
-      logger.warn(`Job not completed: ${jobId}, status: ${job.status}`);
+      logger.warn(`⏳ Job not completed: ${jobId}, status: ${job.status}`);
       return res.status(400).json({
         success: false,
         message: `Conversion is ${job.status}. Please wait for completion.`
@@ -148,7 +148,7 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
     }
     
     if (!job.direct_download_url) {
-      logger.error(`Direct download URL not found for job: ${jobId}`);
+      logger.error(`❌ Direct download URL not found for job: ${jobId}`);
       return res.status(404).json({
         success: false,
         message: 'Download URL not available'
@@ -156,11 +156,97 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
     }
 
     const filename = job.mp3_filename || 'converted.mp3';
-    logger.info(`Redirecting to direct download URL for: ${filename}`);
-    logger.info(`Direct download URL: ${job.direct_download_url}`);
+    logger.info(`🎵 Starting download for: ${filename}`);
+    logger.info(`🔗 Direct download URL: ${job.direct_download_url}`);
 
-    // Redirect to the direct download URL
-    res.redirect(302, job.direct_download_url);
+    // Stream the file from the API URL with proper headers
+    const https = require('https');
+    const url = require('url');
+    
+    const parsedUrl = url.parse(job.direct_download_url);
+    
+    const options = {
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port || 443,
+      path: parsedUrl.path,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'audio/mpeg, audio/*, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1'
+      }
+    };
+
+    // Set proper download headers to hide source domain
+    res.setHeader('Content-Type', 'audio/mpeg');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+
+    const proxyReq = https.request(options, (proxyRes: any) => {
+      logger.info(`📡 Proxy response status: ${proxyRes.statusCode} for job: ${jobId}`);
+      
+      // Handle redirects
+      if (proxyRes.statusCode && proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
+        logger.info(`🔄 Following redirect for job: ${jobId}`);
+        res.redirect(proxyRes.statusCode, proxyRes.headers.location);
+        return;
+      }
+      
+      if (proxyRes.statusCode !== 200) {
+        logger.error(`❌ Download failed with status: ${proxyRes.statusCode} for job: ${jobId}`);
+        res.status(proxyRes.statusCode).json({
+          success: false,
+          message: 'Download failed'
+        });
+        return;
+      }
+
+      // Copy relevant headers (but not source domain info)
+      if (proxyRes.headers['content-length']) {
+        res.setHeader('Content-Length', proxyRes.headers['content-length']);
+      }
+      if (proxyRes.headers['content-type']) {
+        res.setHeader('Content-Type', proxyRes.headers['content-type']);
+      }
+
+      // Stream the file
+      proxyRes.pipe(res);
+      
+      proxyRes.on('end', () => {
+        logger.info(`✅ Download completed successfully for job: ${jobId}`);
+      });
+    });
+
+    proxyReq.on('error', (error: any) => {
+      logger.error(`❌ Download error for job ${jobId}:`, error);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: 'Download failed'
+        });
+      }
+    });
+
+    proxyReq.setTimeout(30000, () => {
+      logger.error(`⏰ Download timeout for job: ${jobId}`);
+      proxyReq.destroy();
+      if (!res.headersSent) {
+        res.status(408).json({
+          success: false,
+          message: 'Download timeout'
+        });
+      }
+    });
+
+    proxyReq.end();
     
   } catch (error) {
     const userMessage = getUserFriendlyError(error);

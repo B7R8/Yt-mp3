@@ -21,6 +21,31 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
     }
   }, []);
 
+  // Hidden anchor tag download method
+  const downloadFile = useCallback(async (jobId: string, filename: string) => {
+    try {
+      console.log(`🎵 Starting download for: ${filename}`);
+      
+      const downloadUrl = `/api/download/${jobId}`;
+      
+      // Create a hidden download link
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${filename}.mp3`;
+      link.style.display = 'none';
+      
+      // Add to DOM, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log(`✅ Download triggered successfully for: ${filename}`);
+    } catch (error) {
+      console.error('❌ Download error:', error);
+      showToast('Download failed. Please try again.', 'error');
+    }
+  }, [showToast]);
+
   const pollStatus = useCallback(async (id: string) => {
     try {
       const currentJob = await getJobStatus(id);
@@ -39,18 +64,7 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
         if (autoDownload) {
           // Small delay to ensure the file is ready
           setTimeout(() => {
-            // Use direct download approach
-            const downloadUrl = `/api/download/${currentJob.id}`;
-            
-            // Create a hidden download link that will follow the redirect
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = `${currentJob.title || 'download'}.mp3`;
-            link.style.display = 'none';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            downloadFile(currentJob.id, currentJob.title || 'download');
           }, 500);
         }
         
@@ -58,6 +72,9 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
       } else if (currentJob.status === JobStatus.FAILED) {
         showToast(`Conversion failed: ${currentJob.error || 'Unknown error'}`, 'error');
         clearPolling();
+      } else if (currentJob.status === 'processing') {
+        // Continue polling for processing status
+        console.log(`⏳ Conversion still processing for job: ${id}`);
       }
     } catch (error) {
       console.error('Error polling job status:', error);
@@ -151,6 +168,7 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
     job,
     isLoading: isConverting,
     handleSubmit,
-    resetConverter
+    resetConverter,
+    downloadFile
   };
 };

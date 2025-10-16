@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS conversions (
     mp3_filename TEXT,
     error_message TEXT,
     quality_message TEXT,
+    direct_download_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -51,6 +52,9 @@ CREATE TRIGGER update_blacklist_updated_at
     BEFORE UPDATE ON blacklist 
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
+
+-- Add direct_download_url column if it doesn't exist (for existing databases)
+ALTER TABLE conversions ADD COLUMN IF NOT EXISTS direct_download_url TEXT;
 
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ytmp3_user;
