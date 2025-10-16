@@ -82,20 +82,20 @@ async function startServer() {
         logger_1.default.info(`Environment variables: NODE_ENV=${process.env.NODE_ENV}, DB_HOST=${process.env.DB_HOST}, PORT=${process.env.PORT}`);
         await (0, database_1.initializeDatabase)();
         logger_1.default.info('Database initialized successfully');
-        // Start cleanup cron job
+        // Start cleanup cron job (every 10 minutes to clean files older than 20 minutes)
         const conversionService = new simpleConversionService_1.SimpleConversionService();
-        node_cron_1.default.schedule('0 */1 * * *', () => {
-            logger_1.default.info('Running cleanup job...');
+        node_cron_1.default.schedule('*/10 * * * *', () => {
+            logger_1.default.info('Running cleanup job for files older than 20 minutes...');
             conversionService.cleanupOldFiles().catch(error => {
                 logger_1.default.error('Cleanup job failed:', error);
             });
         });
-        logger_1.default.info('Cleanup cron job scheduled');
+        logger_1.default.info('Cleanup cron job scheduled (every 10 minutes)');
         // Start server
         const server = app.listen(PORT, '0.0.0.0', () => {
             logger_1.default.info(`✅ Server running on port ${PORT}`);
             logger_1.default.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-            logger_1.default.info(`Database: ${process.env.NODE_ENV === 'development' && !process.env.DB_HOST ? 'SQLite' : 'PostgreSQL'}`);
+            logger_1.default.info(`Database: SQLite`);
             logger_1.default.info(`Cache: In-memory cache enabled`);
             logger_1.default.info('🚀 Backend is ready to accept connections!');
         });

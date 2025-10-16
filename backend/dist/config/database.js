@@ -5,10 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializeDatabase = initializeDatabase;
 exports.query = query;
+exports.ensureDirectDownloadUrlColumn = ensureDirectDownloadUrlColumn;
 const pg_1 = require("pg");
 const logger_1 = __importDefault(require("./logger"));
-// Check if we should use SQLite for local development
-const useSQLite = process.env.NODE_ENV === 'development' && !process.env.DB_HOST;
+// Use SQLite for local development
+const useSQLite = true; // Use SQLite for local development
 let db;
 let sqliteQuery;
 let getRow;
@@ -63,6 +64,7 @@ async function initializeDatabase() {
     if (useSQLite) {
         // SQLite initialization is handled in sqliteDatabase.ts
         console.log('SQLite database will be initialized automatically');
+        await ensureDirectDownloadUrlColumn();
         return;
     }
     try {
@@ -159,6 +161,26 @@ process.on('SIGTERM', async () => {
     }
     process.exit(0);
 });
+// Ensure direct_download_url column exists for SQLite
+async function ensureDirectDownloadUrlColumn() {
+    if (!useSQLite)
+        return;
+    try {
+        await sqliteQuery(`
+      ALTER TABLE conversions 
+      ADD COLUMN direct_download_url TEXT;
+    `);
+        console.log('🗃️ Database schema updated successfully (direct_download_url added)');
+    }
+    catch (error) {
+        if (error.message.includes('duplicate column name') || error.message.includes('already exists')) {
+            console.log('Column direct_download_url already exists');
+        }
+        else {
+            console.log('Column might already exist:', error.message);
+        }
+    }
+}
 // Test connection on startup
 testConnection();
 exports.default = db;

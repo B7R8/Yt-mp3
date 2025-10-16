@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializeDatabase = initializeDatabase;
+exports.ensureDirectDownloadUrlColumn = ensureDirectDownloadUrlColumn;
 exports.query = query;
 exports.getRow = getRow;
 exports.runQuery = runQuery;
@@ -21,41 +22,58 @@ const dbAll = (0, util_1.promisify)(db.all.bind(db));
 // Initialize database tables
 async function initializeDatabase() {
     try {
-        // Create conversions table
+        // Create conversions table with correct schema
         await dbRun(`
       CREATE TABLE IF NOT EXISTS conversions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        video_id TEXT UNIQUE NOT NULL,
-        title TEXT NOT NULL,
-        duration INTEGER,
-        file_size INTEGER,
-        status TEXT DEFAULT 'pending',
+        id VARCHAR(255) PRIMARY KEY,
+        youtube_url TEXT NOT NULL,
+        video_title TEXT,
+        status VARCHAR(50) NOT NULL DEFAULT 'pending',
+        progress INTEGER DEFAULT 0,
+        mp3_filename TEXT,
+        error_message TEXT,
+        quality_message TEXT,
+        direct_download_url TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        download_count INTEGER DEFAULT 0,
-        last_downloaded_at DATETIME,
-        file_path TEXT,
-        thumbnail_url TEXT,
-        channel_name TEXT,
-        view_count INTEGER,
-        like_count INTEGER,
-        description TEXT
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
         // Create blacklist table
         await dbRun(`
       CREATE TABLE IF NOT EXISTS blacklist (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        video_id TEXT UNIQUE NOT NULL,
+        type VARCHAR(50) NOT NULL CHECK (type IN ('channel', 'url', 'video_id')),
+        value TEXT NOT NULL,
         reason TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_by VARCHAR(100) DEFAULT 'admin'
       )
     `);
+        // Add direct_download_url column if it doesn't exist
+        await ensureDirectDownloadUrlColumn();
         console.log('SQLite database initialized successfully');
     }
     catch (error) {
         console.error('SQLite database initialization error:', error);
         throw error;
+    }
+}
+// Ensure direct_download_url column exists
+async function ensureDirectDownloadUrlColumn() {
+    try {
+        await dbRun(`
+      ALTER TABLE conversions 
+      ADD COLUMN direct_download_url TEXT;
+    `);
+        console.log('🗃️ Database schema updated successfully (direct_download_url added)');
+    }
+    catch (error) {
+        if (error.message.includes('duplicate column name') || error.message.includes('already exists')) {
+            console.log('Column direct_download_url already exists');
+        }
+        else {
+            console.log('Column might already exist:', error.message);
+        }
     }
 }
 // Database query helper function

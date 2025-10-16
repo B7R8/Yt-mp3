@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.YouTubeMp3ApiService = void 0;
 const https_1 = __importDefault(require("https"));
 const fs_1 = require("fs");
-const path_1 = __importDefault(require("path"));
 const logger_1 = __importDefault(require("../config/logger"));
 const errorHandler_1 = require("../utils/errorHandler");
 const titleProcessor_1 = require("../utils/titleProcessor");
@@ -14,6 +13,7 @@ class YouTubeMp3ApiService {
     constructor() {
         this.apiKey = process.env.RAPIDAPI_KEY || '546e353d67msha411dc0cd0b0b7dp153e93jsn651c16a2c85b';
         this.apiHost = 'youtube-mp36.p.rapidapi.com';
+        this.alternativeApiHost = 'youtube-mp3-download1.p.rapidapi.com';
         this.downloadsDir = process.env.DOWNLOADS_DIR || './downloads';
         this.ensureDownloadsDir();
     }
@@ -26,19 +26,42 @@ class YouTubeMp3ApiService {
         }
     }
     /**
-     * Extract video ID from YouTube URL
+     * Extract video ID from YouTube URL - Enhanced to support all formats
      */
     extractVideoId(url) {
+        // Comprehensive patterns for all YouTube URL formats
         const patterns = [
-            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
-            /youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/
+            // Standard watch URLs
+            /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+            /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+            // Short URLs
+            /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+            // Embed URLs
+            /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+            // Direct video URLs
+            /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+            // Shorts URLs
+            /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+            // Mobile URLs
+            /(?:https?:\/\/)?m\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+            /(?:https?:\/\/)?m\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+            // Music URLs
+            /(?:https?:\/\/)?(?:www\.)?music\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+            /(?:https?:\/\/)?(?:www\.)?music\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+            // Gaming URLs
+            /(?:https?:\/\/)?(?:www\.)?gaming\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+            /(?:https?:\/\/)?(?:www\.)?gaming\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+            // Just the video ID (11 characters)
+            /^([a-zA-Z0-9_-]{11})$/
         ];
         for (const pattern of patterns) {
             const match = url.match(pattern);
-            if (match) {
+            if (match && match[1]) {
+                logger_1.default.info(`🎯 Extracted video ID: ${match[1]} from URL: ${url}`);
                 return match[1];
             }
         }
+        logger_1.default.warn(`❌ Could not extract video ID from URL: ${url}`);
         return null;
     }
     /**
@@ -114,52 +137,131 @@ class YouTubeMp3ApiService {
         });
     }
     /**
-     * Convert YouTube video to MP3 using the API
+     * Convert YouTube video to MP3 using the API - Direct download approach
      */
     async convertToMp3(url, quality = '192k') {
         const videoId = this.extractVideoId(url);
         if (!videoId) {
+            logger_1.default.error(`❌ Invalid YouTube URL - could not extract video ID from: ${url}`);
             return {
                 success: false,
                 error: 'Invalid YouTube URL - could not extract video ID'
             };
         }
+        logger_1.default.info(`🎵 Starting MP3 conversion for video ID: ${videoId} with quality: ${quality}`);
         try {
             // Get download link directly from API
-            const downloadResult = await this.getDownloadLink(videoId);
+            logger_1.default.info(`🔗 Fetching download link from primary API for video: ${videoId}`);
+            let downloadResult = await this.getDownloadLink(videoId);
+            // If primary API fails, try alternative API
             if (!downloadResult.success || !downloadResult.downloadUrl) {
+                logger_1.default.warn(`⚠️ Primary API failed for ${videoId}, trying alternative API`);
+                downloadResult = await this.tryAlternativeApi(videoId);
+            }
+            if (!downloadResult.success || !downloadResult.downloadUrl) {
+                logger_1.default.error(`❌ All APIs failed for video ${videoId}: ${downloadResult.error}`);
                 return {
                     success: false,
-                    error: downloadResult.error || 'Failed to get download link'
+                    error: downloadResult.error || 'Failed to get download link from all available APIs'
                 };
             }
-            // Generate filename from video ID (we'll get title later if needed)
-            const filename = `video_${videoId}.mp3`;
-            const filePath = path_1.default.join(this.downloadsDir, filename);
-            // Download the MP3 file
-            await this.downloadFile(downloadResult.downloadUrl, filePath);
+            logger_1.default.info(`✅ Download URL obtained for video ${videoId}: ${downloadResult.downloadUrl}`);
             // Get video info for title
             let title = `YouTube Video ${videoId}`;
             try {
+                logger_1.default.info(`📝 Fetching video info for title: ${videoId}`);
                 const videoInfo = await this.getVideoInfo(url);
                 title = videoInfo.title;
+                logger_1.default.info(`📝 Video title: ${title}`);
             }
             catch (error) {
-                logger_1.default.warn('Failed to get video info, using default title:', error);
+                logger_1.default.warn(`⚠️ Failed to get video info for ${videoId}, using default title:`, error);
             }
+            logger_1.default.info(`🎵 Conversion completed successfully for ${videoId}: ${title}`);
             return {
                 success: true,
+                downloadUrl: downloadResult.downloadUrl, // Return the API download URL directly
                 title: title,
                 duration: 0 // Duration not available from this API
             };
         }
         catch (error) {
+            logger_1.default.error(`❌ Conversion failed for video ${videoId}:`, error);
             (0, errorHandler_1.logTechnicalError)(error, 'YouTube MP3 API Conversion');
             return {
                 success: false,
                 error: (0, errorHandler_1.getUserFriendlyError)(error)
             };
         }
+    }
+    /**
+     * Try alternative API if primary fails
+     */
+    async tryAlternativeApi(videoId) {
+        logger_1.default.info(`Trying alternative API for video ${videoId}`);
+        return new Promise((resolve) => {
+            const options = {
+                method: 'GET',
+                hostname: this.alternativeApiHost,
+                port: null,
+                path: `/dl?id=${videoId}`,
+                headers: {
+                    'x-rapidapi-key': this.apiKey,
+                    'x-rapidapi-host': this.alternativeApiHost,
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            };
+            const req = https_1.default.request(options, (res) => {
+                const chunks = [];
+                res.on('data', (chunk) => {
+                    chunks.push(chunk);
+                });
+                res.on('end', () => {
+                    try {
+                        const body = Buffer.concat(chunks).toString();
+                        logger_1.default.info(`Alternative API response for ${videoId}: ${body}`);
+                        const data = JSON.parse(body);
+                        if ((data.status === 'ok' || data.status === 'success') && (data.link || data.download_url || data.url)) {
+                            const downloadUrl = data.link || data.download_url || data.url;
+                            logger_1.default.info(`Alternative API download URL found for ${videoId}: ${downloadUrl}`);
+                            resolve({
+                                success: true,
+                                downloadUrl: downloadUrl
+                            });
+                        }
+                        else {
+                            logger_1.default.error(`Alternative API returned error for ${videoId}: ${JSON.stringify(data)}`);
+                            resolve({
+                                success: false,
+                                error: data.msg || data.message || data.error || 'Alternative API failed'
+                            });
+                        }
+                    }
+                    catch (parseError) {
+                        logger_1.default.error(`Alternative API parse error for ${videoId}: ${parseError}`);
+                        resolve({
+                            success: false,
+                            error: `Alternative API parse error: ${parseError}`
+                        });
+                    }
+                });
+            });
+            req.on('error', (error) => {
+                logger_1.default.error(`Alternative API request error for ${videoId}: ${error.message}`);
+                resolve({
+                    success: false,
+                    error: `Alternative API request failed: ${error.message}`
+                });
+            });
+            req.setTimeout(30000, () => {
+                req.destroy();
+                resolve({
+                    success: false,
+                    error: 'Alternative API request timeout'
+                });
+            });
+            req.end();
+        });
     }
     /**
      * Get download link from YouTube MP3 API
@@ -231,27 +333,86 @@ class YouTubeMp3ApiService {
         });
     }
     /**
-     * Download file from URL to local path
+     * Validate if a download URL is accessible
      */
-    async downloadFile(url, filePath) {
+    async validateDownloadUrl(url) {
+        return new Promise((resolve) => {
+            const options = {
+                method: 'HEAD',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'audio/mpeg, audio/*, */*',
+                },
+                timeout: 10000
+            };
+            https_1.default.request(url, options, (response) => {
+                logger_1.default.info(`URL validation status: ${response.statusCode} for ${url}`);
+                resolve(response.statusCode === 200);
+            }).on('error', (error) => {
+                logger_1.default.warn(`URL validation failed: ${error.message}`);
+                resolve(false);
+            }).on('timeout', () => {
+                logger_1.default.warn(`URL validation timeout for ${url}`);
+                resolve(false);
+            }).end();
+        });
+    }
+    /**
+     * Download file from URL to local path with retry logic
+     */
+    async downloadFile(url, filePath, retries = 3) {
         return new Promise((resolve, reject) => {
             const file = (0, fs_1.createWriteStream)(filePath);
-            https_1.default.get(url, (response) => {
+            const options = {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'audio/mpeg, audio/*, */*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1'
+                },
+                timeout: 30000
+            };
+            https_1.default.get(url, options, (response) => {
+                logger_1.default.info(`Download response status: ${response.statusCode} for URL: ${url}`);
+                // Handle redirects (301, 302, etc.)
+                if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                    logger_1.default.info(`Following redirect to: ${response.headers.location}`);
+                    file.close();
+                    // Retry with the redirect URL
+                    this.downloadFile(response.headers.location, filePath).then(resolve).catch(reject);
+                    return;
+                }
+                if (response.statusCode === 404) {
+                    file.close();
+                    fs_1.promises.unlink(filePath).catch(() => { }); // Clean up on error
+                    reject(new Error(`Download failed with status: ${response.statusCode} - File not found. The download link may have expired.`));
+                    return;
+                }
                 if (response.statusCode !== 200) {
+                    file.close();
+                    fs_1.promises.unlink(filePath).catch(() => { }); // Clean up on error
                     reject(new Error(`Download failed with status: ${response.statusCode}`));
                     return;
                 }
                 response.pipe(file);
                 file.on('finish', () => {
                     file.close();
+                    logger_1.default.info(`File downloaded successfully: ${filePath}`);
                     resolve();
                 });
                 file.on('error', (error) => {
+                    logger_1.default.error(`File write error: ${error.message}`);
                     fs_1.promises.unlink(filePath).catch(() => { }); // Clean up on error
                     reject(error);
                 });
             }).on('error', (error) => {
+                logger_1.default.error(`Download request error: ${error.message}`);
                 reject(error);
+            }).on('timeout', () => {
+                logger_1.default.error(`Download timeout for URL: ${url}`);
+                reject(new Error('Download timeout'));
             });
         });
     }

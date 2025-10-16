@@ -18,10 +18,11 @@ export declare class YouTubeMp3ApiService {
     private readonly apiKey;
     private readonly apiHost;
     private readonly downloadsDir;
+    private readonly alternativeApiHost;
     constructor();
     private ensureDownloadsDir;
     /**
-     * Extract video ID from YouTube URL
+     * Extract video ID from YouTube URL - Enhanced to support all formats
      */
     private extractVideoId;
     /**
@@ -29,15 +30,23 @@ export declare class YouTubeMp3ApiService {
      */
     getVideoInfo(url: string): Promise<VideoInfo>;
     /**
-     * Convert YouTube video to MP3 using the API
+     * Convert YouTube video to MP3 using the API - Direct download approach
      */
     convertToMp3(url: string, quality?: string): Promise<ConversionResult>;
+    /**
+     * Try alternative API if primary fails
+     */
+    private tryAlternativeApi;
     /**
      * Get download link from YouTube MP3 API
      */
     private getDownloadLink;
     /**
-     * Download file from URL to local path
+     * Validate if a download URL is accessible
+     */
+    private validateDownloadUrl;
+    /**
+     * Download file from URL to local path with retry logic
      */
     private downloadFile;
     /**

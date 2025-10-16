@@ -6,7 +6,7 @@ export declare class SimpleConversionService {
     constructor();
     private ensureDownloadsDir;
     /**
-     * Extract video ID from YouTube URL
+     * Extract video ID from YouTube URL - Enhanced to support all formats
      */
     private extractVideoId;
     /**
@@ -38,7 +38,7 @@ export declare class SimpleConversionService {
      */
     getVideoInfo(url: string): Promise<VideoInfo>;
     /**
-     * Cleanup old files
+     * Cleanup old files (20 minutes = 1/3 hour)
      */
     cleanupOldFiles(): Promise<void>;
 }

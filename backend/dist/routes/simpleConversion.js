@@ -23,12 +23,12 @@ router.post('/check-url', async (req, res) => {
                 message: 'YouTube URL is required'
             });
         }
-        // Enhanced URL validation
-        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)[\w-]+/;
+        // Enhanced URL validation - supports all YouTube URL formats
+        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/|m\.youtube\.com\/watch\?v=|music\.youtube\.com\/watch\?v=|gaming\.youtube\.com\/watch\?v=)[\w-]+/;
         if (!youtubeRegex.test(url)) {
             return res.status(400).json({
                 success: false,
-                message: 'Please provide a valid YouTube URL'
+                message: 'Please provide a valid YouTube URL (supports youtube.com, youtu.be, and all YouTube variants)'
             });
         }
         // Check cache first for blacklist status
@@ -87,7 +87,7 @@ router.get('/status/:id', rateLimiter_1.statusRateLimit, validation_1.validateJo
         // Set proper UTF-8 headers for Unicode support
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Content-Encoding', 'utf-8');
-        res.json({
+        const response = {
             success: true,
             jobId: job.id,
             status: job.status,
@@ -97,7 +97,14 @@ router.get('/status/:id', rateLimiter_1.statusRateLimit, validation_1.validateJo
             quality_message: job.quality_message,
             created_at: job.created_at,
             updated_at: job.updated_at
-        });
+        };
+        // Add direct download URL if conversion is completed
+        if (job.status === 'completed' && job.direct_download_url) {
+            response.download_url = job.direct_download_url; // Direct API download URL
+            response.download_filename = job.mp3_filename;
+            response.download_type = 'direct'; // Indicates this is a direct download
+        }
+        res.json(response);
     }
     catch (error) {
         const userMessage = (0, errorHandler_1.getUserFriendlyError)(error);
@@ -105,45 +112,112 @@ router.get('/status/:id', rateLimiter_1.statusRateLimit, validation_1.validateJo
         (0, errorHandler_1.sendErrorResponse)(res, 500, userMessage, error);
     }
 });
-// GET /api/download/:id - Download converted file
+// GET /api/download/:id - Stream file with proper headers (no source domain exposure)
 router.get('/download/:id', validation_1.validateJobId, async (req, res) => {
     try {
-        const filePath = await conversionService.getJobFilePath(req.params.id);
-        if (!filePath) {
+        const jobId = req.params.id;
+        logger_1.default.info(`🎵 Download request for job: ${jobId}`);
+        const job = await conversionService.getJobStatus(jobId);
+        if (!job) {
+            logger_1.default.warn(`❌ Job not found: ${jobId}`);
             return res.status(404).json({
                 success: false,
-                message: 'File not found or conversion not completed'
+                message: 'Job not found'
             });
         }
-        const job = await conversionService.getJobStatus(req.params.id);
-        const filename = job?.mp3_filename || 'converted.mp3';
-        // Set proper headers for direct audio download with caching
+        if (job.status !== 'completed') {
+            logger_1.default.warn(`⏳ Job not completed: ${jobId}, status: ${job.status}`);
+            return res.status(400).json({
+                success: false,
+                message: `Conversion is ${job.status}. Please wait for completion.`
+            });
+        }
+        if (!job.direct_download_url) {
+            logger_1.default.error(`❌ Direct download URL not found for job: ${jobId}`);
+            return res.status(404).json({
+                success: false,
+                message: 'Download URL not available'
+            });
+        }
+        const filename = job.mp3_filename || 'converted.mp3';
+        logger_1.default.info(`🎵 Starting download for: ${filename}`);
+        logger_1.default.info(`🔗 Direct download URL: ${job.direct_download_url}`);
+        // Stream the file from the API URL with proper headers
+        const https = require('https');
+        const url = require('url');
+        const parsedUrl = url.parse(job.direct_download_url);
+        const options = {
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port || 443,
+            path: parsedUrl.path,
+            method: 'GET',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept': 'audio/mpeg, audio/*, */*',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1'
+            }
+        };
+        // Set proper download headers to hide source domain
         res.setHeader('Content-Type', 'audio/mpeg');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('X-Download-Options', 'noopen');
         res.setHeader('X-Frame-Options', 'DENY');
-        res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
-        // Stream the file with proper error handling
-        const fs = require('fs');
-        const fileStream = fs.createReadStream(filePath);
-        // Set content length for proper download
-        const stats = fs.statSync(filePath);
-        res.setHeader('Content-Length', stats.size);
-        fileStream.on('error', (error) => {
-            logger_1.default.error('File stream error:', error);
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+        const proxyReq = https.request(options, (proxyRes) => {
+            logger_1.default.info(`📡 Proxy response status: ${proxyRes.statusCode} for job: ${jobId}`);
+            // Handle redirects
+            if (proxyRes.statusCode && proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
+                logger_1.default.info(`🔄 Following redirect for job: ${jobId}`);
+                res.redirect(proxyRes.statusCode, proxyRes.headers.location);
+                return;
+            }
+            if (proxyRes.statusCode !== 200) {
+                logger_1.default.error(`❌ Download failed with status: ${proxyRes.statusCode} for job: ${jobId}`);
+                res.status(proxyRes.statusCode).json({
+                    success: false,
+                    message: 'Download failed'
+                });
+                return;
+            }
+            // Copy relevant headers (but not source domain info)
+            if (proxyRes.headers['content-length']) {
+                res.setHeader('Content-Length', proxyRes.headers['content-length']);
+            }
+            if (proxyRes.headers['content-type']) {
+                res.setHeader('Content-Type', proxyRes.headers['content-type']);
+            }
+            // Stream the file
+            proxyRes.pipe(res);
+            proxyRes.on('end', () => {
+                logger_1.default.info(`✅ Download completed successfully for job: ${jobId}`);
+            });
+        });
+        proxyReq.on('error', (error) => {
+            logger_1.default.error(`❌ Download error for job ${jobId}:`, error);
             if (!res.headersSent) {
                 res.status(500).json({
                     success: false,
-                    message: 'File stream error'
+                    message: 'Download failed'
                 });
             }
         });
-        fileStream.on('end', () => {
-            logger_1.default.info(`File ${filename} sent successfully`);
+        proxyReq.setTimeout(30000, () => {
+            logger_1.default.error(`⏰ Download timeout for job: ${jobId}`);
+            proxyReq.destroy();
+            if (!res.headersSent) {
+                res.status(408).json({
+                    success: false,
+                    message: 'Download timeout'
+                });
+            }
         });
-        fileStream.pipe(res);
+        proxyReq.end();
     }
     catch (error) {
         const userMessage = (0, errorHandler_1.getUserFriendlyError)(error);
@@ -202,6 +276,187 @@ router.get('/stats', async (req, res) => {
             success: false,
             message: 'Failed to get stats'
         });
+    }
+});
+// GET /api/debug/files - Debug endpoint to check downloaded files
+router.get('/debug/files', async (req, res) => {
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        const downloadsDir = process.env.DOWNLOADS_DIR || './downloads';
+        let files = [];
+        try {
+            const fileList = fs.readdirSync(downloadsDir);
+            files = fileList.map((filename) => {
+                const filePath = path.join(downloadsDir, filename);
+                const stats = fs.statSync(filePath);
+                return {
+                    filename,
+                    size: stats.size,
+                    created: stats.birthtime,
+                    modified: stats.mtime
+                };
+            });
+        }
+        catch (error) {
+            logger_1.default.error('Error reading downloads directory:', error);
+        }
+        res.json({
+            success: true,
+            downloads_dir: downloadsDir,
+            file_count: files.length,
+            files: files
+        });
+    }
+    catch (error) {
+        logger_1.default.error('Debug files error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to get debug info'
+        });
+    }
+});
+// POST /api/cleanup - Manual cleanup trigger
+router.post('/cleanup', async (req, res) => {
+    try {
+        logger_1.default.info('Manual cleanup triggered');
+        await conversionService.cleanupOldFiles();
+        res.json({
+            success: true,
+            message: 'Cleanup completed successfully'
+        });
+    }
+    catch (error) {
+        logger_1.default.error('Manual cleanup error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Cleanup failed'
+        });
+    }
+});
+// GET /api/direct-download/:id - Get direct download URL (for testing)
+router.get('/direct-download/:id', validation_1.validateJobId, async (req, res) => {
+    try {
+        const jobId = req.params.id;
+        const job = await conversionService.getJobStatus(jobId);
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: 'Job not found'
+            });
+        }
+        if (job.status !== 'completed') {
+            return res.status(400).json({
+                success: false,
+                message: `Conversion is ${job.status}. Please wait for completion.`
+            });
+        }
+        if (!job.direct_download_url) {
+            return res.status(404).json({
+                success: false,
+                message: 'Direct download URL not available'
+            });
+        }
+        res.json({
+            success: true,
+            download_url: job.direct_download_url,
+            filename: job.mp3_filename,
+            title: job.video_title
+        });
+    }
+    catch (error) {
+        const userMessage = (0, errorHandler_1.getUserFriendlyError)(error);
+        (0, errorHandler_1.logTechnicalError)(error, 'Direct Download URL', req);
+        (0, errorHandler_1.sendErrorResponse)(res, 500, userMessage, error);
+    }
+});
+// GET /api/test-download/:id - Test download functionality
+router.get('/test-download/:id', validation_1.validateJobId, async (req, res) => {
+    try {
+        const jobId = req.params.id;
+        const job = await conversionService.getJobStatus(jobId);
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: 'Job not found'
+            });
+        }
+        if (job.status !== 'completed') {
+            return res.status(400).json({
+                success: false,
+                message: `Conversion is ${job.status}. Please wait for completion.`
+            });
+        }
+        if (!job.direct_download_url) {
+            return res.status(404).json({
+                success: false,
+                message: 'Direct download URL not available'
+            });
+        }
+        // Return HTML page that tests the download
+        const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Download Test</title>
+        <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+            button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+            button:hover { background: #0056b3; }
+            .info { background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        </style>
+    </head>
+    <body>
+        <h1>Download Test Page</h1>
+        
+        <div class="info">
+            <h3>Job Information:</h3>
+            <p><strong>Job ID:</strong> ${jobId}</p>
+            <p><strong>Title:</strong> ${job.video_title || 'N/A'}</p>
+            <p><strong>Filename:</strong> ${job.mp3_filename || 'N/A'}</p>
+            <p><strong>Direct Download URL:</strong> <a href="${job.direct_download_url}" target="_blank">${job.direct_download_url}</a></p>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 1: Direct Link</h3>
+            <p>Click this button to test direct download:</p>
+            <button onclick="window.open('${job.direct_download_url}', '_blank')">Download Direct</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 2: Redirect Link</h3>
+            <p>Click this button to test redirect download:</p>
+            <button onclick="window.open('/api/download/${jobId}', '_blank')">Download via Redirect</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 3: Hidden Link</h3>
+            <p>Click this button to test hidden link download:</p>
+            <button onclick="testHiddenDownload()">Download via Hidden Link</button>
+        </div>
+        
+        <script>
+            function testHiddenDownload() {
+                const link = document.createElement('a');
+                link.href = '/api/download/${jobId}';
+                link.download = '${job.mp3_filename || 'test.mp3'}';
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        </script>
+    </body>
+    </html>
+    `;
+        res.setHeader('Content-Type', 'text/html');
+        res.send(html);
+    }
+    catch (error) {
+        const userMessage = (0, errorHandler_1.getUserFriendlyError)(error);
+        (0, errorHandler_1.logTechnicalError)(error, 'Test Download', req);
+        (0, errorHandler_1.sendErrorResponse)(res, 500, userMessage, error);
     }
 });
 // POST /api/batch-convert - Batch conversion for multiple URLs

@@ -109,7 +109,7 @@ async function startServer() {
     const server = app.listen(PORT, '0.0.0.0', () => {
       logger.info(`✅ Server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      logger.info(`Database: ${process.env.NODE_ENV === 'development' && !process.env.DB_HOST ? 'SQLite' : 'PostgreSQL'}`);
+      logger.info(`Database: SQLite`);
       logger.info(`Cache: In-memory cache enabled`);
       logger.info('🚀 Backend is ready to accept connections!');
     });

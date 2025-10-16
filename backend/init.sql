@@ -56,6 +56,15 @@ CREATE TRIGGER update_blacklist_updated_at
 -- Add direct_download_url column if it doesn't exist (for existing databases)
 ALTER TABLE conversions ADD COLUMN IF NOT EXISTS direct_download_url TEXT;
 
+-- Create user if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'ytmp3_user') THEN
+        CREATE USER ytmp3_user WITH PASSWORD 'ytmp3_password';
+    END IF;
+END
+$$;
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ytmp3_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ytmp3_user;
