@@ -95,15 +95,15 @@ async function startServer() {
     await initializeDatabase();
     logger.info('Database initialized successfully');
     
-    // Start cleanup cron job
+    // Start cleanup cron job (every 10 minutes to clean files older than 20 minutes)
     const conversionService = new SimpleConversionService();
-    cron.schedule('0 */1 * * *', () => {
-      logger.info('Running cleanup job...');
+    cron.schedule('*/10 * * * *', () => {
+      logger.info('Running cleanup job for files older than 20 minutes...');
       conversionService.cleanupOldFiles().catch(error => {
         logger.error('Cleanup job failed:', error);
       });
     });
-    logger.info('Cleanup cron job scheduled');
+    logger.info('Cleanup cron job scheduled (every 10 minutes)');
 
     // Start server
     const server = app.listen(PORT, '0.0.0.0', () => {

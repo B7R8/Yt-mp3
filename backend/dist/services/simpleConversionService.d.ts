@@ -6,6 +6,10 @@ export declare class SimpleConversionService {
     constructor();
     private ensureDownloadsDir;
     /**
+     * Extract video ID from YouTube URL
+     */
+    private extractVideoId;
+    /**
      * Check if URL is blacklisted
      */
     private checkBlacklist;

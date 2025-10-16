@@ -6,6 +6,7 @@ export interface ConversionJob {
   mp3_filename?: string;
   error_message?: string;
   quality_message?: string;
+  direct_download_url?: string; // Direct API download URL
   created_at: Date;
   updated_at: Date;
 }

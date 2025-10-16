@@ -26,6 +26,24 @@ export class SimpleConversionService {
   }
 
   /**
+   * Extract video ID from YouTube URL
+   */
+  private extractVideoId(url: string): string | null {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/
+    ];
+
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        return match[1];
+      }
+    }
+    return null;
+  }
+
+  /**
    * Check if URL is blacklisted
    */
   private async checkBlacklist(url: string): Promise<{ isBlacklisted: boolean; reason?: string; type?: string }> {
@@ -122,29 +140,41 @@ export class SimpleConversionService {
       
       logger.info(`[Job ${jobId}] Starting conversion for URL: ${request.url}`);
       
-      // Convert using YouTube MP3 API
+      // Convert using YouTube MP3 API - Direct download approach
       const result = await this.apiService.convertToMp3(request.url, request.quality || '192k');
       
       if (!result.success) {
         throw new Error(result.error || 'Conversion failed');
       }
 
-      // Generate filename
-      const filename = `${result.title?.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_') || 'converted'}.mp3`;
-      const filePath = path.join(this.downloadsDir, filename);
-
-      // Move the downloaded file to the correct location if needed
-      // (The API service already downloads to the correct location)
+      // Generate filename from video ID for display purposes
+      const videoId = this.extractVideoId(request.url);
+      const filename = `${result.title || `video_${videoId}`}.mp3`;
       
-      // Mark as completed
-      await this.updateJobStatus(jobId, 'completed', filename);
-      logger.info(`[Job ${jobId}] Conversion completed successfully: ${filename}`);
+      // Store the direct download URL in the database instead of a local file
+      await this.updateJobStatus(jobId, 'completed', filename, undefined, undefined, result.downloadUrl);
+      logger.info(`[Job ${jobId}] Conversion completed successfully with direct download URL`);
+      logger.info(`[Job ${jobId}] Direct download URL: ${result.downloadUrl}`);
 
     } catch (error) {
       logTechnicalError(error, `Conversion Job ${jobId}`);
       logger.error(`[Job ${jobId}] Conversion failed:`, error);
       
-      const userFriendlyError = getUserFriendlyError(error);
+      let userFriendlyError = getUserFriendlyError(error);
+      
+      // Provide more specific error messages for common issues
+      if (error instanceof Error) {
+        if (error.message.includes('404')) {
+          userFriendlyError = 'This video could not be found. Please check the URL and try again.';
+        } else if (error.message.includes('timeout')) {
+          userFriendlyError = 'The conversion timed out. Please try again.';
+        } else if (error.message.includes('expired')) {
+          userFriendlyError = 'The download link has expired. Please try again.';
+        } else if (error.message.includes('rate limit')) {
+          userFriendlyError = 'Too many requests. Please wait a moment and try again.';
+        }
+      }
+      
       await this.updateJobStatus(jobId, 'failed', undefined, userFriendlyError);
     }
   }
@@ -173,6 +203,7 @@ export class SimpleConversionService {
         mp3_filename: result.mp3_filename,
         error_message: result.error_message,
         quality_message: result.quality_message,
+        direct_download_url: result.status === 'completed' ? result.error_message : undefined, // For completed jobs, error_message contains the direct download URL
         created_at: new Date(result.created_at),
         updated_at: new Date(result.updated_at)
       };
@@ -190,16 +221,20 @@ export class SimpleConversionService {
     status: string, 
     mp3Filename?: string, 
     errorMessage?: string,
-    qualityMessage?: string
+    qualityMessage?: string,
+    directDownloadUrl?: string
   ): Promise<void> {
     const database = await db;
     
     try {
+      // Store direct download URL in the error_message field for now (we can add a proper column later)
+      const messageToStore = directDownloadUrl || errorMessage;
+      
       await database.run(
         `UPDATE conversions 
          SET status = ?, mp3_filename = ?, error_message = ?, quality_message = ?, updated_at = datetime('now') 
          WHERE id = ?`,
-        [status, mp3Filename, errorMessage, qualityMessage, jobId]
+        [status, mp3Filename, messageToStore, qualityMessage, jobId]
       );
     } catch (error) {
       logger.error('Failed to update job status:', error);
@@ -240,11 +275,11 @@ export class SimpleConversionService {
   }
 
   /**
-   * Cleanup old files
+   * Cleanup old files (20 minutes = 1/3 hour)
    */
   async cleanupOldFiles(): Promise<void> {
-    const maxAgeHours = parseInt(process.env.MAX_FILE_AGE_HOURS || '1');
-    const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
+    const maxAgeMinutes = parseInt(process.env.MAX_FILE_AGE_MINUTES || '20');
+    const maxAgeMs = maxAgeMinutes * 60 * 1000;
     const cutoffTime = new Date(Date.now() - maxAgeMs);
 
     const database = await db;

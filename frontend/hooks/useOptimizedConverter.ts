@@ -154,35 +154,21 @@ export const useOptimizedConverter = (showToast: (message: string, type: 'succes
     }
   }, [autoDownload, clearPolling, showToast]);
 
-  // Optimized file download
+  // Optimized file download - Direct download approach
   const downloadFile = useCallback(async (jobId: string, filename: string) => {
     try {
       const downloadUrl = `/api/download/${jobId}`;
       
-      // Use fetch with streaming for better performance
-      const response = await fetch(downloadUrl, {
-        headers: {
-          'Accept': 'audio/mpeg',
-          'Cache-Control': 'no-cache',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Download failed');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      
-      // Create a hidden download link
+      // Create a hidden download link that will follow the redirect to the direct API URL
       const link = document.createElement('a');
-      link.href = url;
+      link.href = downloadUrl;
       link.download = `${filename}.mp3`;
       link.style.display = 'none';
+      
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      
     } catch (error) {
       console.error('Download error:', error);
       // Fallback: try direct window.open

@@ -26,6 +26,22 @@ class SimpleConversionService {
         }
     }
     /**
+     * Extract video ID from YouTube URL
+     */
+    extractVideoId(url) {
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+            /youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/
+        ];
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match) {
+                return match[1];
+            }
+        }
+        return null;
+    }
+    /**
      * Check if URL is blacklisted
      */
     async checkBlacklist(url) {
@@ -104,11 +120,21 @@ class SimpleConversionService {
             if (!result.success) {
                 throw new Error(result.error || 'Conversion failed');
             }
-            // Generate filename
-            const filename = `${result.title?.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_') || 'converted'}.mp3`;
+            // Generate filename from video ID
+            const videoId = this.extractVideoId(request.url);
+            const filename = `video_${videoId}.mp3`;
             const filePath = path_1.default.join(this.downloadsDir, filename);
-            // Move the downloaded file to the correct location if needed
-            // (The API service already downloads to the correct location)
+            // The API service downloads with a different filename, so we need to rename it
+            const tempFilename = `video_${videoId}.mp3`;
+            const tempFilePath = path_1.default.join(this.downloadsDir, tempFilename);
+            // Check if the file exists and rename it
+            try {
+                await fs_1.promises.access(tempFilePath);
+                await fs_1.promises.rename(tempFilePath, filePath);
+            }
+            catch (error) {
+                logger_1.default.warn(`File rename failed, using original filename: ${error}`);
+            }
             // Mark as completed
             await this.updateJobStatus(jobId, 'completed', filename);
             logger_1.default.info(`[Job ${jobId}] Conversion completed successfully: ${filename}`);

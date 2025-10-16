@@ -53,9 +53,17 @@ RUN npm ci --only=production --frozen-lockfile && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Create necessary directories
+# Copy startup script
+COPY start.sh /app/start.sh
+
+# Create necessary directories with proper permissions
 RUN mkdir -p downloads cache temp logs && \
-    chown -R nodejs:nodejs /app
+    chown -R nodejs:nodejs /app && \
+    chmod -R 777 /app/downloads && \
+    chmod -R 777 /app/cache && \
+    chmod -R 777 /app/temp && \
+    chmod -R 777 /app/logs && \
+    chmod +x /app/start.sh
 
 # Switch to non-root user
 USER nodejs
@@ -67,6 +75,7 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
+
 # Start the application
-CMD ["npm", "start"]
+CMD ["/app/start.sh"]
 

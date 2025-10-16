@@ -279,74 +279,27 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
                   e.stopPropagation();
                   
                   try {
-                    // Detect browser for optimal download method
-                    const userAgent = navigator.userAgent.toLowerCase();
-                    const isChrome = userAgent.includes('chrome');
-                    const isFirefox = userAgent.includes('firefox');
-                    const isEdge = userAgent.includes('edge');
-                    const isSafari = userAgent.includes('safari') && !userAgent.includes('chrome');
+                    // Use direct download approach - let the browser handle the redirect
+                    const downloadUrl = `/api/download/${job.id}`;
                     
-                    // Create a completely silent download using XMLHttpRequest
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('GET', `/api/download/${job.id}`, true);
-                    xhr.responseType = 'blob';
-                    xhr.setRequestHeader('Accept', 'audio/mpeg');
-                    xhr.setRequestHeader('Cache-Control', 'no-cache');
+                    // Create a hidden download link that will follow the redirect to the direct API URL
+                    const link = document.createElement('a');
+                    link.href = downloadUrl;
+                    link.download = `${job.title || 'converted'}.mp3`;
+                    link.style.display = 'none';
                     
-                    // Add browser-specific headers
-                    if (isChrome || isEdge) {
-                      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-                    }
-                    
-                    xhr.onload = function() {
-                      if (xhr.status === 200) {
-                        const blob = xhr.response;
-                        const url = window.URL.createObjectURL(blob);
-                        
-                        // Create a completely hidden download link
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = `${job.title || 'converted'}.mp3`;
-                        link.style.position = 'absolute';
-                        link.style.left = '-9999px';
-                        link.style.top = '-9999px';
-                        link.style.opacity = '0';
-                        link.style.pointerEvents = 'none';
-                        
-                        document.body.appendChild(link);
-                        
-                        // Trigger download silently
-                        const clickEvent = new MouseEvent('click', {
-                          bubbles: true,
-                          cancelable: true,
-                          view: window
-                        });
-                        link.dispatchEvent(clickEvent);
-                        
-                        // Clean up immediately
-                        setTimeout(() => {
-                          if (document.body.contains(link)) {
-                            document.body.removeChild(link);
-                          }
-                          window.URL.revokeObjectURL(url);
-                        }, 100);
-                      }
-                    };
-                    
-                    xhr.onerror = function() {
-                      console.error('Download failed');
-                      // Fallback: try direct window.open for stubborn browsers
-                      try {
-                        window.open(`/api/download/${job.id}`, '_blank');
-                      } catch (fallbackError) {
-                        console.error('Fallback download also failed:', fallbackError);
-                      }
-                    };
-                    
-                    xhr.send();
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
                     
                   } catch (error) {
                     console.error('Download error:', error);
+                    // Fallback: try direct window.open
+                    try {
+                      window.open(`/api/download/${job.id}`, '_blank');
+                    } catch (fallbackError) {
+                      console.error('Fallback download also failed:', fallbackError);
+                    }
                   }
                 }}
                 className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-black rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-xs sm:text-sm w-full sm:w-auto"

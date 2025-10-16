@@ -36,6 +36,7 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./.env
+    user: "0:0"  # Run as root to fix permissions
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - DB_HOST=${DB_HOST:-postgres}
@@ -62,10 +63,10 @@ services:
       - SECURE_HEADERS=${SECURE_HEADERS:-true}
       - RAPIDAPI_KEY=${RAPIDAPI_KEY:-546e353d67msha411dc0cd0b0b7dp153e93jsn651c16a2c85b}
     volumes:
-      - ./downloads:/app/downloads
-      - ./cache:/app/cache
-      - ./temp:/app/temp
-      - ./logs:/app/logs
+      - ./downloads:/app/downloads:rw
+      - ./cache:/app/cache:rw
+      - ./temp:/app/temp:rw
+      - ./logs:/app/logs:rw
     depends_on:
       postgres:
         condition: service_healthy

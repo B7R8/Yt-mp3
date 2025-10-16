@@ -39,37 +39,18 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
         if (autoDownload) {
           // Small delay to ensure the file is ready
           setTimeout(() => {
+            // Use direct download approach
             const downloadUrl = `/api/download/${currentJob.id}`;
             
-            // Use XMLHttpRequest for reliable download
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', downloadUrl, true);
-            xhr.responseType = 'blob';
-            xhr.setRequestHeader('Accept', 'audio/mpeg');
-            xhr.setRequestHeader('Cache-Control', 'no-cache');
+            // Create a hidden download link that will follow the redirect
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `${currentJob.title || 'download'}.mp3`;
+            link.style.display = 'none';
             
-            xhr.onload = function() {
-              if (xhr.status === 200) {
-                const blob = xhr.response;
-                const url = window.URL.createObjectURL(blob);
-                
-                // Create a hidden download link
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `${currentJob.title || 'download'}.mp3`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-              }
-            };
-            
-            xhr.onerror = function() {
-              // Fallback: try direct window.open
-              window.open(downloadUrl, '_blank');
-            };
-            
-            xhr.send();
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
           }, 500);
         }
         

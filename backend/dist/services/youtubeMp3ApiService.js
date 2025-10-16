@@ -69,10 +69,11 @@ class YouTubeMp3ApiService {
                 res.on('end', () => {
                     try {
                         const body = Buffer.concat(chunks).toString();
+                        logger_1.default.info(`API Response for video ${videoId}: ${body}`);
                         const data = JSON.parse(body);
-                        if (data.status === 'ok' && data.link) {
-                            // Extract title from the response or use a default
-                            const title = data.title || `YouTube Video ${videoId}`;
+                        // Handle different response formats
+                        if (data.status === 'ok' || data.status === 'success') {
+                            const title = data.title || data.video_title || `YouTube Video ${videoId}`;
                             const duration = data.duration || 0;
                             // Format duration
                             const hours = Math.floor(duration / 3600);
@@ -85,22 +86,24 @@ class YouTubeMp3ApiService {
                                 title: (0, titleProcessor_1.preserveExactTitle)(title),
                                 duration,
                                 durationFormatted,
-                                thumbnail: data.thumb || '',
-                                uploader: data.a || '',
-                                viewCount: 0, // API doesn't provide view count
+                                thumbnail: data.thumb || data.thumbnail || '',
+                                uploader: data.a || data.uploader || '',
+                                viewCount: 0,
                                 videoId
                             });
                         }
                         else {
-                            reject(new Error(data.msg || 'Failed to get video information'));
+                            reject(new Error(data.msg || data.message || 'Failed to get video information'));
                         }
                     }
                     catch (parseError) {
+                        logger_1.default.error(`Parse error for video ${videoId}: ${parseError}`);
                         reject(new Error(`Failed to parse API response: ${parseError}`));
                     }
                 });
             });
             req.on('error', (error) => {
+                logger_1.default.error(`API request error for video ${videoId}: ${error.message}`);
                 reject(new Error(`API request failed: ${error.message}`));
             });
             req.setTimeout(30000, () => {
@@ -122,9 +125,7 @@ class YouTubeMp3ApiService {
             };
         }
         try {
-            // First get video info
-            const videoInfo = await this.getVideoInfo(url);
-            // Get download link from API
+            // Get download link directly from API
             const downloadResult = await this.getDownloadLink(videoId);
             if (!downloadResult.success || !downloadResult.downloadUrl) {
                 return {
@@ -132,14 +133,24 @@ class YouTubeMp3ApiService {
                     error: downloadResult.error || 'Failed to get download link'
                 };
             }
-            // Download the MP3 file
-            const filename = `${(0, titleProcessor_1.generateFilenameFromTitle)(videoInfo.title)}.mp3`;
+            // Generate filename from video ID (we'll get title later if needed)
+            const filename = `video_${videoId}.mp3`;
             const filePath = path_1.default.join(this.downloadsDir, filename);
+            // Download the MP3 file
             await this.downloadFile(downloadResult.downloadUrl, filePath);
+            // Get video info for title
+            let title = `YouTube Video ${videoId}`;
+            try {
+                const videoInfo = await this.getVideoInfo(url);
+                title = videoInfo.title;
+            }
+            catch (error) {
+                logger_1.default.warn('Failed to get video info, using default title:', error);
+            }
             return {
                 success: true,
-                title: videoInfo.title,
-                duration: videoInfo.duration
+                title: title,
+                duration: 0 // Duration not available from this API
             };
         }
         catch (error) {
@@ -174,21 +185,27 @@ class YouTubeMp3ApiService {
                 res.on('end', () => {
                     try {
                         const body = Buffer.concat(chunks).toString();
+                        logger_1.default.info(`Download link API response for ${videoId}: ${body}`);
                         const data = JSON.parse(body);
-                        if (data.status === 'ok' && data.link) {
+                        // Handle different response formats from the API
+                        if ((data.status === 'ok' || data.status === 'success') && (data.link || data.download_url || data.url)) {
+                            const downloadUrl = data.link || data.download_url || data.url;
+                            logger_1.default.info(`Download URL found for ${videoId}: ${downloadUrl}`);
                             resolve({
                                 success: true,
-                                downloadUrl: data.link
+                                downloadUrl: downloadUrl
                             });
                         }
                         else {
+                            logger_1.default.error(`API returned error for ${videoId}: ${JSON.stringify(data)}`);
                             resolve({
                                 success: false,
-                                error: data.msg || 'Failed to get download link'
+                                error: data.msg || data.message || data.error || 'Failed to get download link'
                             });
                         }
                     }
                     catch (parseError) {
+                        logger_1.default.error(`Parse error for download link ${videoId}: ${parseError}`);
                         resolve({
                             success: false,
                             error: `Failed to parse API response: ${parseError}`
@@ -197,6 +214,7 @@ class YouTubeMp3ApiService {
                 });
             });
             req.on('error', (error) => {
+                logger_1.default.error(`API request error for download link ${videoId}: ${error.message}`);
                 resolve({
                     success: false,
                     error: `API request failed: ${error.message}`
