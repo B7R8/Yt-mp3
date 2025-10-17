@@ -41,7 +41,7 @@ RUN apk add --no-cache \
     python3 \
     py3-pip \
     bash \
-    && pip3 install --no-cache-dir yt-dlp \
+    py3-yt-dlp \
     && rm -rf /var/cache/apk/* /tmp/*
 
 # Verify installations
