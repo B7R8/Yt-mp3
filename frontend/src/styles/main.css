@@ -46,61 +46,275 @@ body {
 
 /* Header */
 .header {
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(to bottom, #f3f4f6, rgba(229, 231, 235, 0.5));
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 20;
+  border-bottom: 1px solid #d1d5db;
 }
 
 .dark .header {
-  background: #1f2937;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  background: linear-gradient(to bottom, #2d2d2d, #1f1f1f);
+  border-bottom-color: #4b5563;
 }
 
 .header-content {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 0;
+  padding: 0 0.5rem;
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #f97316;
-  text-decoration: none;
-}
-
-.nav {
+.logo-btn {
   display: flex;
-  gap: 2rem;
   align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
-.nav a {
-  color: #333;
-  text-decoration: none;
+.logo-img {
+  height: 2.5rem;
+  width: auto;
+  transition: opacity 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .header {
+    padding: 0.5rem;
+  }
+  
+  .header-content {
+    padding: 0 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .header {
+    padding: 0.625rem;
+  }
+  
+  .logo-img {
+    height: 3rem;
+  }
+}
+
+/* Desktop Navigation */
+.nav-desktop {
+  display: none;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
   font-weight: 500;
+  color: #6b7280;
+}
+
+.dark .nav-desktop {
+  color: #d1d5db;
+}
+
+@media (min-width: 768px) {
+  .nav-desktop {
+    display: flex;
+  }
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
   transition: color 0.3s ease;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
-.nav a:hover {
-  color: #f97316;
+.nav-link:hover {
+  color: #dc2626;
 }
 
-.dark .nav a {
+/* Mobile Menu Button */
+.mobile-menu-btn {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .mobile-menu-btn {
+    display: none;
+  }
+}
+
+.menu-toggle-btn {
+  padding: 0.5rem;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dark .menu-toggle-btn {
+  background: #374151;
+}
+
+.menu-toggle-btn:hover {
+  background: #e5e7eb;
+}
+
+.dark .menu-toggle-btn:hover {
+  background: #4b5563;
+}
+
+.menu-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Mobile Menu */
+.mobile-menu {
+  position: fixed;
+  top: 3rem;
+  right: 0.5rem;
+  z-index: 30;
+  width: 10rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  animation: slideIn 0.2s ease-out;
+}
+
+.dark .mobile-menu {
+  background: #2d2d2d;
+  border-color: #4b5563;
+}
+
+@media (min-width: 640px) {
+  .mobile-menu {
+    right: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-menu {
+    display: none;
+  }
+}
+
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-nav-link {
+  text-align: left;
+  padding: 0.5rem 1rem;
+  color: #111827;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.dark .mobile-nav-link {
+  color: #fff;
+}
+
+.mobile-nav-link:hover {
+  background: #f3f4f6;
+  transform: translateX(0.25rem);
+}
+
+.dark .mobile-nav-link:hover {
+  background: #4b5563;
+}
+
+/* Mobile Menu Backdrop */
+.mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@media (min-width: 768px) {
+  .mobile-menu-backdrop {
+    display: none;
+  }
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* App container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  color: #1f2937;
+  overflow-x: hidden;
+}
+
+.dark .app-container {
   color: #f9fafb;
-}
-
-.dark .nav a:hover {
-  color: #f97316;
 }
 
 /* Main content */
 .main {
-  min-height: calc(100vh - 200px);
-  padding: 2rem 0;
+  flex-grow: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  .main {
+    max-width: 768px;
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .main {
+    max-width: 1024px;
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .main {
+    max-width: 1200px;
+    padding: 2rem;
+  }
 }
 
 /* Hero section */

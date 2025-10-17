@@ -116,9 +116,9 @@ function App() {
 
   return (
     <ThemeProvider>
-      <div className="flex flex-col min-h-screen font-sans text-gray-800 dark:text-gray-200 overflow-x-hidden">
+      <div className="app-container">
         <Header navigateTo={navigateTo} />
-        <main className="flex-grow w-full max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 sm:px-6 md:px-6 py-4 sm:py-6 md:py-6 lg:py-8 overflow-x-hidden">
+        <main className="main">
           {renderPage()}
         </main>
         <Footer navigateTo={navigateTo} />
