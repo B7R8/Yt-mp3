@@ -22,7 +22,7 @@ fi
 if [ ! -f .env ]; then
     echo "⚠️  .env file not found. Creating from template..."
     if [ -f .env.example ]; then
-        cp .env.example .env
+        cp env.template .env
         echo "✅ Created .env file from .env.example"
         echo "📝 Please edit .env file with your configuration before continuing."
         echo "   Especially update:"

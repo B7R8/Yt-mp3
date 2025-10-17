@@ -8,12 +8,13 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const node_cron_1 = __importDefault(require("node-cron"));
-const simpleConversion_1 = __importDefault(require("./routes/simpleConversion"));
+const conversion_1 = __importDefault(require("./routes/conversion"));
 const health_1 = __importDefault(require("./routes/health"));
 const secureWallet_1 = __importDefault(require("./routes/secureWallet"));
 const contact_1 = __importDefault(require("./routes/contact"));
 const processAudio_1 = __importDefault(require("./routes/processAudio"));
-const simpleConversionService_1 = require("./services/simpleConversionService");
+const conversionService_1 = require("./services/conversionService");
+const fallbackConversionService_1 = require("./services/fallbackConversionService");
 const processAudio_2 = require("./controllers/processAudio");
 const logger_1 = __importDefault(require("./config/logger"));
 const database_1 = require("./config/database");
@@ -55,7 +56,7 @@ app.use((req, res, next) => {
 });
 // Routes
 app.use('/api', health_1.default);
-app.use('/api', simpleConversion_1.default);
+app.use('/api', conversion_1.default);
 app.use('/api', contact_1.default);
 app.use('/api', processAudio_1.default);
 app.use('/api/secure-wallet', secureWallet_1.default);
@@ -85,23 +86,43 @@ async function startServer() {
         logger_1.default.info(`Environment variables: NODE_ENV=${process.env.NODE_ENV}, DB_HOST=${process.env.DB_HOST}, PORT=${process.env.PORT}`);
         await (0, database_1.initializeDatabase)();
         logger_1.default.info('Database initialized successfully');
-        // Start cleanup cron job (every 10 minutes to clean files older than 20 minutes)
-        const conversionService = new simpleConversionService_1.SimpleConversionService();
+        // Check if yt-dlp is available
+        const { spawn } = require('child_process');
+        const checkYtDlp = () => {
+            return new Promise((resolve) => {
+                const ytdlp = spawn('yt-dlp', ['--version']);
+                ytdlp.on('close', (code) => {
+                    resolve(code === 0);
+                });
+                ytdlp.on('error', () => {
+                    resolve(false);
+                });
+            });
+        };
+        const ytDlpAvailable = await checkYtDlp();
+        const activeService = ytDlpAvailable ? conversionService_1.conversionService : fallbackConversionService_1.fallbackConversionService;
+        if (ytDlpAvailable) {
+            logger_1.default.info('✅ yt-dlp is available - using full conversion service');
+        }
+        else {
+            logger_1.default.warn('⚠️ yt-dlp not available - using fallback service (mock processing)');
+        }
+        // Start cleanup cron job (every 10 minutes to clean expired files and jobs)
         node_cron_1.default.schedule('*/10 * * * *', () => {
-            logger_1.default.info('Running cleanup job for files older than 20 minutes...');
-            conversionService.cleanupOldFiles().catch(error => {
+            logger_1.default.info('Running cleanup job for expired files and jobs...');
+            activeService.cleanupOldFiles().catch(error => {
                 logger_1.default.error('Cleanup job failed:', error);
             });
         });
         logger_1.default.info('Cleanup cron job scheduled (every 10 minutes)');
-        // Start audio processing cleanup cron job (every 5 minutes)
+        // Start audio processing cleanup cron job (every 5 minutes) - only for legacy processAudio
         node_cron_1.default.schedule('*/5 * * * *', () => {
-            logger_1.default.info('Running audio processing cleanup job...');
+            logger_1.default.info('Running legacy audio processing cleanup job...');
             (0, processAudio_2.cleanupExpiredJobs)().catch(error => {
-                logger_1.default.error('Audio processing cleanup job failed:', error);
+                logger_1.default.error('Legacy audio processing cleanup job failed:', error);
             });
         });
-        logger_1.default.info('Audio processing cleanup cron job scheduled (every 5 minutes)');
+        logger_1.default.info('Legacy audio processing cleanup cron job scheduled (every 5 minutes)');
         // Start server
         const server = app.listen(PORT, '0.0.0.0', () => {
             logger_1.default.info(`✅ Server running on port ${PORT}`);

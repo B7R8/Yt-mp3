@@ -27,7 +27,7 @@ export declare function downloadAudio(req: Request, res: Response): Promise<void
  */
 export declare function getJobStatus(req: Request, res: Response): Promise<void>;
 /**
- * Cleanup expired jobs (called by cron)
+ * Cleanup expired jobs (called by cron) - Legacy function for processAudio
  */
 export declare function cleanupExpiredJobs(): Promise<void>;
 //# sourceMappingURL=processAudio.d.ts.map
