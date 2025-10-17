@@ -66,7 +66,6 @@ COPY --from=builder /app/dist ./dist
 # Copy startup script and migrations
 COPY start.sh /app/start.sh
 COPY migrations/ /app/migrations/
-COPY install-ytdlp.bat /app/install-ytdlp.bat
 
 # Create necessary directories with proper permissions
 RUN mkdir -p downloads cache temp logs /tmp/app-media && \
@@ -77,8 +76,7 @@ RUN mkdir -p downloads cache temp logs /tmp/app-media && \
     chmod -R 755 /app/logs && \
     chmod -R 755 /tmp/app-media && \
     chmod -R 755 /app/migrations && \
-    chmod +x /app/start.sh && \
-    chmod +x /app/install-ytdlp.bat
+    chmod +x /app/start.sh
 
 # Switch to non-root user
 USER nodejs
