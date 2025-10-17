@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { conversionService, ConversionRequest } from '../services/conversionService';
+import { conversionService, ConversionRequest, IConversionService } from '../services/conversionService';
 import { fallbackConversionService } from '../services/fallbackConversionService';
 import { validateConversionRequest, validateJobId } from '../middleware/validation';
 import { conversionRateLimit, statusRateLimit } from '../middleware/rateLimiter';
@@ -21,7 +21,7 @@ const checkYtDlp = () => {
 };
 
 // Use appropriate service based on yt-dlp availability
-let activeService = conversionService;
+let activeService: IConversionService = conversionService;
 checkYtDlp().then((available) => {
   if (!available) {
     activeService = fallbackConversionService;

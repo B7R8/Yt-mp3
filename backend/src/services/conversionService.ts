@@ -45,10 +45,20 @@ export interface VideoInfo {
   viewCount: string;
 }
 
-export class ConversionService {
+export interface IConversionService {
+  maxConcurrentJobs: number;
+  createJob(request: ConversionRequest): Promise<string>;
+  getJobStatus(jobId: string): Promise<ConversionJob | null>;
+  cleanupOldFiles(): Promise<void>;
+  getStats(): Promise<any>;
+  extractVideoId(url: string): string | null;
+  getVideoInfo(videoId: string): Promise<VideoInfo>;
+}
+
+export class ConversionService implements IConversionService {
   private downloadsDir: string;
   private tempDir: string;
-  private maxConcurrentJobs: number;
+  public maxConcurrentJobs: number;
   private processingJobs: Map<string, Promise<void>>;
   private videoMutex: Map<string, string>; // video_id -> job_id
 
@@ -76,7 +86,7 @@ export class ConversionService {
   /**
    * Extract video ID from YouTube URL
    */
-  private extractVideoId(url: string): string | null {
+  extractVideoId(url: string): string | null {
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|m\.youtube\.com\/watch\?v=|music\.youtube\.com\/watch\?v=|gaming\.youtube\.com\/watch\?v=)([^&\n?#]+)/,
       /youtube\.com\/shorts\/([^&\n?#]+)/
@@ -147,7 +157,7 @@ export class ConversionService {
   /**
    * Get video information using yt-dlp
    */
-  private async getVideoInfo(videoId: string): Promise<VideoInfo> {
+  async getVideoInfo(videoId: string): Promise<VideoInfo> {
     return new Promise((resolve, reject) => {
       const ytdlp = spawn('yt-dlp', [
         '--dump-json',

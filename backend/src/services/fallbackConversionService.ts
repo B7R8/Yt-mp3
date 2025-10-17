@@ -3,6 +3,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import logger from '../config/logger';
 import { ErrorHandler } from './errorHandler';
+import { IConversionService, ConversionRequest, ConversionJob, VideoInfo } from './conversionService';
 
 // Import database functions
 let query: any;
@@ -13,54 +14,17 @@ try {
   logger.error('Failed to import database functions:', error);
 }
 
-export interface ConversionRequest {
-  url: string;
-  quality?: string;
-  trimStart?: number;
-  trimDuration?: number;
-  userId?: string;
-  userIp?: string;
-}
-
-export interface ConversionJob {
-  id: string;
-  video_id: string;
-  youtube_url: string;
-  video_title?: string;
-  user_id?: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
-  quality: string;
-  trim_start?: number;
-  trim_duration?: number;
-  file_path?: string;
-  file_size?: number;
-  duration?: number;
-  ffmpeg_logs?: string;
-  error_message?: string;
-  download_url?: string;
-  created_at: Date;
-  updated_at: Date;
-  expires_at: Date;
-}
-
-export interface VideoInfo {
-  title: string;
-  duration: number;
-  durationFormatted: string;
-  thumbnail: string;
-  uploader: string;
-  viewCount: string;
-}
-
-export class FallbackConversionService {
+export class FallbackConversionService implements IConversionService {
   private downloadsDir: string;
   private tempDir: string;
+  public maxConcurrentJobs: number;
   private processingJobs: Map<string, Promise<void>>;
   private videoMutex: Map<string, string>;
 
   constructor() {
     this.downloadsDir = process.env.DOWNLOADS_DIR || './downloads';
     this.tempDir = process.env.TEMP_DIR || './temp';
+    this.maxConcurrentJobs = parseInt(process.env.MAX_CONCURRENT_JOBS || '5');
     this.processingJobs = new Map();
     this.videoMutex = new Map();
     
@@ -81,7 +45,7 @@ export class FallbackConversionService {
   /**
    * Extract video ID from YouTube URL
    */
-  private extractVideoId(url: string): string | null {
+  extractVideoId(url: string): string | null {
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|m\.youtube\.com\/watch\?v=|music\.youtube\.com\/watch\?v=|gaming\.youtube\.com\/watch\?v=)([^&\n?#]+)/,
       /youtube\.com\/shorts\/([^&\n?#]+)/
@@ -162,7 +126,7 @@ export class FallbackConversionService {
   /**
    * Get video information (fallback - returns mock data)
    */
-  private async getVideoInfo(videoId: string): Promise<VideoInfo> {
+  async getVideoInfo(videoId: string): Promise<VideoInfo> {
     // Fallback implementation - return mock data
     return {
       title: `YouTube Video ${videoId}`,
@@ -172,6 +136,51 @@ export class FallbackConversionService {
       uploader: 'Unknown Channel',
       viewCount: '1000000'
     };
+  }
+
+  /**
+   * Download video (fallback - creates mock file)
+   */
+  private async downloadVideo(videoId: string, jobId: string): Promise<string> {
+    const tempPath = path.join(this.tempDir, `${jobId}.mp3`);
+    
+    // Create a mock downloaded file
+    const mockContent = Buffer.from('Mock downloaded video content for testing');
+    await fs.writeFile(tempPath, mockContent);
+    
+    logger.info(`Mock download completed for video ${videoId} to ${tempPath}`);
+    return tempPath;
+  }
+
+  /**
+   * Process audio (fallback - creates mock processed file)
+   */
+  private async processAudio(
+    inputPath: string, 
+    outputPath: string, 
+    quality: string, 
+    trimStart?: number, 
+    trimDuration?: number
+  ): Promise<{ logs: string; duration: number; fileSize: number }> {
+    // Create a mock processed file
+    const mockContent = Buffer.from(`Mock processed audio content - Quality: ${quality}, Trim: ${trimStart || 0}-${trimDuration || 'none'}`);
+    await fs.writeFile(outputPath, mockContent);
+    
+    logger.info(`Mock audio processing completed: ${inputPath} -> ${outputPath}`);
+    
+    return {
+      logs: `Mock processing completed successfully. Quality: ${quality}, Trim: ${trimStart || 0}-${trimDuration || 'none'}`,
+      duration: 180, // 3 minutes
+      fileSize: mockContent.length
+    };
+  }
+
+  /**
+   * Get audio duration (fallback - returns mock duration)
+   */
+  private async getAudioDuration(filePath: string): Promise<number> {
+    // Return mock duration
+    return 180; // 3 minutes
   }
 
   /**
@@ -326,21 +335,43 @@ export class FallbackConversionService {
       // Update status to processing
       await this.updateJobStatus(jobId, 'processing');
 
-      // Simulate processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Create a mock MP3 file
-      const outputPath = path.join(this.downloadsDir, `${jobId}.mp3`);
-      const mockContent = Buffer.from('Mock MP3 content for testing');
-      await fs.writeFile(outputPath, mockContent);
-
-      logger.info(`✅ Fallback processing completed for job ${jobId}`, {
+      // Download video (mock)
+      logger.info(`📥 Mock downloading video ${videoId} for job ${jobId}`, {
         jobId,
         videoId,
-        videoTitle: job.video_title,
-        fileSize: mockContent.length,
-        duration: 180,
+        operation: 'download'
+      });
+      const downloadedPath = await this.downloadVideo(videoId, jobId);
+      logger.info(`✅ Mock downloaded video ${videoId} to ${downloadedPath}`, {
+        jobId,
+        videoId,
+        downloadedPath
+      });
+
+      // Process audio
+      const outputPath = path.join(this.downloadsDir, `${jobId}.mp3`);
+      logger.info(`🎵 Mock processing audio for job ${jobId} with quality ${job.quality}`, {
+        jobId,
+        videoId,
         quality: job.quality,
+        trimStart: job.trim_start,
+        trimDuration: job.trim_duration,
+        outputPath
+      });
+      
+      const processResult = await this.processAudio(
+        downloadedPath,
+        outputPath,
+        job.quality,
+        job.trim_start,
+        job.trim_duration
+      );
+
+      logger.info(`✅ Mock audio processing completed for job ${jobId}`, {
+        jobId,
+        videoId,
+        fileSize: processResult.fileSize,
+        duration: processResult.duration,
         outputPath
       });
 
@@ -358,9 +389,9 @@ export class FallbackConversionService {
         [
           'completed',
           outputPath,
-          mockContent.length,
-          180,
-          'Mock processing completed successfully',
+          processResult.fileSize,
+          processResult.duration,
+          processResult.logs,
           `/api/download/${jobId}`,
           jobId
         ]
@@ -369,15 +400,22 @@ export class FallbackConversionService {
       // Record processed file
       await query(
         'INSERT INTO processed_files (id, job_id, file_path, file_size, expires_at) VALUES (?, ?, ?, ?, datetime("now", "+24 hours"))',
-        [uuidv4(), jobId, outputPath, mockContent.length]
+        [uuidv4(), jobId, outputPath, processResult.fileSize]
       );
+
+      // Clean up temp file
+      try {
+        await fs.unlink(downloadedPath);
+      } catch (error) {
+        logger.warn(`Failed to clean up temp file ${downloadedPath}:`, error);
+      }
 
       logger.info(`🎉 Fallback job ${jobId} completed successfully`, {
         jobId,
         videoId,
         videoTitle: job.video_title,
-        fileSize: mockContent.length,
-        duration: 180,
+        fileSize: processResult.fileSize,
+        duration: processResult.duration,
         quality: job.quality
       });
 
