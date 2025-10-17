@@ -20,7 +20,7 @@ wait_for_database() {
     local attempt=1
     
     while [ $attempt -le $max_attempts ]; do
-        if pg_isready -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" >/dev/null 2>&1; then
+        if PGPASSWORD="${DB_PASSWORD:-postgres}" pg_isready -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" >/dev/null 2>&1; then
             log "✅ Database connection established"
             return 0
         fi
@@ -49,9 +49,9 @@ run_migrations() {
         log "🔧 Checking database schema..."
         
         # Test if jobs table exists
-        if ! psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -c "SELECT 1 FROM jobs LIMIT 1;" >/dev/null 2>&1; then
+        if ! PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -c "SELECT 1 FROM jobs LIMIT 1;" >/dev/null 2>&1; then
             log "📋 Initializing database schema..."
-            psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -f /app/migrations/init.sql
+            PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -f /app/migrations/init.sql
             log "✅ Database schema initialized"
         else
             log "✅ Database schema already exists"
