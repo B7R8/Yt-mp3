@@ -34,9 +34,17 @@ export declare class YouTubeMp3ApiService {
      */
     convertToMp3(url: string, quality?: string): Promise<ConversionResult>;
     /**
+     * Try alternative API if primary fails with validation
+     */
+    private tryAlternativeApiWithValidation;
+    /**
      * Try alternative API if primary fails
      */
     private tryAlternativeApi;
+    /**
+     * Get download link from YouTube MP3 API with validation
+     */
+    private getDownloadLinkWithValidation;
     /**
      * Get download link from YouTube MP3 API
      */

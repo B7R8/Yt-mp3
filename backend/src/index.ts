@@ -9,7 +9,9 @@ import simpleConversionRoutes from './routes/simpleConversion';
 import healthRoutes from './routes/health';
 import secureWalletRoutes from './routes/secureWallet';
 import contactRoutes from './routes/contact';
+import processAudioRoutes from './routes/processAudio';
 import { SimpleConversionService } from './services/simpleConversionService';
+import { cleanupExpiredJobs } from './controllers/processAudio';
 import logger from './config/logger';
 import { initializeDatabase } from './config/database';
 
@@ -61,10 +63,11 @@ app.use((req, res, next) => {
 app.use('/api', healthRoutes);
 app.use('/api', simpleConversionRoutes);
 app.use('/api', contactRoutes);
+app.use('/api', processAudioRoutes);
 app.use('/api/secure-wallet', secureWalletRoutes);
 
 // Debug: Log all registered routes
-console.log('Routes registered: health, conversion, contact');
+console.log('Routes registered: health, conversion, contact, processAudio');
 
 // Error handling middleware
 app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -105,11 +108,22 @@ async function startServer() {
     });
     logger.info('Cleanup cron job scheduled (every 10 minutes)');
 
+    // Start audio processing cleanup cron job (every 5 minutes)
+    cron.schedule('*/5 * * * *', () => {
+      logger.info('Running audio processing cleanup job...');
+      cleanupExpiredJobs().catch(error => {
+        logger.error('Audio processing cleanup job failed:', error);
+      });
+    });
+    logger.info('Audio processing cleanup cron job scheduled (every 5 minutes)');
+
     // Start server
     const server = app.listen(PORT, '0.0.0.0', () => {
       logger.info(`✅ Server running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      logger.info(`Database: SQLite`);
+      // Use the same logic as database.ts to determine database type
+      const useSQLite = process.env.NODE_ENV !== 'production' && !process.env.DB_HOST;
+      logger.info(`Database: ${useSQLite ? 'SQLite' : 'PostgreSQL'}`);
       logger.info(`Cache: In-memory cache enabled`);
       logger.info('🚀 Backend is ready to accept connections!');
     });

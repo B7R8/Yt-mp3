@@ -56,6 +56,39 @@ CREATE TRIGGER update_blacklist_updated_at
 -- Add direct_download_url column if it doesn't exist (for existing databases)
 ALTER TABLE conversions ADD COLUMN IF NOT EXISTS direct_download_url TEXT;
 
+-- Create jobs table for audio processing
+CREATE TABLE IF NOT EXISTS jobs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    source_url TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'ready', 'failed', 'deleted')),
+    direct_download_url TEXT,
+    processed_path TEXT,
+    file_size BIGINT,
+    duration FLOAT,
+    bitrate INT,
+    action TEXT CHECK (action IN ('trim', 'reencode', 'none')),
+    trim_start FLOAT,
+    trim_duration FLOAT,
+    download_token TEXT UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    error_message TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for jobs table
+CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at);
+CREATE INDEX IF NOT EXISTS idx_jobs_expires_at ON jobs(expires_at);
+CREATE INDEX IF NOT EXISTS idx_jobs_download_token ON jobs(download_token);
+CREATE INDEX IF NOT EXISTS idx_jobs_source_url ON jobs(source_url);
+
+-- Create updated_at trigger for jobs table
+CREATE TRIGGER update_jobs_updated_at 
+    BEFORE UPDATE ON jobs 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
 -- Create user if it doesn't exist
 DO $$
 BEGIN
@@ -68,3 +101,4 @@ $$;
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ytmp3_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ytmp3_user;
+GRANT ALL PRIVILEGES ON TABLE jobs TO ytmp3_user;

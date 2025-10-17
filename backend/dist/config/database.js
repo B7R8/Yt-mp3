@@ -5,11 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializeDatabase = initializeDatabase;
 exports.query = query;
+exports.queryWithParams = queryWithParams;
 exports.ensureDirectDownloadUrlColumn = ensureDirectDownloadUrlColumn;
 const pg_1 = require("pg");
 const logger_1 = __importDefault(require("./logger"));
-// Use SQLite for local development
-const useSQLite = true; // Use SQLite for local development
+// Use SQLite for local development, PostgreSQL for production
+const useSQLite = process.env.NODE_ENV !== 'production' && !process.env.DB_HOST;
 let db;
 let sqliteQuery;
 let getRow;
@@ -130,6 +131,30 @@ async function query(text, params) {
             logger_1.default.debug('Executed query', { text, duration, rows: res.rowCount });
         }
         // Ensure consistent return format for both SQLite and PostgreSQL
+        return {
+            rows: res.rows,
+            rowCount: res.rowCount
+        };
+    }
+    catch (error) {
+        console.error('Database query error:', error);
+        throw error;
+    }
+}
+// Database-agnostic query function that handles parameter placeholders
+async function queryWithParams(text, params) {
+    if (useSQLite) {
+        // Convert PostgreSQL placeholders ($1, $2, etc.) to SQLite placeholders (?)
+        const sqliteText = text.replace(/\$(\d+)/g, '?');
+        return await sqliteQuery(sqliteText, params || []);
+    }
+    const start = Date.now();
+    try {
+        const res = await db.query(text, params);
+        const duration = Date.now() - start;
+        if (process.env.LOG_LEVEL === 'debug') {
+            logger_1.default.debug('Executed query', { text, duration, rows: res.rowCount });
+        }
         return {
             rows: res.rows,
             rowCount: res.rowCount

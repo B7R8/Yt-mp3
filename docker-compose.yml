@@ -53,7 +53,11 @@ services:
       - DOWNLOADS_DIR=${DOWNLOADS_DIR:-/app/downloads}
       - CACHE_DIR=${CACHE_DIR:-/app/cache}
       - TEMP_DIR=${TEMP_DIR:-/app/temp}
+      - TMP_DIR=${TMP_DIR:-/tmp/app-media}
       - MAX_FILE_AGE_HOURS=${MAX_FILE_AGE_HOURS:-24}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-100000000}
+      - AUDIO_PROCESSING_ENABLED=${AUDIO_PROCESSING_ENABLED:-true}
+      - FFMPEG_TIMEOUT=${FFMPEG_TIMEOUT:-300000}
       - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
       - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-20}
       - LOG_LEVEL=${LOG_LEVEL:-info}
@@ -67,6 +71,8 @@ services:
       - ./cache:/app/cache:rw
       - ./temp:/app/temp:rw
       - ./logs:/app/logs:rw
+      - /tmp/app-media:/tmp/app-media:rw
+      - ./backend/migrations:/app/migrations:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -81,10 +87,11 @@ services:
           cpus: '1'
           memory: 1G
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/api/health && wget --no-verbose --tries=1 --spider http://localhost:3001/api/process/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
     networks:
       - app-network
 

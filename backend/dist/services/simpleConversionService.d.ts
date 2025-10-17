@@ -38,6 +38,10 @@ export declare class SimpleConversionService {
      */
     getVideoInfo(url: string): Promise<VideoInfo>;
     /**
+     * Refresh download URL for an existing job
+     */
+    refreshDownloadUrl(jobId: string): Promise<string | null>;
+    /**
      * Cleanup old files (20 minutes = 1/3 hour)
      */
     cleanupOldFiles(): Promise<void>;

@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -73,7 +106,9 @@ class SimpleConversionService {
             const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
             const videoId = videoIdMatch ? videoIdMatch[1] : null;
             // Check for exact URL match
-            const urlMatch = await database.get('SELECT reason FROM blacklist WHERE type = ? AND value = ?', ['url', url]);
+            const { queryWithParams } = await Promise.resolve().then(() => __importStar(require('../config/database')));
+            const urlMatchResult = await queryWithParams('SELECT reason FROM blacklist WHERE type = $1 AND value = $2', ['url', url]);
+            const urlMatch = urlMatchResult.rows?.[0];
             if (urlMatch) {
                 return {
                     isBlacklisted: true,
@@ -83,7 +118,8 @@ class SimpleConversionService {
             }
             // Check for video ID match
             if (videoId) {
-                const videoIdMatch = await database.get('SELECT reason FROM blacklist WHERE type = ? AND value = ?', ['video_id', videoId]);
+                const videoIdMatchResult = await queryWithParams('SELECT reason FROM blacklist WHERE type = $1 AND value = $2', ['video_id', videoId]);
+                const videoIdMatch = videoIdMatchResult.rows?.[0];
                 if (videoIdMatch) {
                     return {
                         isBlacklisted: true,
@@ -124,8 +160,9 @@ class SimpleConversionService {
             logger_1.default.info(`📝 Fetching video info for job: ${jobId}`);
             const videoInfo = await this.apiService.getVideoInfo(request.url);
             logger_1.default.info(`📝 Video title for job ${jobId}: ${videoInfo.title}`);
-            await database.run(`INSERT INTO conversions (id, youtube_url, video_title, status, created_at, updated_at) 
-         VALUES (?, ?, ?, 'pending', datetime('now'), datetime('now'))`, [jobId, request.url, videoInfo.title]);
+            const { queryWithParams } = await Promise.resolve().then(() => __importStar(require('../config/database')));
+            await queryWithParams(`INSERT INTO conversions (id, youtube_url, video_title, status, created_at, updated_at) 
+         VALUES ($1, $2, $3, 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`, [jobId, request.url, videoInfo.title]);
             logger_1.default.info(`💾 Job ${jobId} created in database successfully`);
             // Start conversion process asynchronously
             this.processConversion(jobId, request).catch(error => {
@@ -197,21 +234,24 @@ class SimpleConversionService {
     async getJobStatus(jobId) {
         const database = await optimizedDatabase_1.optimizedDb;
         try {
-            const result = await database.get('SELECT * FROM conversions WHERE id = ?', [jobId]);
-            if (!result) {
+            const { queryWithParams } = await Promise.resolve().then(() => __importStar(require('../config/database')));
+            const result = await queryWithParams('SELECT * FROM conversions WHERE id = $1', [jobId]);
+            const jobData = result.rows?.[0];
+            if (!jobData) {
                 return null;
             }
             return {
-                id: result.id,
-                youtube_url: result.youtube_url,
-                video_title: result.video_title,
-                status: result.status,
-                mp3_filename: result.mp3_filename,
-                error_message: result.error_message,
-                quality_message: result.quality_message,
-                direct_download_url: result.direct_download_url, // Now properly stored in dedicated column
-                created_at: new Date(result.created_at),
-                updated_at: new Date(result.updated_at)
+                id: jobData.id,
+                youtube_url: jobData.youtube_url,
+                video_title: jobData.video_title,
+                status: jobData.status,
+                progress: jobData.progress,
+                mp3_filename: jobData.mp3_filename,
+                error_message: jobData.error_message,
+                quality_message: jobData.quality_message,
+                direct_download_url: jobData.direct_download_url, // Now properly stored in dedicated column
+                created_at: new Date(jobData.created_at),
+                updated_at: new Date(jobData.updated_at)
             };
         }
         catch (error) {
@@ -223,12 +263,13 @@ class SimpleConversionService {
      * Update job status
      */
     async updateJobStatus(jobId, status, mp3Filename, errorMessage, qualityMessage, directDownloadUrl) {
-        const database = await optimizedDatabase_1.optimizedDb;
         try {
-            // Store direct download URL in dedicated column
-            await database.run(`UPDATE conversions 
-         SET status = ?, mp3_filename = ?, error_message = ?, quality_message = ?, direct_download_url = ?, updated_at = datetime('now') 
-         WHERE id = ?`, [status, mp3Filename, errorMessage, qualityMessage, directDownloadUrl, jobId]);
+            // Use the unified query function that works with both SQLite and PostgreSQL
+            const { queryWithParams } = await Promise.resolve().then(() => __importStar(require('../config/database')));
+            // Use database-agnostic query with proper parameter placeholders
+            await queryWithParams(`UPDATE conversions 
+         SET status = $1, mp3_filename = $2, error_message = $3, quality_message = $4, direct_download_url = $5, updated_at = CURRENT_TIMESTAMP 
+         WHERE id = $6`, [status, mp3Filename, errorMessage, qualityMessage, directDownloadUrl, jobId]);
             logger_1.default.info(`📝 Updated job ${jobId} status to: ${status}${directDownloadUrl ? ' with download URL' : ''}`);
         }
         catch (error) {
@@ -264,6 +305,39 @@ class SimpleConversionService {
         return await this.apiService.getVideoInfo(url);
     }
     /**
+     * Refresh download URL for an existing job
+     */
+    async refreshDownloadUrl(jobId) {
+        try {
+            const job = await this.getJobStatus(jobId);
+            if (!job || !job.youtube_url) {
+                logger_1.default.error(`❌ Cannot refresh download URL for job ${jobId}: job not found or no YouTube URL`);
+                return null;
+            }
+            if (job.status !== 'completed') {
+                logger_1.default.error(`❌ Cannot refresh download URL for job ${jobId}: job status is ${job.status}`);
+                return null;
+            }
+            logger_1.default.info(`🔄 Refreshing download URL for job: ${jobId}`);
+            // Get a fresh download URL from the API
+            const result = await this.apiService.convertToMp3(job.youtube_url, '192k');
+            if (result.success && result.downloadUrl) {
+                // Update the job with the new download URL
+                await this.updateJobStatus(jobId, 'completed', job.mp3_filename, undefined, undefined, result.downloadUrl);
+                logger_1.default.info(`✅ Successfully refreshed download URL for job: ${jobId}`);
+                return result.downloadUrl;
+            }
+            else {
+                logger_1.default.error(`❌ Failed to get fresh download URL for job ${jobId}: ${result.error}`);
+                return null;
+            }
+        }
+        catch (error) {
+            logger_1.default.error(`❌ Failed to refresh download URL for job ${jobId}:`, error);
+            return null;
+        }
+    }
+    /**
      * Cleanup old files (20 minutes = 1/3 hour)
      */
     async cleanupOldFiles() {
@@ -272,9 +346,11 @@ class SimpleConversionService {
         const cutoffTime = new Date(Date.now() - maxAgeMs);
         const database = await optimizedDatabase_1.optimizedDb;
         try {
-            const result = await database.all(`SELECT id, mp3_filename FROM conversions 
-         WHERE status = 'completed' AND created_at < ?`, [cutoffTime.toISOString()]);
-            for (const row of result) {
+            const { queryWithParams } = await Promise.resolve().then(() => __importStar(require('../config/database')));
+            const result = await queryWithParams(`SELECT id, mp3_filename FROM conversions 
+         WHERE status = 'completed' AND created_at < $1`, [cutoffTime.toISOString()]);
+            const rows = result.rows || [];
+            for (const row of rows) {
                 if (row.mp3_filename) {
                     const filePath = path_1.default.join(this.downloadsDir, row.mp3_filename);
                     try {
@@ -285,9 +361,9 @@ class SimpleConversionService {
                         logger_1.default.warn(`Failed to delete file ${filePath}:`, error);
                     }
                 }
-                await database.run('UPDATE conversions SET status = ? WHERE id = ?', ['cleaned', row.id]);
+                await queryWithParams('UPDATE conversions SET status = $1 WHERE id = $2', ['cleaned', row.id]);
             }
-            logger_1.default.info(`Cleanup completed. Processed ${result.length} old jobs.`);
+            logger_1.default.info(`Cleanup completed. Processed ${rows.length} old jobs.`);
         }
         catch (error) {
             logger_1.default.error('Cleanup failed:', error);

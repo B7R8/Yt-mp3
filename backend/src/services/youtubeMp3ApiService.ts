@@ -193,14 +193,14 @@ export class YouTubeMp3ApiService {
     logger.info(`🎵 Starting MP3 conversion for video ID: ${videoId} with quality: ${quality}`);
 
     try {
-      // Get download link directly from API
+      // Get download link directly from API with validation
       logger.info(`🔗 Fetching download link from primary API for video: ${videoId}`);
-      let downloadResult = await this.getDownloadLink(videoId);
+      let downloadResult = await this.getDownloadLinkWithValidation(videoId);
       
       // If primary API fails, try alternative API
       if (!downloadResult.success || !downloadResult.downloadUrl) {
         logger.warn(`⚠️ Primary API failed for ${videoId}, trying alternative API`);
-        downloadResult = await this.tryAlternativeApi(videoId);
+        downloadResult = await this.tryAlternativeApiWithValidation(videoId);
       }
       
       if (!downloadResult.success || !downloadResult.downloadUrl) {
@@ -211,7 +211,7 @@ export class YouTubeMp3ApiService {
         };
       }
 
-      logger.info(`✅ Download URL obtained for video ${videoId}: ${downloadResult.downloadUrl}`);
+      logger.info(`✅ Valid download URL obtained for video ${videoId}: ${downloadResult.downloadUrl}`);
 
       // Get video info for title
       let title = `YouTube Video ${videoId}`;
@@ -228,7 +228,7 @@ export class YouTubeMp3ApiService {
 
       return {
         success: true,
-        downloadUrl: downloadResult.downloadUrl, // Return the API download URL directly
+        downloadUrl: downloadResult.downloadUrl, // Return the validated API download URL
         title: title,
         duration: 0 // Duration not available from this API
       };
@@ -241,6 +241,45 @@ export class YouTubeMp3ApiService {
         error: getUserFriendlyError(error)
       };
     }
+  }
+
+  /**
+   * Try alternative API if primary fails with validation
+   */
+  private async tryAlternativeApiWithValidation(videoId: string): Promise<{ success: boolean; downloadUrl?: string; error?: string }> {
+    const maxRetries = 2;
+    let lastError = '';
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      logger.info(`🔄 Attempt ${attempt}/${maxRetries} - Trying alternative API for ${videoId}`);
+      
+      const result = await this.tryAlternativeApi(videoId);
+      
+      if (result.success && result.downloadUrl) {
+        // Validate the download URL
+        const isValid = await this.validateDownloadUrl(result.downloadUrl);
+        if (isValid) {
+          logger.info(`✅ Valid alternative download URL obtained for ${videoId} on attempt ${attempt}`);
+          return result;
+        } else {
+          logger.warn(`⚠️ Alternative download URL validation failed for ${videoId} on attempt ${attempt}`);
+          lastError = 'Alternative download URL is not accessible';
+        }
+      } else {
+        lastError = result.error || 'Alternative API failed';
+        logger.warn(`⚠️ Alternative API request failed for ${videoId} on attempt ${attempt}: ${lastError}`);
+      }
+      
+      // Wait before retry (except on last attempt)
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 3000 * attempt)); // Exponential backoff
+      }
+    }
+    
+    return {
+      success: false,
+      error: `Alternative API failed after ${maxRetries} attempts. Last error: ${lastError}`
+    };
   }
 
   /**
@@ -317,6 +356,45 @@ export class YouTubeMp3ApiService {
 
       req.end();
     });
+  }
+
+  /**
+   * Get download link from YouTube MP3 API with validation
+   */
+  private async getDownloadLinkWithValidation(videoId: string): Promise<{ success: boolean; downloadUrl?: string; error?: string }> {
+    const maxRetries = 3;
+    let lastError = '';
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      logger.info(`🔗 Attempt ${attempt}/${maxRetries} - Fetching download link for ${videoId}`);
+      
+      const result = await this.getDownloadLink(videoId);
+      
+      if (result.success && result.downloadUrl) {
+        // Validate the download URL
+        const isValid = await this.validateDownloadUrl(result.downloadUrl);
+        if (isValid) {
+          logger.info(`✅ Valid download URL obtained for ${videoId} on attempt ${attempt}`);
+          return result;
+        } else {
+          logger.warn(`⚠️ Download URL validation failed for ${videoId} on attempt ${attempt}`);
+          lastError = 'Download URL is not accessible';
+        }
+      } else {
+        lastError = result.error || 'Failed to get download link';
+        logger.warn(`⚠️ Download link request failed for ${videoId} on attempt ${attempt}: ${lastError}`);
+      }
+      
+      // Wait before retry (except on last attempt)
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 2000 * attempt)); // Exponential backoff
+      }
+    }
+    
+    return {
+      success: false,
+      error: `Failed to get valid download link after ${maxRetries} attempts. Last error: ${lastError}`
+    };
   }
 
   /**

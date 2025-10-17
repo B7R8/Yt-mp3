@@ -10,6 +10,11 @@ import { optimizedDb } from '../config/optimizedDatabase';
 const router = express.Router();
 const conversionService = new SimpleConversionService();
 
+// Helper method to refresh download URL
+async function refreshDownloadUrl(jobId: string): Promise<string | null> {
+  return await conversionService.refreshDownloadUrl(jobId);
+}
+
 // POST /api/check-url - URL validation with blacklist check
 router.post('/check-url', async (req: Request, res: Response) => {
   try {
@@ -200,6 +205,29 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
         return;
       }
       
+      if (proxyRes.statusCode === 404) {
+        logger.error(`❌ Download URL expired (404) for job: ${jobId} - attempting to refresh`);
+        // Try to refresh the download URL
+        refreshDownloadUrl(jobId).then((newUrl) => {
+          if (newUrl) {
+            logger.info(`🔄 Redirecting to refreshed URL for job: ${jobId}`);
+            res.redirect(302, `/api/download/${jobId}`);
+          } else {
+            res.status(404).json({
+              success: false,
+              message: 'Download link has expired. Please try converting again.'
+            });
+          }
+        }).catch((error) => {
+          logger.error(`❌ Failed to refresh download URL for job ${jobId}:`, error);
+          res.status(404).json({
+            success: false,
+            message: 'Download link has expired. Please try converting again.'
+          });
+        });
+        return;
+      }
+      
       if (proxyRes.statusCode !== 200) {
         logger.error(`❌ Download failed with status: ${proxyRes.statusCode} for job: ${jobId}`);
         res.status(proxyRes.statusCode).json({
@@ -369,6 +397,33 @@ router.post('/cleanup', async (req: Request, res: Response) => {
       success: false,
       message: 'Cleanup failed'
     });
+  }
+});
+
+// POST /api/refresh-download/:id - Refresh download URL for a job
+router.post('/refresh-download/:id', validateJobId, async (req: Request, res: Response) => {
+  try {
+    const jobId = req.params.id;
+    logger.info(`Manual download URL refresh triggered for job: ${jobId}`);
+    
+    const newUrl = await conversionService.refreshDownloadUrl(jobId);
+    
+    if (newUrl) {
+      res.json({
+        success: true,
+        message: 'Download URL refreshed successfully',
+        download_url: newUrl
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: 'Failed to refresh download URL. The job may not exist or the conversion may have failed.'
+      });
+    }
+  } catch (error) {
+    const userMessage = getUserFriendlyError(error);
+    logTechnicalError(error, 'Refresh Download URL', req);
+    sendErrorResponse(res, 500, userMessage, error);
   }
 });
 

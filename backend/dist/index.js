@@ -12,7 +12,9 @@ const simpleConversion_1 = __importDefault(require("./routes/simpleConversion"))
 const health_1 = __importDefault(require("./routes/health"));
 const secureWallet_1 = __importDefault(require("./routes/secureWallet"));
 const contact_1 = __importDefault(require("./routes/contact"));
+const processAudio_1 = __importDefault(require("./routes/processAudio"));
 const simpleConversionService_1 = require("./services/simpleConversionService");
+const processAudio_2 = require("./controllers/processAudio");
 const logger_1 = __importDefault(require("./config/logger"));
 const database_1 = require("./config/database");
 // Load environment variables
@@ -55,9 +57,10 @@ app.use((req, res, next) => {
 app.use('/api', health_1.default);
 app.use('/api', simpleConversion_1.default);
 app.use('/api', contact_1.default);
+app.use('/api', processAudio_1.default);
 app.use('/api/secure-wallet', secureWallet_1.default);
 // Debug: Log all registered routes
-console.log('Routes registered: health, conversion, contact');
+console.log('Routes registered: health, conversion, contact, processAudio');
 // Error handling middleware
 app.use((error, req, res, next) => {
     const { getUserFriendlyError, logTechnicalError } = require('./utils/errorHandler');
@@ -91,11 +94,21 @@ async function startServer() {
             });
         });
         logger_1.default.info('Cleanup cron job scheduled (every 10 minutes)');
+        // Start audio processing cleanup cron job (every 5 minutes)
+        node_cron_1.default.schedule('*/5 * * * *', () => {
+            logger_1.default.info('Running audio processing cleanup job...');
+            (0, processAudio_2.cleanupExpiredJobs)().catch(error => {
+                logger_1.default.error('Audio processing cleanup job failed:', error);
+            });
+        });
+        logger_1.default.info('Audio processing cleanup cron job scheduled (every 5 minutes)');
         // Start server
         const server = app.listen(PORT, '0.0.0.0', () => {
             logger_1.default.info(`✅ Server running on port ${PORT}`);
             logger_1.default.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-            logger_1.default.info(`Database: SQLite`);
+            // Use the same logic as database.ts to determine database type
+            const useSQLite = process.env.NODE_ENV !== 'production' && !process.env.DB_HOST;
+            logger_1.default.info(`Database: ${useSQLite ? 'SQLite' : 'PostgreSQL'}`);
             logger_1.default.info(`Cache: In-memory cache enabled`);
             logger_1.default.info('🚀 Backend is ready to accept connections!');
         });

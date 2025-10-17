@@ -3,6 +3,7 @@ export interface ConversionJob {
     youtube_url: string;
     video_title?: string;
     status: 'pending' | 'processing' | 'completed' | 'failed';
+    progress?: number;
     mp3_filename?: string;
     error_message?: string;
     quality_message?: string;

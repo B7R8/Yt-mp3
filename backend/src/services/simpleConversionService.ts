@@ -86,10 +86,12 @@ export class SimpleConversionService {
       const videoId = videoIdMatch ? videoIdMatch[1] : null;
       
       // Check for exact URL match
-      const urlMatch = await database.get(
-        'SELECT reason FROM blacklist WHERE type = ? AND value = ?',
+      const { queryWithParams } = await import('../config/database');
+      const urlMatchResult = await queryWithParams(
+        'SELECT reason FROM blacklist WHERE type = $1 AND value = $2',
         ['url', url]
       );
+      const urlMatch = urlMatchResult.rows?.[0];
       
       if (urlMatch) {
         return { 
@@ -101,10 +103,11 @@ export class SimpleConversionService {
       
       // Check for video ID match
       if (videoId) {
-        const videoIdMatch = await database.get(
-          'SELECT reason FROM blacklist WHERE type = ? AND value = ?',
+        const videoIdMatchResult = await queryWithParams(
+          'SELECT reason FROM blacklist WHERE type = $1 AND value = $2',
           ['video_id', videoId]
         );
+        const videoIdMatch = videoIdMatchResult.rows?.[0];
         
         if (videoIdMatch) {
           return { 
@@ -154,9 +157,10 @@ export class SimpleConversionService {
       const videoInfo = await this.apiService.getVideoInfo(request.url);
       logger.info(`📝 Video title for job ${jobId}: ${videoInfo.title}`);
       
-      await database.run(
+      const { queryWithParams } = await import('../config/database');
+      await queryWithParams(
         `INSERT INTO conversions (id, youtube_url, video_title, status, created_at, updated_at) 
-         VALUES (?, ?, ?, 'pending', datetime('now'), datetime('now'))`,
+         VALUES ($1, $2, $3, 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
         [jobId, request.url, videoInfo.title]
       );
       
@@ -241,26 +245,29 @@ export class SimpleConversionService {
     const database = await db;
     
     try {
-      const result = await database.get(
-        'SELECT * FROM conversions WHERE id = ?',
+      const { queryWithParams } = await import('../config/database');
+      const result = await queryWithParams(
+        'SELECT * FROM conversions WHERE id = $1',
         [jobId]
       );
+      const jobData = result.rows?.[0];
 
-      if (!result) {
+      if (!jobData) {
         return null;
       }
 
       return {
-        id: result.id,
-        youtube_url: result.youtube_url,
-        video_title: result.video_title,
-        status: result.status,
-        mp3_filename: result.mp3_filename,
-        error_message: result.error_message,
-        quality_message: result.quality_message,
-        direct_download_url: result.direct_download_url, // Now properly stored in dedicated column
-        created_at: new Date(result.created_at),
-        updated_at: new Date(result.updated_at)
+        id: jobData.id,
+        youtube_url: jobData.youtube_url,
+        video_title: jobData.video_title,
+        status: jobData.status,
+        progress: jobData.progress,
+        mp3_filename: jobData.mp3_filename,
+        error_message: jobData.error_message,
+        quality_message: jobData.quality_message,
+        direct_download_url: jobData.direct_download_url, // Now properly stored in dedicated column
+        created_at: new Date(jobData.created_at),
+        updated_at: new Date(jobData.updated_at)
       };
     } catch (error) {
       logger.error('Failed to get job status:', error);
@@ -279,14 +286,15 @@ export class SimpleConversionService {
     qualityMessage?: string,
     directDownloadUrl?: string
   ): Promise<void> {
-    const database = await db;
-    
     try {
-      // Store direct download URL in dedicated column
-      await database.run(
+      // Use the unified query function that works with both SQLite and PostgreSQL
+      const { queryWithParams } = await import('../config/database');
+      
+      // Use database-agnostic query with proper parameter placeholders
+      await queryWithParams(
         `UPDATE conversions 
-         SET status = ?, mp3_filename = ?, error_message = ?, quality_message = ?, direct_download_url = ?, updated_at = datetime('now') 
-         WHERE id = ?`,
+         SET status = $1, mp3_filename = $2, error_message = $3, quality_message = $4, direct_download_url = $5, updated_at = CURRENT_TIMESTAMP 
+         WHERE id = $6`,
         [status, mp3Filename, errorMessage, qualityMessage, directDownloadUrl, jobId]
       );
       
@@ -330,6 +338,42 @@ export class SimpleConversionService {
   }
 
   /**
+   * Refresh download URL for an existing job
+   */
+  async refreshDownloadUrl(jobId: string): Promise<string | null> {
+    try {
+      const job = await this.getJobStatus(jobId);
+      if (!job || !job.youtube_url) {
+        logger.error(`❌ Cannot refresh download URL for job ${jobId}: job not found or no YouTube URL`);
+        return null;
+      }
+
+      if (job.status !== 'completed') {
+        logger.error(`❌ Cannot refresh download URL for job ${jobId}: job status is ${job.status}`);
+        return null;
+      }
+
+      logger.info(`🔄 Refreshing download URL for job: ${jobId}`);
+      
+      // Get a fresh download URL from the API
+      const result = await this.apiService.convertToMp3(job.youtube_url, '192k');
+      
+      if (result.success && result.downloadUrl) {
+        // Update the job with the new download URL
+        await this.updateJobStatus(jobId, 'completed', job.mp3_filename, undefined, undefined, result.downloadUrl);
+        logger.info(`✅ Successfully refreshed download URL for job: ${jobId}`);
+        return result.downloadUrl;
+      } else {
+        logger.error(`❌ Failed to get fresh download URL for job ${jobId}: ${result.error}`);
+        return null;
+      }
+    } catch (error) {
+      logger.error(`❌ Failed to refresh download URL for job ${jobId}:`, error);
+      return null;
+    }
+  }
+
+  /**
    * Cleanup old files (20 minutes = 1/3 hour)
    */
   async cleanupOldFiles(): Promise<void> {
@@ -340,13 +384,15 @@ export class SimpleConversionService {
     const database = await db;
     
     try {
-      const result = await database.all(
+      const { queryWithParams } = await import('../config/database');
+      const result = await queryWithParams(
         `SELECT id, mp3_filename FROM conversions 
-         WHERE status = 'completed' AND created_at < ?`,
+         WHERE status = 'completed' AND created_at < $1`,
         [cutoffTime.toISOString()]
       );
+      const rows = result.rows || [];
 
-      for (const row of result) {
+      for (const row of rows) {
         if (row.mp3_filename) {
           const filePath = path.join(this.downloadsDir, row.mp3_filename);
           
@@ -358,13 +404,13 @@ export class SimpleConversionService {
           }
         }
 
-        await database.run(
-          'UPDATE conversions SET status = ? WHERE id = ?',
+        await queryWithParams(
+          'UPDATE conversions SET status = $1 WHERE id = $2',
           ['cleaned', row.id]
         );
       }
 
-      logger.info(`Cleanup completed. Processed ${result.length} old jobs.`);
+      logger.info(`Cleanup completed. Processed ${rows.length} old jobs.`);
     } catch (error) {
       logger.error('Cleanup failed:', error);
     }
