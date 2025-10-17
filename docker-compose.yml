@@ -3,9 +3,9 @@ services:
     image: postgres:15-alpine
     container_name: yt-mp3-postgres
     environment:
-      - POSTGRES_DB=${DB_NAME:-youtube_converter}
-      - POSTGRES_USER=${DB_USER:-postgres}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=youtube_converter
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -38,13 +38,13 @@ services:
       - ./.env
     user: "0:0"  # Run as root to fix permissions
     environment:
-      - NODE_ENV=${NODE_ENV:-production}
-      - DB_HOST=${DB_HOST:-postgres}
-      - DB_PORT=${DB_PORT:-5432}
-      - DB_NAME=${DB_NAME:-youtube_converter}
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
-      - DB_TYPE=${DB_TYPE:-postgres}
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=youtube_converter
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_TYPE=postgres
       - PORT=${PORT:-3001}
       - MAX_WORKERS=${MAX_WORKERS:-8}
       - MAX_CONCURRENT_JOBS=${MAX_CONCURRENT_JOBS:-20}
