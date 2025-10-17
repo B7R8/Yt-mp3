@@ -53,13 +53,23 @@ export default defineConfig(({ mode }) => {
             drop_console: true,
             drop_debugger: true,
             pure_funcs: ['console.log', 'console.info', 'console.debug'],
-            passes: 2,
+            passes: 3,
+            unsafe: true,
+            unsafe_comps: true,
+            unsafe_math: true,
+            unsafe_proto: true,
+            unsafe_regexp: true,
+            unsafe_undefined: true,
           },
           format: {
             comments: false,
+            ascii_only: true,
           },
           mangle: {
             safari10: true,
+            properties: {
+              regex: /^_/,
+            },
           },
         },
         // Optimize chunk splitting
@@ -68,17 +78,41 @@ export default defineConfig(({ mode }) => {
             chunkFileNames: 'assets/[hash:8].js',
             entryFileNames: 'assets/[hash:8].js',
             assetFileNames: 'assets/[hash:8].[ext]',
-            manualChunks: {
-              vendor: ['react', 'react-dom'],
-              query: ['@tanstack/react-query'],
-              utils: ['swr'],
+            manualChunks: (id) => {
+              // Vendor chunks
+              if (id.includes('node_modules')) {
+                if (id.includes('react') || id.includes('react-dom')) {
+                  return 'react-vendor';
+                }
+                if (id.includes('@tanstack/react-query')) {
+                  return 'query-vendor';
+                }
+                if (id.includes('swr')) {
+                  return 'swr-vendor';
+                }
+                return 'vendor';
+              }
+              // Component chunks
+              if (id.includes('/components/')) {
+                return 'components';
+              }
+              // Page chunks
+              if (id.includes('/pages/')) {
+                return 'pages';
+              }
             },
           },
         },
         // Enable compression
         reportCompressedSize: true,
         // Optimize for production
-        assetsInlineLimit: 4096,
+        assetsInlineLimit: 2048, // Reduced for better caching
+        // Enable CSS minification
+        cssMinify: true,
+        // Optimize dependencies
+        commonjsOptions: {
+          include: [/node_modules/],
+        },
       },
     };
 });

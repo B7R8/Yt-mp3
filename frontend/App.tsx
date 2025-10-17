@@ -1,27 +1,27 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Converter from './components/Converter';
 import Toast from './components/Toast';
 import ThemeToggle from './components/ThemeToggle';
 import ScrollToTop from './components/ScrollToTop';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastData } from './types';
-import HowToSection from './components/HowToSection';
-import Home from './pages/Home';
-import FAQs from './pages/FAQs';
-import Changelog from './pages/Changelog';
-import Contact from './pages/Contact';
-import Copyright from './pages/Copyright';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import ComingSoon from './pages/ComingSoon';
-import SupportUs from './pages/SupportUs';
-import CryptoDonation from './pages/CryptoDonation';
-import SupportLinks from './components/SupportLinks';
-import NotFound from './components/NotFound';
+import LoadingSpinner from './components/LoadingSpinner';
 import { useURLRouting, updateURL } from './hooks/useURLRouting';
+
+// Lazy load components for better performance
+const Home = lazy(() => import('./pages/Home'));
+const FAQs = lazy(() => import('./pages/FAQs'));
+const Changelog = lazy(() => import('./pages/Changelog'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Copyright = lazy(() => import('./pages/Copyright'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const ComingSoon = lazy(() => import('./pages/ComingSoon'));
+const SupportUs = lazy(() => import('./pages/SupportUs'));
+const CryptoDonation = lazy(() => import('./pages/CryptoDonation'));
+const NotFound = lazy(() => import('./components/NotFound'));
 
 export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation' | 'not-found';
 
@@ -75,39 +75,50 @@ function App() {
   }, []);
 
   const renderPage = () => {
-    switch (page) {
-      case 'home':
-        return <Home showToast={showToast} navigateTo={navigateTo} />;
-      case 'faqs':
-        return <FAQs />;
-      case 'changelog':
-        return <Changelog />;
-      case 'contact':
-        return <Contact />;
-      case 'copyright':
-        return <Copyright />;
-      case 'terms':
-        return <Terms />;
-      case 'privacy':
-        return <Privacy />;
-      case 'coming-soon':
-        return <ComingSoon navigateTo={navigateTo} />;
-      case 'support-us':
-        return <SupportUs navigateTo={navigateTo} />;
-      case 'crypto-donation':
-        return <CryptoDonation navigateTo={navigateTo} />;
-      case 'not-found':
-        return <NotFound navigateTo={navigateTo} showToast={showToast} />;
-      default:
-        return <NotFound navigateTo={navigateTo} showToast={showToast} />;
-    }
+    const PageComponent = (() => {
+      switch (page) {
+        case 'home':
+          return Home;
+        case 'faqs':
+          return FAQs;
+        case 'changelog':
+          return Changelog;
+        case 'contact':
+          return Contact;
+        case 'copyright':
+          return Copyright;
+        case 'terms':
+          return Terms;
+        case 'privacy':
+          return Privacy;
+        case 'coming-soon':
+          return ComingSoon;
+        case 'support-us':
+          return SupportUs;
+        case 'crypto-donation':
+          return CryptoDonation;
+        case 'not-found':
+          return NotFound;
+        default:
+          return NotFound;
+      }
+    })();
+
+    return (
+      <Suspense fallback={<LoadingSpinner />}>
+        <PageComponent 
+          showToast={showToast} 
+          navigateTo={navigateTo} 
+        />
+      </Suspense>
+    );
   };
 
   return (
     <ThemeProvider>
       <div className="flex flex-col min-h-screen font-sans text-gray-800 dark:text-gray-200 overflow-x-hidden">
         <Header navigateTo={navigateTo} />
-        <main className="flex-grow w-full max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 lg:py-6 overflow-x-hidden">
+        <main className="flex-grow w-full max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 sm:px-6 md:px-6 py-4 sm:py-6 md:py-6 lg:py-8 overflow-x-hidden">
           {renderPage()}
         </main>
         <Footer navigateTo={navigateTo} />

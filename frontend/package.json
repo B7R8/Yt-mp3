@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:optimized": "node scripts/build-optimized.js",
+    "preview": "vite preview",
+    "analyze": "npm run build && npx vite-bundle-analyzer dist/assets/*.js",
+    "tailwind:build": "tailwindcss -i ./input.css -o ./dist/output.css --minify",
+    "tailwind:watch": "tailwindcss -i ./input.css -o ./dist/output.css --watch"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.0.0",
@@ -20,6 +24,7 @@
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.21",
+    "cssnano": "^7.1.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.14",
     "terser": "^5.44.0",

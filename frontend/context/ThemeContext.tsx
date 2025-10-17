@@ -18,12 +18,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       return savedTheme;
     }
     
-    // Fallback to system preference
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    
-    return 'light'; // Default fallback
+    // Always default to light mode - no system preference detection
+    return 'light';
   });
 
   // Apply theme to DOM

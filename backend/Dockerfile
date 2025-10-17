@@ -32,13 +32,20 @@ RUN rm -rf src/ package*.json tsconfig.json
 # Production stage
 FROM node:18-alpine AS production
 
-# Install runtime dependencies including ffmpeg
+# Install runtime dependencies including ffmpeg and yt-dlp
 RUN apk add --no-cache \
     postgresql-client \
     curl \
     wget \
     ffmpeg \
-    && rm -rf /var/cache/apk/*
+    python3 \
+    py3-pip \
+    bash \
+    && pip3 install --no-cache-dir yt-dlp \
+    && rm -rf /var/cache/apk/* /tmp/*
+
+# Verify installations
+RUN yt-dlp --version && ffmpeg -version
 
 # Create app user
 RUN addgroup -g 1001 -S nodejs && \
@@ -59,6 +66,7 @@ COPY --from=builder /app/dist ./dist
 # Copy startup script and migrations
 COPY start.sh /app/start.sh
 COPY migrations/ /app/migrations/
+COPY install-ytdlp.bat /app/install-ytdlp.bat
 
 # Create necessary directories with proper permissions
 RUN mkdir -p downloads cache temp logs /tmp/app-media && \
@@ -69,7 +77,8 @@ RUN mkdir -p downloads cache temp logs /tmp/app-media && \
     chmod -R 755 /app/logs && \
     chmod -R 755 /tmp/app-media && \
     chmod -R 755 /app/migrations && \
-    chmod +x /app/start.sh
+    chmod +x /app/start.sh && \
+    chmod +x /app/install-ytdlp.bat
 
 # Switch to non-root user
 USER nodejs

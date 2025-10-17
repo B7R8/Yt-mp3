@@ -12,11 +12,11 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
   return (
     <>
-      <section id="hero" className="text-center mb-6 sm:mb-8 md:mb-12 lg:mb-16 px-2 sm:px-3 md:px-4">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+      <section id="hero" className="text-center mb-8 sm:mb-10 md:mb-10 lg:mb-12 px-4 sm:px-6 md:px-6">
+        <h1 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
           YouTube to MP3
         </h1>
-        <p className="max-w-2xl mx-auto text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-6 px-2 leading-relaxed">
+        <p className="max-w-2xl mx-auto text-xs sm:text-sm md:text-sm text-gray-600 dark:text-gray-300 mb-8 px-4 leading-relaxed">
           Free YouTube to MP3 converter - Download high-quality MP3 audio from YouTube videos instantly. Convert YouTube to MP3, YouTube video to MP3, YT to MP3 with our fast and reliable YouTube to MP3 downloader. Download YouTube MP3, YT MP3 files without registration. Best YouTube to MP3 converter for all your audio needs.
         </p>
         <Converter showToast={showToast} />
@@ -26,17 +26,17 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
         <SupportLinks navigateTo={navigateTo} />
       </section>
       
-      <section className="mb-6 sm:mb-8 md:mb-12 px-2 sm:px-3 md:px-4">
-        <div className="flex flex-col sm:flex-row items-center justify-center text-center gap-2 sm:gap-3 md:gap-4">
-          <p className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight">Got questions? Join our subreddit!</p>
-          <a href="https://reddit.com/r/saveytb" target="_blank" rel="noopener noreferrer" className="bg-orange-600 text-white font-bold py-1.5 sm:py-2 px-3 sm:px-4 rounded-full hover:bg-orange-700 transition-colors duration-300 shrink-0 text-xs sm:text-sm" aria-label="Join SaveYTB Reddit community r/SaveYTB" title="Join SaveYTB Reddit community r/SaveYTB">
+      <section className="mb-8 sm:mb-10 md:mb-10 px-4 sm:px-6 md:px-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center text-center gap-3 sm:gap-4 md:gap-4">
+          <p className="text-sm sm:text-base md:text-base font-semibold text-gray-800 dark:text-gray-200 leading-tight">Got questions? Join our subreddit!</p>
+          <a href="https://reddit.com/r/saveytb" target="_blank" rel="noopener noreferrer" className="bg-orange-600 text-white font-bold py-2 sm:py-3 md:py-2.5 px-4 sm:px-6 md:px-5 rounded-full hover:bg-orange-700 transition-colors duration-300 shrink-0 text-sm sm:text-base md:text-base" aria-label="Join SaveYTB Reddit community r/SaveYTB" title="Join SaveYTB Reddit community r/SaveYTB">
             r/SaveYTB
           </a>
         </div>
       </section>
       
-      <div className="my-8 sm:my-12 md:my-16 flex items-center justify-center px-3 sm:px-4">
-        <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 w-full max-w-full sm:max-w-md">
+      <div className="my-10 sm:my-14 md:my-14 flex items-center justify-center px-4 sm:px-6">
+        <div className="flex items-center space-x-3 sm:space-x-4 md:space-x-4 w-full max-w-full sm:max-w-md">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
@@ -48,7 +48,7 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
       </div>
 
       {/* Feature Icons - Creative Glass Tiles */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-3 sm:mb-5 md:mb-7 px-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-6 mb-6 sm:mb-8 md:mb-8 px-4 sm:px-6">
         <div className="text-center group">
           <div className="relative w-16 h-16 mx-auto mb-2 rounded-2xl p-[1px] bg-gradient-to-br from-green-400/70 via-green-500/40 to-emerald-500/70 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-[1.03]">
             <div className="w-full h-full rounded-2xl bg-white/70 dark:bg-gray-900/50 backdrop-blur-sm shadow-sm flex items-center justify-center">
@@ -57,8 +57,8 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
               </div>
             </div>
           </div>
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">Secure</h2>
-          <p className="text-xs text-gray-600 dark:text-gray-400">Safe & Private</p>
+          <h2 className="text-base md:text-base font-semibold text-gray-800 dark:text-gray-200 mb-2">Secure</h2>
+          <p className="text-sm md:text-sm text-gray-600 dark:text-gray-400">Safe & Private</p>
         </div>
 
         <div className="text-center group">
@@ -69,8 +69,8 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
               </div>
             </div>
           </div>
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">Fast</h2>
-          <p className="text-xs text-gray-600 dark:text-gray-400">Quick Processing</p>
+          <h2 className="text-base md:text-base font-semibold text-gray-800 dark:text-gray-200 mb-2">Fast</h2>
+          <p className="text-sm md:text-sm text-gray-600 dark:text-gray-400">Quick Processing</p>
         </div>
 
         <div className="text-center group">
@@ -81,8 +81,8 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
               </div>
             </div>
           </div>
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">Free</h2>
-          <p className="text-xs text-gray-600 dark:text-gray-400">No Cost</p>
+          <h2 className="text-base md:text-base font-semibold text-gray-800 dark:text-gray-200 mb-2">Free</h2>
+          <p className="text-sm md:text-sm text-gray-600 dark:text-gray-400">No Cost</p>
         </div>
 
         <div className="text-center group">
@@ -93,8 +93,8 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
               </div>
             </div>
           </div>
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">Quality</h2>
-          <p className="text-xs text-gray-600 dark:text-gray-400">High Audio</p>
+          <h2 className="text-base md:text-base font-semibold text-gray-800 dark:text-gray-200 mb-2">Quality</h2>
+          <p className="text-sm md:text-sm text-gray-600 dark:text-gray-400">High Audio</p>
         </div>
       </div>
 
@@ -102,34 +102,34 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
       <HowToSection navigateTo={navigateTo} />
       
       {/* SEO Content Section */}
-      <section className="pt-4 sm:pt-6 md:pt-8 pb-8 sm:pb-12 md:pb-16 text-gray-700 dark:text-gray-300">
-        <div className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto space-y-6 px-2 sm:px-3 md:px-4">
+      <section className="pt-6 sm:pt-8 md:pt-8 pb-10 sm:pb-14 md:pb-14 text-gray-700 dark:text-gray-300">
+        <div className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto space-y-6 px-4 sm:px-6 md:px-6">
           <div className="text-center">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4">Why Choose Our YouTube to MP3 Converter?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <h2 className="text-xl sm:text-2xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6">Why Choose Our YouTube to MP3 Converter?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base">
               <div className="text-left">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Best YouTube to MP3 Downloader</h3>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">Best YouTube to MP3 Downloader</h3>
                 <p className="text-gray-600 dark:text-gray-400">
                   Our YouTube to MP3 converter is the fastest and most reliable way to convert YouTube videos to MP3 format. 
                   Download YouTube MP3 files instantly with our advanced YouTube to MP3 downloader. Perfect for YouTube video to MP3 conversion.
                 </p>
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Convert YouTube to MP3 Free</h3>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">Convert YouTube to MP3 Free</h3>
                 <p className="text-gray-600 dark:text-gray-400">
                   Convert YouTube to MP3 completely free with no hidden costs. Our YT to MP3 converter supports 
                   all YouTube videos including YouTube Shorts and long-form content. Best free YouTube to MP3 converter available.
                 </p>
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">YouTube Video to MP3</h3>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">YouTube Video to MP3</h3>
                 <p className="text-gray-600 dark:text-gray-400">
                   Transform any YouTube video to MP3 with high-quality audio extraction. Our YouTube MP3 downloader 
                   preserves audio quality while reducing file size for easy storage. Download YouTube MP3 files instantly.
                 </p>
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">YT MP3 Converter</h3>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">YT MP3 Converter</h3>
                 <p className="text-gray-600 dark:text-gray-400">
                   The best YT MP3 converter for all your audio needs. Download YT MP3 files quickly and securely 
                   with our user-friendly YouTube to MP3 converter interface. Convert YouTube to MP3 with ease.
@@ -141,9 +141,9 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
       </section>
 
       {/* Terms of Use Section */}
-      <section className="py-4 text-center">
-        <div className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-2 sm:px-3 md:px-4">
-          <p className="text-xs text-gray-600 dark:text-gray-400">
+      <section className="py-6 text-center">
+        <div className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto px-4 sm:px-6 md:px-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             By using SaveYTB, you agree to our <button onClick={() => navigateTo('terms')} className="text-red-600 dark:text-red-400 hover:underline">terms of use</button>.
           </p>
         </div>

@@ -8,18 +8,20 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY vite.config.ts ./
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
 
 # Install dependencies
 RUN npm ci --frozen-lockfile && npm cache clean --force
 
-# Copy source code (no src folder in this project)
+# Copy source code
 COPY . .
 
-# Build the application with security optimizations
+# Build the application with performance optimizations
 RUN npm run build
 
 # Remove source files and dev dependencies after build
-RUN rm -rf src/ node_modules/ package*.json tsconfig.json vite.config.ts
+RUN rm -rf src/ node_modules/ package*.json tsconfig.json vite.config.ts tailwind.config.js postcss.config.js
 
 # Production stage with Nginx
 FROM nginx:alpine AS production

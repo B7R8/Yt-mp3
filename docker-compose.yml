@@ -56,6 +56,7 @@ services:
       - TMP_DIR=${TMP_DIR:-/tmp/app-media}
       - MAX_FILE_AGE_HOURS=${MAX_FILE_AGE_HOURS:-24}
       - MAX_FILE_SIZE=${MAX_FILE_SIZE:-100000000}
+      - MAX_CONCURRENT_JOBS=${MAX_CONCURRENT_JOBS:-5}
       - AUDIO_PROCESSING_ENABLED=${AUDIO_PROCESSING_ENABLED:-true}
       - FFMPEG_TIMEOUT=${FFMPEG_TIMEOUT:-300000}
       - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
@@ -66,6 +67,8 @@ services:
       - HIDE_SERVER_INFO=${HIDE_SERVER_INFO:-true}
       - SECURE_HEADERS=${SECURE_HEADERS:-true}
       - RAPIDAPI_KEY=${RAPIDAPI_KEY:-546e353d67msha411dc0cd0b0b7dp153e93jsn651c16a2c85b}
+      - YT_DLP_ENABLED=${YT_DLP_ENABLED:-true}
+      - FALLBACK_MODE=${FALLBACK_MODE:-false}
     volumes:
       - ./downloads:/app/downloads:rw
       - ./cache:/app/cache:rw
@@ -124,8 +127,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx-main.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/nginx-optimized.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl
     depends_on:
       - frontend

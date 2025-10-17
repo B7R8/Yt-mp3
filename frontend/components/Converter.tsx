@@ -354,7 +354,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
 
     return (
       <>
-        <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-3 md:gap-4">
+        <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-4 md:gap-4">
           <div className="flex-grow flex w-full bg-white dark:bg-[#3a3a3a] border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-brand-500 focus-within:border-brand-500">
             <input
               id="url-input"
@@ -363,7 +363,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               onChange={(e) => handleUrlChange(e.target.value)}
               placeholder="Paste YouTube URL here to convert YouTube to MP3"
               aria-label="YouTube video URL"
-              className="flex-grow px-3 sm:px-3 md:px-4 lg:px-5 py-3 sm:py-3 md:py-3.5 lg:py-4 bg-transparent border-0 rounded-l-lg focus:outline-none focus:ring-0 text-xs sm:text-sm min-w-0"
+              className="flex-grow px-4 sm:px-4 md:px-4 lg:px-5 py-4 sm:py-4 md:py-4 lg:py-4.5 bg-transparent border-0 rounded-l-lg focus:outline-none focus:ring-0 text-sm sm:text-base min-w-0"
               disabled={isLoading}
             />
             {url && (
@@ -378,8 +378,8 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
                   </button>
                </div>
             )}
-            <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 pl-1 sm:pl-2 md:pl-3 lg:pl-4 pr-1 sm:pr-2 md:pr-3 lg:pr-4 bg-transparent">
-              <div className="h-5 sm:h-6 md:h-7 w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-500 to-transparent mr-1 sm:mr-2"></div>
+            <div className="flex items-center gap-2 sm:gap-2.5 md:gap-2.5 pl-2 sm:pl-3 md:pl-3 lg:pl-4 pr-2 sm:pr-3 md:pr-3 lg:pr-4 bg-transparent">
+              <div className="h-6 sm:h-7 md:h-7 w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-500 to-transparent mr-2 sm:mr-3"></div>
               <Tooltip text="Trim Audio">
                 <button 
                   type="button" 
@@ -388,23 +388,23 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
                     e.stopPropagation();
                     handleTrimClick();
                   }}
-                  className={`p-1.5 sm:p-2 md:p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-white transition-colors relative z-10 ${isFetchingDuration ? 'animate-pulse' : ''}`}
+                  className={`p-2 sm:p-2.5 md:p-2.5 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-white transition-colors relative z-10 ${isFetchingDuration ? 'animate-pulse' : ''}`}
                   disabled={isFetchingDuration}
                   aria-label="Open trim audio settings modal"
                 >
                     {isFetchingDuration ? (
                       <LoadingSpinner size="small" />
                     ) : (
-                      <ScissorsIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                      <ScissorsIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-6 md:h-6" />
                     )}
                 </button>
               </Tooltip>
-              <div className="h-5 sm:h-6 w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-500 to-transparent"></div>
+              <div className="h-6 sm:h-7 w-px bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-500 to-transparent"></div>
               <Tooltip text="Quality">
                 <button 
                   type="button"
                   onClick={() => setIsQualityModalOpen(true)}
-                  className="px-2 sm:px-2.5 md:px-3 py-2 sm:py-2.5 md:py-3 rounded-md font-semibold text-gray-700 dark:text-gray-300 text-xs sm:text-sm hover:bg-gray-200 dark:hover:bg-gray-700"
+                  className="px-3 sm:px-3.5 md:px-3.5 py-2.5 sm:py-3 md:py-3 rounded-md font-semibold text-gray-700 dark:text-gray-300 text-sm sm:text-base hover:bg-gray-200 dark:hover:bg-gray-700"
                   aria-label={`Select audio quality, current: ${quality}`}
                 >
                     {quality}
@@ -414,31 +414,31 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
           </div>
           <button
             type="submit"
-            className="flex items-center justify-center gap-1 sm:gap-2 w-full md:w-auto md:shrink-0 px-5 sm:px-6 md:px-8 lg:px-10 py-3 sm:py-3 md:py-3.5 lg:py-4 font-semibold text-white bg-gray-900 dark:bg-[#1f1f1f] rounded-lg hover:bg-black dark:hover:bg-[#1f1f1f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-[#3a3a3a] transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-xs sm:text-sm"
+            className="flex items-center justify-center gap-2 sm:gap-3 w-full md:w-auto md:shrink-0 px-6 sm:px-8 md:px-8 lg:px-10 py-4 sm:py-4 md:py-4 lg:py-4.5 font-semibold text-white bg-gray-900 dark:bg-[#1f1f1f] rounded-lg hover:bg-black dark:hover:bg-[#1f1f1f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-[#3a3a3a] transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-sm sm:text-base"
             disabled={isLoading}
           >
-            {isLoading ? <LoadingSpinner className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"/> : 'Convert'}
-            {!isLoading && <RefreshIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />}
+            {isLoading ? <LoadingSpinner className="w-5 h-5 sm:w-6 sm:h-6 md:w-6 md:h-6"/> : 'Convert'}
+            {!isLoading && <RefreshIcon className="w-5 h-5 sm:w-6 sm:h-6 md:w-6 md:h-6" />}
           </button>
         </form>
         
         {/* Auto Download Toggle */}
-        <div className="flex items-center justify-center mt-3">
-          <div className="flex items-center gap-2 sm:gap-3 bg-gray-100 dark:bg-[#2d2d2d] rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
-            <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div className="flex items-center justify-center mt-4">
+          <div className="flex items-center gap-3 sm:gap-4 md:gap-3 bg-gray-100 dark:bg-[#2d2d2d] rounded-lg px-4 py-2 sm:px-5 sm:py-2.5 md:px-4 md:py-2">
+            <span className="text-sm sm:text-base md:text-base font-medium text-gray-700 dark:text-gray-300">
               Auto Download
             </span>
             <button
               type="button"
               onClick={() => setAutoDownload(!autoDownload)}
-              className={`relative inline-flex h-4 w-8 sm:h-5 sm:w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 ${
+              className={`relative inline-flex h-5 w-10 sm:h-6 sm:w-11 md:h-5 md:w-10 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 ${
                 autoDownload ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
               }`}
               aria-label={`Toggle auto download - currently ${autoDownload ? 'enabled' : 'disabled'}`}
             >
               <span
-                className={`inline-block h-2.5 w-2.5 sm:h-3 sm:w-3 transform rounded-full bg-white transition-transform ${
-                  autoDownload ? 'translate-x-4 sm:translate-x-5' : 'translate-x-1'
+                className={`inline-block h-3 w-3 sm:h-4 sm:w-4 md:h-3 md:w-3 transform rounded-full bg-white transition-transform ${
+                  autoDownload ? 'translate-x-5 sm:translate-x-6 md:translate-x-5' : 'translate-x-1'
                 }`}
               />
             </button>
@@ -470,7 +470,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   };
 
   return (
-    <div className="w-full max-w-full md:max-w-3xl lg:max-w-4xl mx-auto bg-gray-100/50 dark:bg-[#2d2d2d] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-3 sm:p-5 md:p-6 lg:p-7 xl:p-8 transition-all duration-300 flex items-center justify-center">
+    <div className="w-full max-w-full md:max-w-2xl lg:max-w-3xl mx-auto bg-gray-100/50 dark:bg-[#2d2d2d] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-4 sm:p-6 md:p-6 lg:p-8 xl:p-10 transition-all duration-300 flex items-center justify-center">
       <div className="w-full">
         {renderContent()}
       </div>

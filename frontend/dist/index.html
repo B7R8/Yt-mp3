@@ -2,42 +2,52 @@
 <html lang="en" itemscope itemtype="https://schema.org/WebApplication">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    
+    <!-- Favicon -->
     <link rel="icon" type="image/webp" href="/Favicon.webp" sizes="any" />
-    <link rel="icon" type="image/webp" href="/Favicon.webp" sizes="32x32" />
-    <link rel="icon" type="image/webp" href="/Favicon.webp" sizes="48x48" />
-    <link rel="icon" type="image/webp" href="/Favicon.webp" sizes="64x64" />
     <link rel="apple-touch-icon" href="/Favicon.webp" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-          <title>YouTube to MP3 - Free Converter & Downloader</title>
-          <meta name="description" content="Convert YouTube to MP3 free! YouTube to MP3 converter & downloader. YT to MP3, YouTube video to MP3, YouTube MP3 downloader. Fast & secure." />
-          <meta name="keywords" content="youtube to mp3, youtube to mp3 converter, youtube to mp3 downloader, convert youtube to mp3, youtube video to mp3, yt to mp3, youtube mp3, yt mp3, youtube to mp3 converter" />
+    
+    <!-- SEO Meta Tags -->
+    <title>YouTube to MP3 – Fast & Free YouTube to MP3 Converter</title>
+    <meta name="description" content="Convert YouTube to MP3 instantly with our free YouTube to MP3 converter. Download high-quality MP3s from your favorite YouTube videos easily." />
+    <meta name="keywords" content="youtube to mp3, youtube to mp3 converter, youtube to mp3 downloader, convert youtube to mp3, youtube video to mp3, yt to mp3, youtube mp3, yt mp3, youtube to mp3 converter" />
     <meta name="author" content="SaveYTB" />
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
     <meta name="revisit-after" content="7 days" />
     
     <!-- Open Graph Meta Tags -->
-          <meta property="og:title" content="YouTube to MP3 - Free Converter & Downloader" />
-          <meta property="og:description" content="Convert YouTube to MP3 free! YouTube to MP3 converter & downloader. YT to MP3, YouTube video to MP3, YouTube MP3 downloader. Fast & secure." />
+    <meta property="og:title" content="YouTube to MP3 – Fast & Free YouTube to MP3 Converter" />
+    <meta property="og:description" content="Convert YouTube to MP3 instantly and download high-quality MP3s easily." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://saveytb.com/" />
     <meta property="og:site_name" content="SaveYTB" />
     <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://saveytb.com/logo.webp" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="YouTube to MP3 Converter - SaveYTB" />
     
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content="YouTube to MP3 - Free Converter & Downloader" />
-          <meta name="twitter:description" content="Convert YouTube to MP3 free! YouTube to MP3 converter & downloader. YT to MP3, YouTube video to MP3, YouTube MP3 downloader. Fast & secure." />
+    <meta name="twitter:title" content="YouTube to MP3 – Fast & Free Converter" />
+    <meta name="twitter:description" content="Quickly convert YouTube videos to MP3 in seconds. Free and easy to use." />
+    <meta name="twitter:image" content="https://saveytb.com/logo.webp" />
+    <meta name="twitter:image:alt" content="YouTube to MP3 Converter - SaveYTB" />
     
     <!-- Additional SEO Meta Tags -->
     <meta name="theme-color" content="#f97316" />
     <meta name="msapplication-TileColor" content="#f97316" />
     <link rel="canonical" href="https://saveytb.com/" />
     
-    <!-- Additional SEO Meta Tags -->
+    <!-- Performance and Security -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    
+    <!-- Mobile App Meta Tags -->
     <meta name="format-detection" content="telephone=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -48,17 +58,26 @@
     <meta name="msapplication-starturl" content="/" />
     
     <!-- Preconnect to external domains for performance -->
-    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
     
     <!-- DNS Prefetch for better performance -->
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     
     <!-- Resource hints for maximum performance -->
-    <link rel="preload" href="/logo.webp" as="image" type="image/webp">
-    <link rel="preload" href="/logo-dm.webp" as="image" type="image/webp">
-    <link rel="preload" href="/Favicon.webp" as="image" type="image/webp">
+    <link rel="preload" href="/logo.webp" as="image" type="image/webp" />
+    <link rel="preload" href="/logo-dm.webp" as="image" type="image/webp" />
+    <link rel="preload" href="/Favicon.webp" as="image" type="image/webp" />
     
-    <!-- Theme initialization script - MUST be before Tailwind -->
+    <!-- Font preloading for better performance -->
+    <link rel="preload" href="/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Inter-SemiBold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Inter-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    
+    <!-- Critical CSS inlined for immediate rendering -->
+    <style>*{font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif}*,body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}body{background-color:#f9fafb;margin:0;padding:0;text-rendering:optimizeLegibility;transition:background-color .3s ease-in-out}@media (prefers-color-scheme:dark){body{background-color:#1a1a1a!important}}.bg-gray-50{background-color:#f9fafb;transition:background-color .3s ease-in-out}.dark .bg-gray-50{background-color:#1a1a1a}.text-gray-900{color:#111827;transition:color .3s ease-in-out}.dark .text-gray-900{color:#f9fafb}.text-gray-600{color:#4b5563;transition:color .3s ease-in-out}.dark .text-gray-600{color:#9ca3af}.bg-white{background-color:#fff;transition:background-color .3s ease-in-out}.dark .bg-white{background-color:#1f2937}.rounded-lg{border-radius:.5rem}.shadow-md{box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06)}.p-4{padding:1rem}.mb-4{margin-bottom:1rem}.flex{display:flex}.items-center{align-items:center}.justify-center{justify-content:center}.text-center{text-align:center}.font-bold{font-weight:700}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.w-full{width:100%}.max-w-2xl{max-width:42rem}.mx-auto{margin-left:auto;margin-right:auto}.px-4{padding-left:1rem;padding-right:1rem}.py-2{padding-bottom:.5rem;padding-top:.5rem}.bg-gray-900{background-color:#111827;transition:background-color .3s ease-in-out}.dark .bg-gray-900{background-color:#1f2937}.text-white{color:#fff;transition:color .3s ease-in-out}.hover\\:bg-gray-800:hover{background-color:#1f2937}.focus\\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.transition-colors{transition-duration:.3s;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1)}.disabled\\:bg-gray-400:disabled{background-color:#9ca3af}.dark .disabled\\:bg-gray-400:disabled{background-color:#6b7280}.disabled\\:cursor-not-allowed:disabled{cursor:not-allowed}html{transition:background-color .3s ease-in-out}*{transition:background-color .3s ease-in-out,color .3s ease-in-out,border-color .3s ease-in-out}</style>
+    
+    <!-- Theme initialization script - MUST be before any other scripts -->
     <script>
       // Prevent theme flash by applying theme immediately
       (function() {
@@ -97,271 +116,146 @@
       })();
     </script>
     
-    <!-- Tailwind CSS CDN for immediate styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                '50': '#fff7ed',
-                '100': '#ffedd5',
-                '200': '#fed7aa',
-                '300': '#fdba74',
-                '400': '#fb923c',
-                '500': '#f97316',
-                '600': '#ea580c',
-                '700': '#c2410c',
-                '800': '#9a3412',
-                '900': '#7c2d12',
-                '950': '#431407',
-              },
-            }
-          },
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "YouTube to MP3 – Fast & Free YouTube to MP3 Converter",
+      "description": "Convert YouTube to MP3 instantly with our free YouTube to MP3 converter. Download high-quality MP3s from your favorite YouTube videos easily.",
+      "url": "https://saveytb.com/",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web Browser",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      },
+      "creator": {
+        "@type": "Organization",
+        "name": "SaveYTB",
+        "url": "https://saveytb.com/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "SaveYTB",
+        "url": "https://saveytb.com/"
+      },
+      "keywords": "youtube to mp3, youtube to mp3 converter, youtube to mp3 downloader, convert youtube to mp3, youtube video to mp3, yt to mp3, youtube mp3, yt mp3, youtube to mp3 converter",
+      "featureList": [
+        "YouTube to MP3 conversion",
+        "YouTube to MP3 converter",
+        "YouTube to MP3 downloader",
+        "Convert YouTube to MP3",
+        "YouTube video to MP3",
+        "YT to MP3",
+        "YouTube MP3",
+        "YT MP3",
+        "Free YouTube to MP3 converter",
+        "High quality audio conversion",
+        "No registration required",
+        "Fast processing speed",
+        "Secure and private"
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "1250",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "screenshot": "https://saveytb.com/logo.webp",
+      "softwareVersion": "2.0",
+      "datePublished": "2024-01-01",
+      "dateModified": "2024-12-19"
+    }
+    </script>
+    
+    <!-- Additional Structured Data for FAQ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How to convert YouTube to MP3?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Simply paste your YouTube video URL into our converter, select your preferred audio quality, and click convert. Your MP3 file will be ready for download in seconds."
+          }
         },
-        darkMode: 'class',
-      }
-    </script>
-    
-          <!-- Critical CSS inlined for immediate rendering -->
-          <style>
-            /* Source Code Protection CSS */
-            * {
-              -webkit-user-select: none !important;
-              -moz-user-select: none !important;
-              -ms-user-select: none !important;
-              user-select: none !important;
-              -webkit-touch-callout: none !important;
-              -webkit-tap-highlight-color: transparent !important;
-            }
-            
-            /* Disable text selection */
-            body, html, div, span, p, a, h1, h2, h3, h4, h5, h6 {
-              -webkit-user-select: none !important;
-              -moz-user-select: none !important;
-              -ms-user-select: none !important;
-              user-select: none !important;
-            }
-            
-            /* Hide source code from inspection */
-            script, style {
-              display: none !important;
-            }
-            
-            /* Disable image saving */
-            img {
-              -webkit-user-drag: none !important;
-              -moz-user-drag: none !important;
-              pointer-events: none !important;
-            }
-            
-            /* Disable all interactions that could reveal source */
-            * {
-              -webkit-touch-callout: none !important;
-              -webkit-user-select: none !important;
-              -khtml-user-select: none !important;
-              -moz-user-select: none !important;
-              -ms-user-select: none !important;
-              user-select: none !important;
-            }
-            
-            /* Critical CSS for above-the-fold content with smooth transitions */
-      *{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-      body{text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background-color:#f9fafb;margin:0;padding:0;transition:background-color 0.3s ease-in-out}
-      @media (prefers-color-scheme:dark){body{background-color:#1a1a1a!important}}
-      .bg-gray-50{background-color:#f9fafb;transition:background-color 0.3s ease-in-out}
-      .dark .bg-gray-50{background-color:#1a1a1a}
-      .text-gray-900{color:#111827;transition:color 0.3s ease-in-out}
-      .dark .text-gray-900{color:#f9fafb}
-      .text-gray-600{color:#4b5563;transition:color 0.3s ease-in-out}
-      .dark .text-gray-600{color:#9ca3af}
-      .bg-white{background-color:#ffffff;transition:background-color 0.3s ease-in-out}
-      .dark .bg-white{background-color:#1f2937}
-      .rounded-lg{border-radius:0.5rem}
-      .shadow-md{box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06)}
-      .p-4{padding:1rem}
-      .mb-4{margin-bottom:1rem}
-      .flex{display:flex}
-      .items-center{align-items:center}
-      .justify-center{justify-content:center}
-      .text-center{text-align:center}
-      .font-bold{font-weight:700}
-      .text-xl{font-size:1.25rem;line-height:1.75rem}
-      .text-sm{font-size:0.875rem;line-height:1.25rem}
-      .w-full{width:100%}
-      .max-w-2xl{max-width:42rem}
-      .mx-auto{margin-left:auto;margin-right:auto}
-      .px-4{padding-left:1rem;padding-right:1rem}
-      .py-2{padding-top:0.5rem;padding-bottom:0.5rem}
-      .bg-gray-900{background-color:#111827;transition:background-color 0.3s ease-in-out}
-      .dark .bg-gray-900{background-color:#1f2937}
-      .text-white{color:#ffffff;transition:color 0.3s ease-in-out}
-      .hover\\:bg-gray-800:hover{background-color:#1f2937}
-      .focus\\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}
-      .transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(0.4,0,0.2,1);transition-duration:300ms}
-      .disabled\\:bg-gray-400:disabled{background-color:#9ca3af}
-      .dark .disabled\\:bg-gray-400:disabled{background-color:#6b7280}
-      .disabled\\:cursor-not-allowed:disabled{cursor:not-allowed}
-      
-      /* Global smooth theme transitions */
-      html{transition:background-color 0.3s ease-in-out}
-      *{transition:background-color 0.3s ease-in-out,color 0.3s ease-in-out,border-color 0.3s ease-in-out}
-    </style>
-    
-    
-          <!-- JSON-LD Structured Data -->
-          <script type="application/ld+json">
-          {
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "YouTube to MP3 - Free Converter & Downloader",
-            "description": "Convert YouTube to MP3 free! YouTube to MP3 converter & downloader. YT to MP3, YouTube video to MP3, YouTube MP3 downloader. Fast & secure.",
-            "url": "https://saveytb.com/",
-            "applicationCategory": "MultimediaApplication",
-            "operatingSystem": "Web Browser",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD"
-            },
-            "creator": {
-              "@type": "Organization",
-              "name": "SaveYTB"
-            },
-            "keywords": "youtube to mp3, youtube to mp3 converter, youtube to mp3 downloader, convert youtube to mp3, youtube video to mp3, yt to mp3, youtube mp3, yt mp3, youtube to mp3 converter",
-            "featureList": [
-              "YouTube to MP3 conversion",
-              "YouTube to MP3 converter",
-              "YouTube to MP3 downloader",
-              "Convert YouTube to MP3",
-              "YouTube video to MP3",
-              "YT to MP3",
-              "YouTube MP3",
-              "YT MP3",
-              "Free YouTube to MP3 converter",
-              "High quality audio conversion",
-              "No registration required",
-              "Fast processing speed",
-              "Secure and private"
-            ]
+        {
+          "@type": "Question",
+          "name": "Is YouTube to MP3 conversion free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, our YouTube to MP3 converter is completely free to use. No registration required, no hidden fees, and no limits on conversions."
           }
-          </script>
-    
-    <!-- Source Code Protection -->
-    <script>
-      // Disable right-click context menu
-      document.addEventListener('contextmenu', e => e.preventDefault());
-      
-      // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S, Ctrl+A, Ctrl+P
-      document.addEventListener('keydown', e => {
-        if (e.key === 'F12' || 
-            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-            (e.ctrlKey && e.key === 'U') ||
-            (e.ctrlKey && e.key === 'S') ||
-            (e.ctrlKey && e.key === 'A') ||
-            (e.ctrlKey && e.key === 'P') ||
-            (e.ctrlKey && e.key === 'H') ||
-            (e.ctrlKey && e.key === 'R') ||
-            (e.altKey && e.key === 'F4')) {
-          e.preventDefault();
-          return false;
-        }
-      });
-      
-      // Disable text selection
-      document.addEventListener('selectstart', e => e.preventDefault());
-      
-      // Disable drag
-      document.addEventListener('dragstart', e => e.preventDefault());
-      
-      // Clear console on page load
-      console.clear();
-      
-      // Override console methods
-      ['log', 'info', 'warn', 'error', 'debug', 'trace', 'table', 'group', 'groupEnd', 'dir', 'dirxml', 'assert', 'count', 'markTimeline', 'profile', 'profileEnd', 'time', 'timeEnd', 'timeStamp', 'timeline', 'timelineEnd'].forEach(method => {
-        console[method] = function() {};
-      });
-      
-      // Disable dev tools detection
-      let devtools = {open: false, orientation: null};
-      setInterval(() => {
-        if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
-          if (!devtools.open) {
-            devtools.open = true;
-            document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Arial;font-size:24px;color:#333;">Access Denied</div>';
+        },
+        {
+          "@type": "Question",
+          "name": "What audio qualities are available?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We support multiple audio quality options including 64K, 128K, 192K, 256K, and 320K MP3 formats to suit your needs."
           }
         }
-      }, 500);
-      
-      // Disable source view
-      window.addEventListener('beforeunload', () => {
-        document.body.innerHTML = '';
-      });
-      
-      // Disable print
-      window.addEventListener('beforeprint', e => {
-        e.preventDefault();
-        return false;
-      });
-      
-      // Disable save page
-      document.addEventListener('keydown', e => {
-        if (e.ctrlKey && e.key === 's') {
-          e.preventDefault();
-          return false;
-        }
-      });
-      
-      // Hide all scripts and styles from DOM
-      document.addEventListener('DOMContentLoaded', () => {
-        const scripts = document.querySelectorAll('script');
-        const styles = document.querySelectorAll('style');
-        scripts.forEach(script => script.style.display = 'none');
-        styles.forEach(style => style.style.display = 'none');
-      });
+      ]
+    }
     </script>
     
-    <!-- Google tag (gtag.js) - deferred for better performance -->
+    <!-- BreadcrumbList Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://saveytb.com/"
+        }
+      ]
+    }
+    </script>
+    
+    <!-- Google Analytics - Deferred for better performance -->
     <script defer src="https://www.googletagmanager.com/gtag/js?id=G-KCJMJ5D403"></script>
     <script defer>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
-      gtag('config', 'G-KCJMJ5D403');
+      gtag('config', 'G-KCJMJ5D403', {
+        page_title: document.title,
+        page_location: window.location.href
+      });
     </script>
     
-
-  <script type="importmap" defer>
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0"
-  }
-}
-</script>
-  <script type="module" crossorigin src="/assets/DUHTt3my.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/D_hYkIIj.js">
-  <link rel="modulepreload" crossorigin href="/assets/BJxXEwmy.js">
-</head>
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
+    <script type="module" crossorigin src="/assets/a900B5ST.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/DqNu8C8O.js">
+    <link rel="modulepreload" crossorigin href="/assets/DeKEQ-kQ.js">
+    <link rel="modulepreload" crossorigin href="/assets/toGBMhPM.js">
+    <link rel="stylesheet" crossorigin href="/assets/Td737mzA.css">
+  </head>
   <body class="bg-gray-50 transition-colors duration-300" style="background-color: #f9fafb; transition: background-color 0.3s ease-in-out;" data-theme="light">
-    <style>
-      @media (prefers-color-scheme: dark) {
-        body {
-          background-color: #1a1a1a !important;
-          transition: background-color 0.3s ease-in-out !important;
-        }
-      }
-      .dark body {
-        background-color: #1a1a1a !important;
-        transition: background-color 0.3s ease-in-out !important;
-      }
-      body {
-        transition: background-color 0.3s ease-in-out !important;
-      }
-    </style>
     <div id="root"></div>
   </body>
 </html>
