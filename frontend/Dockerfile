@@ -17,11 +17,9 @@ RUN npm ci --frozen-lockfile && npm cache clean --force
 # Copy source code
 COPY . .
 
-# Build the application with performance optimizations
-RUN npm run build
-
-# Remove source files and dev dependencies after build
-RUN rm -rf src/ node_modules/ package*.json tsconfig.json vite.config.ts tailwind.config.js postcss.config.js
+# Build the application with performance optimizations and cleanup
+RUN npm run build && \
+    rm -rf src/ node_modules/ package*.json tsconfig.json vite.config.ts tailwind.config.js postcss.config.js
 
 # Production stage with Nginx
 FROM nginx:alpine AS production
