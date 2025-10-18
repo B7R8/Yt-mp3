@@ -8,6 +8,7 @@ export interface ConversionJob {
   error_message?: string;
   quality_message?: string;
   direct_download_url?: string; // Direct API download URL
+  processed_path?: string; // Local file path on server
   created_at: Date;
   updated_at: Date;
 }

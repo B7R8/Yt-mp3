@@ -2,6 +2,7 @@ import sqlite3 from 'sqlite3';
 declare const db: sqlite3.Database;
 export declare function initializeDatabase(): Promise<void>;
 export declare function ensureDirectDownloadUrlColumn(): Promise<void>;
+export declare function ensureProcessedPathColumn(): Promise<void>;
 export declare function query(text: string, params?: unknown[]): Promise<{
     rows: any[];
     rowCount: number;

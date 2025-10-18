@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializeDatabase = initializeDatabase;
 exports.ensureDirectDownloadUrlColumn = ensureDirectDownloadUrlColumn;
+exports.ensureProcessedPathColumn = ensureProcessedPathColumn;
 exports.query = query;
 exports.getRow = getRow;
 exports.runQuery = runQuery;
@@ -34,6 +35,7 @@ async function initializeDatabase() {
         error_message TEXT,
         quality_message TEXT,
         direct_download_url TEXT,
+        processed_path TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
@@ -51,6 +53,8 @@ async function initializeDatabase() {
     `);
         // Add direct_download_url column if it doesn't exist
         await ensureDirectDownloadUrlColumn();
+        // Add processed_path column if it doesn't exist
+        await ensureProcessedPathColumn();
         console.log('SQLite database initialized successfully');
     }
     catch (error) {
@@ -70,6 +74,24 @@ async function ensureDirectDownloadUrlColumn() {
     catch (error) {
         if (error.message.includes('duplicate column name') || error.message.includes('already exists')) {
             console.log('Column direct_download_url already exists');
+        }
+        else {
+            console.log('Column might already exist:', error.message);
+        }
+    }
+}
+// Ensure processed_path column exists
+async function ensureProcessedPathColumn() {
+    try {
+        await dbRun(`
+      ALTER TABLE conversions 
+      ADD COLUMN processed_path TEXT;
+    `);
+        console.log('🗃️ Database schema updated successfully (processed_path added)');
+    }
+    catch (error) {
+        if (error.message.includes('duplicate column name') || error.message.includes('already exists')) {
+            console.log('Column processed_path already exists');
         }
         else {
             console.log('Column might already exist:', error.message);

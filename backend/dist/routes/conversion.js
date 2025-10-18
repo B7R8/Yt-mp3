@@ -152,13 +152,31 @@ router.get('/status/:id', rateLimiter_1.statusRateLimit, validation_1.validateJo
             expires_at: job.expires_at
         };
         // Add download URL if conversion is completed
-        if (job.status === 'completed' && job.direct_download_url) {
-            response.download_url = job.direct_download_url;
-            response.download_filename = `${job.video_title || 'converted'}.mp3`;
-            response.download_type = 'direct'; // Indicates this is a direct download
-            // For direct download URLs, we don't need file validation
-            response.file_valid = true;
-            response.file_size = 0; // Unknown for external URLs
+        logger_1.default.info(`🔍 [Job ${job.id}] Status check: status=${job.status}, processed_path=${job.processed_path}, direct_download_url=${job.direct_download_url}`);
+        if (job.status === 'completed') {
+            if (job.processed_path) {
+                // Local file available - preferred method
+                response.download_url = `/api/download/${job.id}`;
+                response.download_filename = `${job.video_title || 'converted'}.mp3`;
+                response.download_type = 'local'; // Indicates this is a local file
+                response.file_valid = true;
+                response.file_size = 0; // Will be determined during download
+                logger_1.default.info(`📁 [Job ${job.id}] Status: Local file available at ${job.processed_path}`);
+                logger_1.default.info(`🔗 [Job ${job.id}] Status Response: download_url=${response.download_url}, file_valid=${response.file_valid}`);
+            }
+            else if (job.direct_download_url) {
+                // Fallback to external URL
+                response.download_url = job.direct_download_url;
+                response.download_filename = `${job.video_title || 'converted'}.mp3`;
+                response.download_type = 'direct'; // Indicates this is a direct download
+                response.file_valid = true;
+                response.file_size = 0; // Unknown for external URLs
+                logger_1.default.info(`🔗 [Job ${job.id}] Status: External download URL available`);
+                logger_1.default.info(`🔗 [Job ${job.id}] Status Response: download_url=${response.download_url}, file_valid=${response.file_valid}`);
+            }
+            else {
+                logger_1.default.warn(`⚠️ [Job ${job.id}] Status: Completed but no download URL available (processed_path: ${job.processed_path}, direct_download_url: ${job.direct_download_url})`);
+            }
         }
         // Add ffmpeg logs if requested by admin (you can add admin check here)
         if (req.query.includeLogs === 'true' && job.ffmpeg_logs) {
@@ -201,7 +219,67 @@ router.get('/download/:id', validation_1.validateJobId, async (req, res) => {
                 message: `Conversion is ${job.status}. Please wait for completion.`
             });
         }
-        // Check if we have a direct download URL (external API)
+        // Check if we have a local file first (preferred)
+        if (job.processed_path) {
+            const filename = `${job.video_title || 'converted'}.mp3`;
+            logger_1.default.info(`🎵 Starting download for local file: ${filename}`);
+            logger_1.default.info(`📁 Local file path: ${job.processed_path}`);
+            // Set proper download headers with RFC 5987 encoding for international characters
+            res.setHeader('Content-Type', 'audio/mpeg');
+            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            res.setHeader('X-Frame-Options', 'DENY');
+            res.setHeader('X-XSS-Protection', '1; mode=block');
+            try {
+                // Check if file exists and get its size
+                const fs = require('fs');
+                const stats = await fs.promises.stat(job.processed_path);
+                if (stats.size === 0) {
+                    logger_1.default.error(`❌ File is empty: ${job.processed_path}, size: ${stats.size}`);
+                    return res.status(500).json({
+                        success: false,
+                        message: 'File is empty or corrupted'
+                    });
+                }
+                if (stats.size > 1073741824) { // 1GB limit
+                    logger_1.default.error(`❌ File too large: ${job.processed_path}, size: ${stats.size} bytes`);
+                    return res.status(500).json({
+                        success: false,
+                        message: 'File is too large'
+                    });
+                }
+                // Set content length for proper download progress
+                res.setHeader('Content-Length', stats.size);
+                // Stream the local file
+                const fileStream = fs.createReadStream(job.processed_path);
+                fileStream.pipe(res);
+                fileStream.on('error', (error) => {
+                    logger_1.default.error(`❌ Error streaming local file: ${error.message}`);
+                    if (!res.headersSent) {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error reading file'
+                        });
+                    }
+                });
+                logger_1.default.info(`✅ Successfully streaming local file: ${job.processed_path}`);
+                return;
+            }
+            catch (error) {
+                logger_1.default.error(`❌ Error accessing local file: ${error}`);
+                if (!res.headersSent) {
+                    res.status(500).json({
+                        success: false,
+                        message: 'File not accessible'
+                    });
+                }
+                return;
+            }
+        }
+        // Fallback to direct download URL (external API) if no local file
         if (job.direct_download_url) {
             const originalFilename = job.video_title || 'converted';
             const safeFilename = originalFilename.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_');

@@ -8,6 +8,7 @@ export interface ConversionJob {
     error_message?: string;
     quality_message?: string;
     direct_download_url?: string;
+    processed_path?: string;
     created_at: Date;
     updated_at: Date;
 }

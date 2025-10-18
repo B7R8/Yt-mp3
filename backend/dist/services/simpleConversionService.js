@@ -46,7 +46,7 @@ const errorHandler_1 = require("../utils/errorHandler");
 const youtubeMp3ApiService_1 = require("./youtubeMp3ApiService");
 class SimpleConversionService {
     constructor() {
-        this.downloadsDir = process.env.DOWNLOADS_DIR || './downloads';
+        this.downloadsDir = process.env.DOWNLOADS_DIR || '../downloads';
         this.apiService = new youtubeMp3ApiService_1.YouTubeMp3ApiService();
         this.ensureDownloadsDir();
     }
@@ -197,9 +197,27 @@ class SimpleConversionService {
             const filename = `${result.title || `video_${videoId}`}.mp3`;
             logger_1.default.info(`📁 [Job ${jobId}] Generated filename: ${filename}`);
             logger_1.default.info(`🔗 [Job ${jobId}] Direct download URL: ${result.downloadUrl}`);
-            // Store the direct download URL in the database instead of a local file
-            await this.updateJobStatus(jobId, 'completed', filename, undefined, undefined, result.downloadUrl);
-            logger_1.default.info(`✅ [Job ${jobId}] Conversion completed successfully with direct download URL`);
+            // Download the file locally to the server's downloads folder
+            const localFilePath = path_1.default.join(this.downloadsDir, filename);
+            logger_1.default.info(`📥 [Job ${jobId}] Downloading file to local path: ${localFilePath}`);
+            try {
+                if (result.downloadUrl) {
+                    await this.downloadFileToLocal(result.downloadUrl, localFilePath);
+                    logger_1.default.info(`✅ [Job ${jobId}] File downloaded successfully to: ${localFilePath}`);
+                }
+                else {
+                    throw new Error('No download URL available');
+                }
+                // Store the local file path in the database
+                await this.updateJobStatus(jobId, 'completed', filename, undefined, undefined, undefined, localFilePath);
+                logger_1.default.info(`✅ [Job ${jobId}] Conversion completed successfully with local file`);
+            }
+            catch (downloadError) {
+                logger_1.default.error(`❌ [Job ${jobId}] Failed to download file locally:`, downloadError);
+                // Fallback to direct download URL if local download fails
+                await this.updateJobStatus(jobId, 'completed', filename, undefined, undefined, result.downloadUrl);
+                logger_1.default.info(`⚠️ [Job ${jobId}] Fallback to direct download URL due to local download failure`);
+            }
         }
         catch (error) {
             logger_1.default.error(`❌ [Job ${jobId}] Conversion failed:`, error);
@@ -249,7 +267,8 @@ class SimpleConversionService {
                 mp3_filename: jobData.mp3_filename,
                 error_message: jobData.error_message,
                 quality_message: jobData.quality_message,
-                direct_download_url: jobData.direct_download_url, // Now properly stored in dedicated column
+                direct_download_url: jobData.direct_download_url,
+                processed_path: jobData.processed_path, // Add missing processed_path field
                 created_at: new Date(jobData.created_at),
                 updated_at: new Date(jobData.updated_at)
             };
@@ -262,15 +281,15 @@ class SimpleConversionService {
     /**
      * Update job status
      */
-    async updateJobStatus(jobId, status, mp3Filename, errorMessage, qualityMessage, directDownloadUrl) {
+    async updateJobStatus(jobId, status, mp3Filename, errorMessage, qualityMessage, directDownloadUrl, localFilePath) {
         try {
             // Use the unified query function that works with both SQLite and PostgreSQL
             const { queryWithParams } = await Promise.resolve().then(() => __importStar(require('../config/database')));
             // Use database-agnostic query with proper parameter placeholders
             await queryWithParams(`UPDATE conversions 
-         SET status = $1, mp3_filename = $2, error_message = $3, quality_message = $4, direct_download_url = $5, updated_at = CURRENT_TIMESTAMP 
-         WHERE id = $6`, [status, mp3Filename, errorMessage, qualityMessage, directDownloadUrl, jobId]);
-            logger_1.default.info(`📝 Updated job ${jobId} status to: ${status}${directDownloadUrl ? ' with download URL' : ''}`);
+         SET status = $1, mp3_filename = $2, error_message = $3, quality_message = $4, direct_download_url = $5, processed_path = $6, updated_at = CURRENT_TIMESTAMP 
+         WHERE id = $7`, [status, mp3Filename, errorMessage, qualityMessage, directDownloadUrl, localFilePath, jobId]);
+            logger_1.default.info(`📝 Updated job ${jobId} status to: ${status}${directDownloadUrl ? ' with download URL' : ''}${localFilePath ? ' with local file' : ''}`);
         }
         catch (error) {
             logger_1.default.error('Failed to update job status:', error);
@@ -368,6 +387,70 @@ class SimpleConversionService {
         catch (error) {
             logger_1.default.error('Cleanup failed:', error);
         }
+    }
+    /**
+     * Download file from external URL to local path
+     */
+    async downloadFileToLocal(url, filePath) {
+        return new Promise((resolve, reject) => {
+            const https = require('https');
+            const http = require('http');
+            const urlModule = require('url');
+            const parsedUrl = urlModule.parse(url);
+            const isHttps = parsedUrl.protocol === 'https:';
+            const client = isHttps ? https : http;
+            const file = require('fs').createWriteStream(filePath);
+            const options = {
+                hostname: parsedUrl.hostname,
+                port: parsedUrl.port,
+                path: parsedUrl.path,
+                method: 'GET',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'audio/mpeg, audio/*, */*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive'
+                },
+                timeout: 60000 // 60 seconds timeout
+            };
+            const req = client.request(options, (res) => {
+                logger_1.default.info(`📡 Download response status: ${res.statusCode} for URL: ${url}`);
+                if (res.statusCode === 404) {
+                    file.close();
+                    require('fs').unlink(filePath).catch(() => { }); // Clean up on error
+                    reject(new Error(`Download failed with status: ${res.statusCode} - File not found. The download link may have expired.`));
+                    return;
+                }
+                if (res.statusCode !== 200) {
+                    file.close();
+                    require('fs').unlink(filePath).catch(() => { }); // Clean up on error
+                    reject(new Error(`Download failed with status: ${res.statusCode}`));
+                    return;
+                }
+                res.pipe(file);
+                file.on('finish', () => {
+                    file.close();
+                    logger_1.default.info(`✅ File downloaded successfully: ${filePath}`);
+                    resolve();
+                });
+                file.on('error', (error) => {
+                    logger_1.default.error(`File write error: ${error.message}`);
+                    require('fs').unlink(filePath).catch(() => { }); // Clean up on error
+                    reject(error);
+                });
+            });
+            req.on('error', (error) => {
+                logger_1.default.error(`Download request error: ${error.message}`);
+                reject(error);
+            });
+            req.on('timeout', () => {
+                logger_1.default.error(`Download timeout for URL: ${url}`);
+                req.destroy();
+                reject(new Error('Download timeout'));
+            });
+            req.end();
+        });
     }
 }
 exports.SimpleConversionService = SimpleConversionService;

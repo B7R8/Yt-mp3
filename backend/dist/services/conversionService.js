@@ -13,7 +13,7 @@ const database_1 = require("../config/database");
 const errorHandler_1 = require("./errorHandler");
 class ConversionService {
     constructor() {
-        this.downloadsDir = process.env.DOWNLOADS_DIR || './downloads';
+        this.downloadsDir = process.env.DOWNLOADS_DIR || '../downloads';
         this.tempDir = process.env.TEMP_DIR || './temp';
         this.maxConcurrentJobs = parseInt(process.env.MAX_CONCURRENT_JOBS || '5');
         this.processingJobs = new Map();

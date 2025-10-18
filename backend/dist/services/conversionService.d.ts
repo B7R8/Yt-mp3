@@ -16,6 +16,7 @@ export interface ConversionJob {
     error_message?: string;
     quality_message?: string;
     direct_download_url?: string;
+    processed_path?: string;
     quality?: string;
     trim_start?: number;
     trim_duration?: number;

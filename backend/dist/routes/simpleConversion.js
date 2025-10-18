@@ -113,11 +113,26 @@ router.get('/status/:id', rateLimiter_1.statusRateLimit, validation_1.validateJo
             created_at: job.created_at,
             updated_at: job.updated_at
         };
-        // Add direct download URL if conversion is completed
-        if (job.status === 'completed' && job.direct_download_url) {
-            response.download_url = job.direct_download_url; // Direct API download URL
-            response.download_filename = job.mp3_filename;
-            response.download_type = 'direct'; // Indicates this is a direct download
+        // Add download URL if conversion is completed
+        if (job.status === 'completed') {
+            if (job.processed_path) {
+                // Local file available - preferred method
+                response.download_url = `/api/download/${job.id}`;
+                response.download_filename = job.mp3_filename;
+                response.download_type = 'local'; // Indicates this is a local file
+                response.file_valid = true;
+                response.file_size = 0; // Will be determined during download
+                logger_1.default.info(`📁 [Job ${job.id}] Status: Local file available at ${job.processed_path}`);
+            }
+            else if (job.direct_download_url) {
+                // Fallback to external URL
+                response.download_url = job.direct_download_url; // Direct API download URL
+                response.download_filename = job.mp3_filename;
+                response.download_type = 'direct'; // Indicates this is a direct download
+                response.file_valid = true;
+                response.file_size = 0; // Unknown for external URLs
+                logger_1.default.info(`🔗 [Job ${job.id}] Status: External download URL available`);
+            }
         }
         res.json(response);
     }
@@ -147,14 +162,71 @@ router.get('/download/:id', validation_1.validateJobId, async (req, res) => {
                 message: `Conversion is ${job.status}. Please wait for completion.`
             });
         }
+        const filename = job.mp3_filename || 'converted.mp3';
+        // Priority 1: Serve local file if available
+        if (job.processed_path) {
+            logger_1.default.info(`🎵 Starting download for local file: ${filename}`);
+            logger_1.default.info(`📁 Local file path: ${job.processed_path}`);
+            // Set proper download headers with RFC 5987 encoding for international characters
+            res.setHeader('Content-Type', 'audio/mpeg');
+            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            res.setHeader('X-Frame-Options', 'DENY');
+            res.setHeader('X-XSS-Protection', '1; mode=block');
+            const fs = require('fs');
+            const path = require('path');
+            try {
+                // Resolve the path relative to the backend directory
+                const filePath = path.resolve(__dirname, '../../', job.processed_path);
+                // Check if file exists and get its size
+                const stats = await fs.promises.stat(filePath);
+                if (stats.size === 0) {
+                    logger_1.default.error(`❌ File is empty: ${filePath}, size: ${stats.size}`);
+                    return res.status(500).json({
+                        success: false,
+                        message: 'File is empty or corrupted'
+                    });
+                }
+                if (stats.size > 1073741824) { // 1GB limit
+                    logger_1.default.error(`❌ File too large: ${filePath}, size: ${stats.size} bytes`);
+                    return res.status(500).json({
+                        success: false,
+                        message: 'File is too large'
+                    });
+                }
+                // Set content length for proper download progress
+                res.setHeader('Content-Length', stats.size);
+                // Stream the local file
+                const fileStream = fs.createReadStream(filePath);
+                fileStream.pipe(res);
+                fileStream.on('error', (error) => {
+                    logger_1.default.error(`❌ Error streaming local file: ${error.message}`);
+                    if (!res.headersSent) {
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error reading file'
+                        });
+                    }
+                });
+                logger_1.default.info(`✅ Successfully streaming local file: ${filePath}`);
+                return;
+            }
+            catch (error) {
+                logger_1.default.error(`❌ Error accessing local file: ${error}`);
+                // Fall through to try direct download URL
+            }
+        }
+        // Priority 2: Fallback to direct download URL if no local file
         if (!job.direct_download_url) {
-            logger_1.default.error(`❌ Direct download URL not found for job: ${jobId}`);
+            logger_1.default.error(`❌ No download URL or local file found for job: ${jobId}`);
             return res.status(404).json({
                 success: false,
                 message: 'Download URL not available'
             });
         }
-        const filename = job.mp3_filename || 'converted.mp3';
         logger_1.default.info(`🎵 Starting download for: ${filename}`);
         logger_1.default.info(`🔗 Direct download URL: ${job.direct_download_url}`);
         // Stream the file from the API URL with proper headers

@@ -36,7 +36,7 @@ export class YouTubeMp3ApiService {
     this.apiKeys = this.loadApiKeys();
     this.apiHost = 'youtube-mp36.p.rapidapi.com';
     this.alternativeApiHost = 'youtube-mp3-download1.p.rapidapi.com';
-    this.downloadsDir = process.env.DOWNLOADS_DIR || './downloads';
+    this.downloadsDir = process.env.DOWNLOADS_DIR || '../downloads';
     this.ensureDownloadsDir();
   }
 

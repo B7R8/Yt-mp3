@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS conversions (
     error_message TEXT,
     quality_message TEXT,
     direct_download_url TEXT,
+    processed_path TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

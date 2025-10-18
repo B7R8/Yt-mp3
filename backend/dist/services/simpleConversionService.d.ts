@@ -45,5 +45,9 @@ export declare class SimpleConversionService {
      * Cleanup old files (20 minutes = 1/3 hour)
      */
     cleanupOldFiles(): Promise<void>;
+    /**
+     * Download file from external URL to local path
+     */
+    private downloadFileToLocal;
 }
 //# sourceMappingURL=simpleConversionService.d.ts.map

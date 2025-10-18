@@ -25,6 +25,7 @@ export interface ConversionJob {
   error_message?: string;
   quality_message?: string;
   direct_download_url?: string;
+  processed_path?: string; // Local file path on server
   quality?: string;
   trim_start?: number;
   trim_duration?: number;
@@ -63,7 +64,7 @@ export class ConversionService implements IConversionService {
   private videoMutex: Map<string, string>; // video_id -> job_id
 
   constructor() {
-    this.downloadsDir = process.env.DOWNLOADS_DIR || './downloads';
+    this.downloadsDir = process.env.DOWNLOADS_DIR || '../downloads';
     this.tempDir = process.env.TEMP_DIR || './temp';
     this.maxConcurrentJobs = parseInt(process.env.MAX_CONCURRENT_JOBS || '5');
     this.processingJobs = new Map();
