@@ -204,12 +204,16 @@ export class SimpleConversionService {
       const filename = this.generateFilename(conversionResult.title || 'Unknown', job.quality || 'high');
       const filePath = path.join(this.downloadsDir, filename);
 
-      // Download file using server-side script (outside container)
+      // Download file immediately while URL is still valid (URLs expire in seconds)
       if (conversionResult.downloadUrl) {
-        logger.info(`📥 Downloading file using server script: ${conversionResult.downloadUrl}`);
-        const downloadResult = await this.downloadFileOnServer(conversionResult.downloadUrl, filename);
+        logger.info(`📥 Downloading file immediately from: ${conversionResult.downloadUrl}`);
+        await this.downloadFileImmediately(conversionResult.downloadUrl, filePath);
         
-        // Update job with server file path
+        // Get file size
+        const stats = await fs.stat(filePath);
+        const fileSize = stats.size;
+        
+        // Update job with local file path
         await query(
           `UPDATE conversions SET 
             status = $1, 
@@ -221,8 +225,8 @@ export class SimpleConversionService {
           [
             'completed',
             filename,
-            downloadResult.filePath, // Store the server file path
-            downloadResult.size,
+            filePath, // Store the local file path
+            fileSize,
             new Date(),
             job.id
           ]
@@ -247,82 +251,38 @@ export class SimpleConversionService {
     }
   }
 
-  /**
-   * Download file using server-side script (outside container)
-   */
-  private async downloadFileOnServer(url: string, filename: string): Promise<{ filePath: string; size: number }> {
-    return new Promise((resolve, reject) => {
-      const { spawn } = require('child_process');
-      const scriptPath = path.join(__dirname, '../scripts/downloadFromApi.js');
-      
-      logger.info(`🚀 Running server download script: ${scriptPath}`);
-      
-      const child = spawn('node', [scriptPath, url, filename], {
-        stdio: ['pipe', 'pipe', 'pipe']
-      });
-      
-      let stdout = '';
-      let stderr = '';
-      
-      child.stdout.on('data', (data: Buffer) => {
-        stdout += data.toString();
-        logger.info(`📥 Download script output: ${data.toString().trim()}`);
-      });
-      
-      child.stderr.on('data', (data: Buffer) => {
-        stderr += data.toString();
-        logger.error(`❌ Download script error: ${data.toString().trim()}`);
-      });
-      
-      child.on('close', (code: number) => {
-        if (code === 0) {
-          // Parse the result from stdout
-          try {
-            const lines = stdout.split('\n');
-            const resultLine = lines.find(line => line.includes('Download completed:'));
-            if (resultLine) {
-              const result = JSON.parse(resultLine.split('Download completed: ')[1]);
-              resolve(result);
-            } else {
-              // Fallback: construct result from expected path
-              const serverFilePath = `/var/Yt-mp3/downloads/${filename}`;
-              resolve({
-                filePath: serverFilePath,
-                size: 0 // Will be updated when file is served
-              });
-            }
-          } catch (error) {
-            logger.warn(`⚠️ Could not parse download result, using fallback: ${error}`);
-            const serverFilePath = `/var/Yt-mp3/downloads/${filename}`;
-            resolve({
-              filePath: serverFilePath,
-              size: 0
-            });
-          }
-        } else {
-          logger.error(`❌ Download script failed with code ${code}: ${stderr}`);
-          reject(new Error(`Server download failed: ${stderr}`));
-        }
-      });
-      
-      child.on('error', (error: Error) => {
-        logger.error(`❌ Failed to start download script: ${error.message}`);
-        reject(error);
-      });
-    });
-  }
 
   /**
-   * Download file immediately from URL (for URLs that expire quickly) - DEPRECATED
+   * Download file immediately from URL (for URLs that expire quickly)
    */
   private async downloadFileImmediately(url: string, filePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const https = require('https');
+      const urlModule = require('url');
       const file = require('fs').createWriteStream(filePath);
       
       logger.info(`📥 Downloading file immediately from: ${url}`);
       
-      const request = https.get(url, (response: any) => {
+      // Parse URL to add proper headers
+      const parsedUrl = urlModule.parse(url);
+      
+      const options = {
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port || 443,
+        path: parsedUrl.path,
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'audio/mpeg, audio/*, */*',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'identity', // Don't compress to avoid issues
+          'Connection': 'keep-alive',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      };
+      
+      const request = https.request(options, (response: any) => {
         if (response.statusCode === 200) {
           let downloadedBytes = 0;
           
@@ -357,10 +317,12 @@ export class SimpleConversionService {
         reject(error);
       });
       
-      request.setTimeout(30000, () => {
+      request.setTimeout(15000, () => {
         request.destroy();
         reject(new Error('Download timeout - URL may have expired'));
       });
+      
+      request.end();
     });
   }
 
@@ -495,7 +457,7 @@ export class SimpleConversionService {
     try {
             await fs.unlink(filePath);
             logger.info(`🗑️ Deleted expired file: ${filePath}`);
-    } catch (error) {
+          } catch (error) {
             logger.warn(`Failed to delete file ${filePath}:`, error);
           }
         }
