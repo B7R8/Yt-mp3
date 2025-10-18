@@ -1,7 +1,22 @@
--- Migration: Create jobs table for audio processing
--- This table stores metadata for audio processing jobs including download, ffmpeg processing, and cleanup
+-- Quick fix for the database schema issues
+-- Run this manually to fix the current problems
 
--- Create jobs table
+-- Add processed_path column to conversions table if it doesn't exist
+ALTER TABLE conversions ADD COLUMN IF NOT EXISTS processed_path TEXT;
+
+-- Create index for processed_path if it doesn't exist
+CREATE INDEX IF NOT EXISTS idx_conversions_processed_path ON conversions(processed_path) WHERE processed_path IS NOT NULL;
+
+-- Ensure the update_updated_at_column function exists
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create jobs table if it doesn't exist (simplified version)
 CREATE TABLE IF NOT EXISTS jobs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     source_url TEXT NOT NULL,
@@ -21,13 +36,13 @@ CREATE TABLE IF NOT EXISTS jobs (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create indexes for better performance
+-- Create basic indexes for jobs table
 CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
 CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at);
 CREATE INDEX IF NOT EXISTS idx_jobs_expires_at ON jobs(expires_at);
 CREATE INDEX IF NOT EXISTS idx_jobs_source_url ON jobs(source_url);
 
--- Create download_token index only if the column exists
+-- Create download_token index only if column exists
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'jobs' AND column_name = 'download_token') THEN
@@ -35,19 +50,14 @@ BEGIN
     END IF;
 END $$;
 
--- Create updated_at trigger for jobs table (only if function exists)
-DO $$
-BEGIN
-    IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'update_updated_at_column') THEN
-        DROP TRIGGER IF EXISTS update_jobs_updated_at ON jobs;
-        CREATE TRIGGER update_jobs_updated_at 
-            BEFORE UPDATE ON jobs 
-            FOR EACH ROW 
-            EXECUTE FUNCTION update_updated_at_column();
-    END IF;
-END $$;
+-- Create trigger for jobs table
+DROP TRIGGER IF EXISTS update_jobs_updated_at ON jobs;
+CREATE TRIGGER update_jobs_updated_at 
+    BEFORE UPDATE ON jobs 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
 
--- Grant permissions to existing user (only if user exists)
+-- Grant permissions if user exists
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ytmp3_user') THEN
@@ -55,3 +65,6 @@ BEGIN
         GRANT ALL PRIVILEGES ON SEQUENCE jobs_id_seq TO ytmp3_user;
     END IF;
 END $$;
+
+-- Show success message
+SELECT 'Database schema fixed successfully!' as status;
