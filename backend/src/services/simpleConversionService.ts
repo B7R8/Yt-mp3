@@ -173,7 +173,7 @@ export class SimpleConversionService {
 
     } catch (error) {
       logger.error(`❌ Failed to start conversion: ${error}`);
-      throw getUserFriendlyError(error);
+      throw new Error(this.getUserFriendlyErrorMessage(error as Error));
     }
   }
 
@@ -233,12 +233,73 @@ export class SimpleConversionService {
     } catch (error) {
       logger.error(`❌ Conversion failed for job ${job.id}:`, error);
       
-      // Update job with error
+      // Convert technical error to user-friendly message
+      const userFriendlyError = this.getUserFriendlyErrorMessage(error as Error);
+      
+      // Update job with user-friendly error message
       await query(
         'UPDATE conversions SET status = $1, error_message = $2, updated_at = $3 WHERE id = $4',
-        ['failed', (error as Error).message, new Date(), job.id]
+        ['failed', userFriendlyError, new Date(), job.id]
       );
     }
+  }
+
+  /**
+   * Convert technical errors to user-friendly messages
+   */
+  private getUserFriendlyErrorMessage(error: Error): string {
+    const errorMessage = error.message.toLowerCase();
+    
+    // File system errors
+    if (errorMessage.includes('enoent') || errorMessage.includes('no such file')) {
+      return 'The conversion file could not be found. Please try again.';
+    }
+    
+    if (errorMessage.includes('eacces') || errorMessage.includes('permission denied')) {
+      return 'Permission denied. Please try again.';
+    }
+    
+    if (errorMessage.includes('enospc') || errorMessage.includes('no space')) {
+      return 'Server storage is full. Please try again later.';
+    }
+    
+    // Network errors
+    if (errorMessage.includes('timeout') || errorMessage.includes('etimedout')) {
+      return 'The request timed out. Please try again.';
+    }
+    
+    if (errorMessage.includes('econnreset') || errorMessage.includes('connection reset')) {
+      return 'Connection was reset. Please try again.';
+    }
+    
+    if (errorMessage.includes('enotfound') || errorMessage.includes('dns')) {
+      return 'Network error. Please check your connection and try again.';
+    }
+    
+    // API errors
+    if (errorMessage.includes('rate limit') || errorMessage.includes('too many requests')) {
+      return 'Too many requests. Please wait a moment and try again.';
+    }
+    
+    if (errorMessage.includes('unauthorized') || errorMessage.includes('401')) {
+      return 'Service temporarily unavailable. Please try again later.';
+    }
+    
+    if (errorMessage.includes('forbidden') || errorMessage.includes('403')) {
+      return 'Access denied. Please try again later.';
+    }
+    
+    if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+      return 'Video not found. Please check the URL and try again.';
+    }
+    
+    // Database errors
+    if (errorMessage.includes('database') || errorMessage.includes('sql')) {
+      return 'Database error. Please try again.';
+    }
+    
+    // Generic fallback
+    return 'Something went wrong. Please try again.';
   }
 
   /**
@@ -378,7 +439,7 @@ export class SimpleConversionService {
       return job.id;
     } catch (error) {
       logger.error(`❌ Failed to create job: ${error}`);
-      throw error;
+      throw new Error(this.getUserFriendlyErrorMessage(error as Error));
     }
   }
 
