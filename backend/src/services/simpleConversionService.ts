@@ -5,7 +5,7 @@ import { ConversionJob, ConversionRequest } from './conversionService';
 import logger from '../config/logger';
 import { query } from '../config/database';
 import { getUserFriendlyError, logTechnicalError } from '../utils/errorHandler';
-import { YouTubeMp3ApiService, VideoInfo } from './youtubeMp3ApiService';
+import { YouTubeMp3ApiService, VideoInfo, ConversionResult } from './youtubeMp3ApiService';
 
 export class SimpleConversionService {
   private downloadsDir: string;
@@ -204,36 +204,31 @@ export class SimpleConversionService {
       const filename = this.generateFilename(conversionResult.title || 'Unknown', job.quality || 'high');
       const filePath = path.join(this.downloadsDir, filename);
 
-      // Download the file immediately from the URL (URLs expire in seconds)
+      // Store the download URL directly (URLs expire quickly, so we'll stream from API)
       if (conversionResult.downloadUrl) {
-        logger.info(`📥 Downloading file immediately from: ${conversionResult.downloadUrl}`);
-        await this.downloadFileImmediately(conversionResult.downloadUrl, filePath);
-      } else {
+        logger.info(`🔗 Storing download URL for streaming: ${conversionResult.downloadUrl}`);
+        
+        // Update job with download URL for streaming (no local file storage)
+        await query(
+          `UPDATE conversions SET 
+            status = $1, 
+            mp3_filename = $2, 
+            processed_path = $3,
+            file_size = $4, 
+            updated_at = $5
+          WHERE id = $6`,
+          [
+            'completed',
+            filename,
+            conversionResult.downloadUrl, // Store the API download URL
+            conversionResult.filesize || 0, // Use filesize from API response
+            new Date(),
+            job.id
+          ]
+        );
+        } else {
         throw new Error('No download URL received from conversion service');
       }
-
-      // Get file size
-      const stats = await fs.stat(filePath);
-      const fileSize = stats.size;
-
-      // Update job with success
-      await query(
-        `UPDATE conversions SET 
-          status = $1, 
-          mp3_filename = $2, 
-          processed_path = $3,
-          file_size = $4, 
-          updated_at = $5
-        WHERE id = $6`,
-        [
-          'completed',
-          filename,
-          filePath,
-          fileSize,
-          new Date(),
-          job.id
-        ]
-      );
 
       logger.info(`🎉 Conversion completed successfully: ${job.id}`);
 
@@ -252,65 +247,6 @@ export class SimpleConversionService {
   }
 
 
-  /**
-   * Download file immediately from URL to local path (handles URL expiration)
-   */
-  private async downloadFileImmediately(url: string, filePath: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const https = require('https');
-      const file = require('fs').createWriteStream(filePath);
-      
-      logger.info(`📥 Downloading file immediately from: ${url}`);
-      
-      const request = https.get(url, (response: any) => {
-        if (response.statusCode === 200) {
-          let downloadedBytes = 0;
-          
-          response.on('data', (chunk: Buffer) => {
-            downloadedBytes += chunk.length;
-          });
-          
-          response.pipe(file);
-          
-          file.on('finish', () => {
-            file.close();
-            logger.info(`✅ File downloaded successfully: ${filePath} (${downloadedBytes} bytes)`);
-            resolve();
-          });
-          
-          file.on('error', (error: Error) => {
-            logger.error(`❌ File write error: ${error.message}`);
-            fs.unlink(filePath).catch(() => {}); // Clean up on error
-            reject(error);
-          });
-        } else if (response.statusCode === 404) {
-          logger.error(`❌ Download URL expired (404): ${url}`);
-          reject(new Error('Download URL has expired. Please try again.'));
-        } else {
-          logger.error(`❌ Download failed with status: ${response.statusCode}`);
-          reject(new Error(`Download failed with status: ${response.statusCode}`));
-        }
-      });
-      
-      request.on('error', (error: Error) => {
-        logger.error(`❌ Download request error: ${error.message}`);
-        reject(error);
-      });
-      
-      // Shorter timeout since URLs expire quickly
-      request.setTimeout(30000, () => {
-        request.destroy();
-        reject(new Error('Download timeout - URL may have expired'));
-      });
-    });
-  }
-
-  /**
-   * Download file from URL to local path (legacy method)
-   */
-  private async downloadFile(url: string, filePath: string): Promise<void> {
-    return this.downloadFileImmediately(url, filePath);
-  }
 
   /**
    * Convert technical errors to user-friendly messages

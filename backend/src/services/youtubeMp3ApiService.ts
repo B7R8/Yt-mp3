@@ -22,6 +22,7 @@ export interface ConversionResult {
   error?: string;
   title?: string;
   duration?: number;
+  filesize?: number; // File size in bytes from API response
 }
 
 export class YouTubeMp3ApiService {
@@ -301,7 +302,8 @@ export class YouTubeMp3ApiService {
             success: true,
             downloadUrl: downloadResult.downloadUrl, // Return the validated API download URL
             title: title,
-            duration: 0 // Duration not available from this API
+            duration: 0, // Duration not available from this API
+            filesize: downloadResult.filesize || 0 // File size from API response
           };
         }
 
@@ -444,7 +446,7 @@ export class YouTubeMp3ApiService {
   /**
    * Get download link from YouTube MP3 API with validation
    */
-  private async getDownloadLinkWithValidation(videoId: string): Promise<{ success: boolean; downloadUrl?: string; error?: string }> {
+  private async getDownloadLinkWithValidation(videoId: string): Promise<{ success: boolean; downloadUrl?: string; error?: string; filesize?: number }> {
     const maxRetries = 3;
     let lastError = '';
 
@@ -483,7 +485,7 @@ export class YouTubeMp3ApiService {
   /**
    * Get download link from YouTube MP3 API
    */
-  private async getDownloadLink(videoId: string): Promise<{ success: boolean; downloadUrl?: string; error?: string }> {
+  private async getDownloadLink(videoId: string): Promise<{ success: boolean; downloadUrl?: string; error?: string; filesize?: number }> {
     return new Promise((resolve, reject) => {
       const options = {
         method: 'GET',
@@ -513,10 +515,12 @@ export class YouTubeMp3ApiService {
             // Handle different response formats from the API
             if ((data.status === 'ok' || data.status === 'success') && (data.link || data.download_url || data.url)) {
               const downloadUrl = data.link || data.download_url || data.url;
+              const filesize = data.filesize || data.file_size || 0;
               logger.info(`Download URL found for ${videoId}: ${downloadUrl}`);
               resolve({
                 success: true,
-                downloadUrl: downloadUrl
+                downloadUrl: downloadUrl,
+                filesize: filesize
               });
             } else {
               logger.error(`API returned error for ${videoId}: ${JSON.stringify(data)}`);
