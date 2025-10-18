@@ -221,8 +221,8 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
         case JobStatus.PENDING:
         case 'processing':
           return (
-            <div className="max-w-lg mx-auto">
-              <h2 className="text-sm font-semibold text-center mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title || 'Processing...'}</h2>
+            <div className="w-full sm:max-w-lg mx-auto">
+              <h2 className="text-base sm:text-sm font-semibold text-center mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title || 'Processing...'}</h2>
               <p className="text-center text-gray-600 dark:text-gray-400 mb-6 capitalize font-medium">{job.status}...</p>
               
               {/* Quality Message for 3-hour rule */}
@@ -301,8 +301,8 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
         case JobStatus.COMPLETED:
         case 'done':
           return (
-            <div className="text-center">
-              <h2 className="text-sm font-semibold mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title}</h2>
+            <div className="text-center w-full sm:max-w-lg mx-auto">
+              <h2 className="text-base sm:text-sm font-semibold mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title}</h2>
               <p className="text-green-500 mb-6 text-sm font-medium">Conversion Complete!</p>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 justify-center items-center">
                 <button
@@ -313,7 +313,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
                   // Use the hidden anchor tag download method
                   downloadFile(job.id, job.title || 'converted');
                 }}
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-black rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-sm sm:text-sm md:text-xs w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-3 md:px-6 py-3 sm:py-2 md:py-3 font-semibold text-white bg-black rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-base sm:text-sm md:text-xs w-full sm:w-auto"
               >
                 <DownloadIcon className="w-5 h-5" />
                 Download MP3
@@ -321,7 +321,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               
               <button
                 onClick={() => window.open('https://ko-fi.com/saveytb', '_blank')}
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#41484B] transition-colors duration-300 text-sm sm:text-sm md:text-xs w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-3 md:px-6 py-3 sm:py-2 md:py-3 font-semibold text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#41484B] transition-colors duration-300 text-base sm:text-sm md:text-xs w-full sm:w-auto"
                 style={{ backgroundColor: '#ff5f5f' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff4a4a'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ff5f5f'}
@@ -332,7 +332,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               
               <button 
                 onClick={resetConverter} 
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-gray-600 dark:bg-[#2d2d2d] rounded-lg shadow-md hover:bg-gray-700 dark:hover:bg-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-[#2d2d2d] transition-colors duration-300 text-sm sm:text-sm md:text-xs w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-3 md:px-6 py-3 sm:py-2 md:py-3 font-semibold text-white bg-gray-600 dark:bg-[#2d2d2d] rounded-lg shadow-md hover:bg-gray-700 dark:hover:bg-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-[#2d2d2d] transition-colors duration-300 text-base sm:text-sm md:text-xs w-full sm:w-auto"
               >
                 <AutorenewIcon className="w-5 h-5" />
                 Convert Next
@@ -364,7 +364,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               onChange={(e) => handleUrlChange(e.target.value)}
               placeholder="Paste YouTube URL here to convert YouTube to MP3"
               aria-label="YouTube video URL"
-              className="flex-grow px-4 sm:px-4 md:px-4 lg:px-5 py-4 sm:py-4 md:py-4 lg:py-4.5 bg-transparent border-0 rounded-l-lg focus:outline-none focus:ring-0 text-sm sm:text-base min-w-0"
+              className="flex-grow px-4 sm:px-4 md:px-4 lg:px-5 py-4 sm:py-4 md:py-4 lg:py-4.5 bg-transparent border-0 rounded-l-lg focus:outline-none focus:ring-0 text-base sm:text-base min-w-0"
               disabled={isLoading}
             />
             {url && (
@@ -405,7 +405,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
                 <button 
                   type="button"
                   onClick={() => setIsQualityModalOpen(true)}
-                  className="px-3 sm:px-3.5 md:px-3.5 py-2.5 sm:py-3 md:py-3 rounded-md font-semibold text-gray-700 dark:text-gray-300 text-sm sm:text-base hover:bg-gray-200 dark:hover:bg-gray-700"
+                  className="px-4 sm:px-3.5 md:px-3.5 py-3 sm:py-3 md:py-3 rounded-md font-semibold text-gray-700 dark:text-gray-300 text-base sm:text-base hover:bg-gray-200 dark:hover:bg-gray-700"
                   aria-label={`Select audio quality, current: ${quality}`}
                 >
                     {quality}
@@ -415,7 +415,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
           </div>
           <button
             type="submit"
-            className="flex items-center justify-center gap-2 sm:gap-3 w-full md:w-auto md:shrink-0 px-6 sm:px-8 md:px-8 lg:px-10 py-4 sm:py-4 md:py-4 lg:py-4.5 font-semibold text-white bg-gray-900 dark:bg-[#1f1f1f] rounded-lg hover:bg-black dark:hover:bg-[#1f1f1f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-[#3a3a3a] transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-sm sm:text-base"
+            className="flex items-center justify-center gap-2 sm:gap-3 w-full md:w-auto md:shrink-0 px-6 sm:px-8 md:px-8 lg:px-10 py-4 sm:py-4 md:py-4 lg:py-4.5 font-semibold text-white bg-gray-900 dark:bg-[#1f1f1f] rounded-lg hover:bg-black dark:hover:bg-[#1f1f1f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 dark:focus:ring-offset-[#3a3a3a] transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-base sm:text-base"
             disabled={isLoading}
           >
             {isLoading ? <LoadingSpinner className="w-5 h-5 sm:w-6 sm:h-6 md:w-6 md:h-6"/> : 'Convert'}
@@ -425,8 +425,8 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
         
         {/* Auto Download Toggle */}
         <div className="flex items-center justify-center mt-4">
-          <div className="flex items-center gap-3 sm:gap-4 md:gap-3 bg-gray-100 dark:bg-[#2d2d2d] rounded-lg px-4 py-2 sm:px-5 sm:py-2.5 md:px-4 md:py-2">
-            <span className="text-sm sm:text-base md:text-base font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex items-center gap-3 sm:gap-4 md:gap-3 bg-gray-100 dark:bg-[#2d2d2d] rounded-lg px-4 py-3 sm:px-5 sm:py-2.5 md:px-4 md:py-2">
+            <span className="text-base sm:text-base md:text-base font-medium text-gray-700 dark:text-gray-300">
               Auto Download
             </span>
             <button
@@ -471,7 +471,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
   };
 
   return (
-    <div className="w-full max-w-full md:max-w-2xl lg:max-w-3xl mx-auto bg-gray-100/50 dark:bg-[#2d2d2d] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-4 sm:p-6 md:p-6 lg:p-8 xl:p-10 transition-all duration-300 flex items-center justify-center">
+    <div className="w-full max-w-full sm:max-w-2xl lg:max-w-3xl mx-auto bg-gray-100/50 dark:bg-[#2d2d2d] rounded-lg sm:rounded-xl shadow-md border border-gray-200/80 dark:border-gray-600/50 p-4 sm:p-6 md:p-6 lg:p-8 xl:p-10 transition-all duration-300 flex items-center justify-center">
       <div className="w-full">
         {renderContent()}
       </div>
