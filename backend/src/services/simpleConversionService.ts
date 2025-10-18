@@ -197,14 +197,21 @@ export class SimpleConversionService {
       const filename = this.generateFilename(videoInfo.title, job.quality || 'high');
       const filePath = path.join(this.downloadsDir, filename);
 
-      // Convert video to MP3
+      // Convert video to MP3 (this gets the download URL)
       const conversionResult = await this.apiService.convertToMp3(
         job.youtube_url,
-        filePath
+        job.quality || 'high'
       );
 
       if (!conversionResult.success) {
         throw new Error(conversionResult.error || 'Conversion failed');
+      }
+
+      // Download the file from the URL
+      if (conversionResult.downloadUrl) {
+        await this.downloadFile(conversionResult.downloadUrl, filePath);
+      } else {
+        throw new Error('No download URL received from conversion service');
       }
 
       // Get file size
@@ -242,6 +249,49 @@ export class SimpleConversionService {
         ['failed', userFriendlyError, new Date(), job.id]
       );
     }
+  }
+
+  /**
+   * Download file from URL to local path
+   */
+  private async downloadFile(url: string, filePath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const https = require('https');
+      const file = require('fs').createWriteStream(filePath);
+      
+      logger.info(`📥 Downloading file from: ${url}`);
+      
+      const request = https.get(url, (response: any) => {
+        if (response.statusCode === 200) {
+          response.pipe(file);
+          
+          file.on('finish', () => {
+            file.close();
+            logger.info(`✅ File downloaded successfully: ${filePath}`);
+            resolve();
+          });
+          
+          file.on('error', (error: Error) => {
+            logger.error(`❌ File write error: ${error.message}`);
+            fs.unlink(filePath).catch(() => {}); // Clean up on error
+            reject(error);
+          });
+        } else {
+          logger.error(`❌ Download failed with status: ${response.statusCode}`);
+          reject(new Error(`Download failed with status: ${response.statusCode}`));
+        }
+      });
+      
+      request.on('error', (error: Error) => {
+        logger.error(`❌ Download request error: ${error.message}`);
+        reject(error);
+      });
+      
+      request.setTimeout(60000, () => {
+        request.destroy();
+        reject(new Error('Download timeout'));
+      });
+    });
   }
 
   /**
