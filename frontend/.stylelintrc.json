@@ -28,6 +28,14 @@
       }
     ],
     "no-descending-specificity": null,
-    "declaration-property-value-keyword-no-deprecated": null
+    "declaration-property-value-keyword-no-deprecated": null,
+    "import-notation": null,
+    "color-hex-length": null,
+    "custom-property-empty-line-before": null,
+    "color-function-alias-notation": null,
+    "color-function-notation": null,
+    "alpha-value-notation": null,
+    "value-keyword-case": null,
+    "no-duplicate-selectors": null
   }
 }
