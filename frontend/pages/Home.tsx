@@ -13,7 +13,7 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
   return (
     <>
       <section id="hero" className="text-center mb-12 sm:mb-10 md:mb-10 lg:mb-12 px-6 sm:px-6 md:px-6">
-        <h1 className="text-4xl sm:text-4xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+        <h1 className="text-3xl sm:text-3xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
           YouTube to MP3
         </h1>
         <p className="max-w-2xl mx-auto text-base sm:text-sm md:text-sm text-gray-600 dark:text-gray-300 mb-10 px-4 leading-relaxed">
