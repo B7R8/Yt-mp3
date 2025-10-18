@@ -104,6 +104,9 @@ export const getJobStatus = async (id: string): Promise<Job> => {
     title: data.video_title,
     url: data.youtube_url || '', // Handle missing youtube_url
     error: data.error_message,
-    quality_message: data.quality_message
+    quality_message: data.quality_message,
+    file_size: data.file_size,
+    file_valid: data.file_valid,
+    download_url: data.download_url
   };
 };

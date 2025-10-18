@@ -14,6 +14,9 @@ export interface Job {
   url?: string;
   error?: string;
   quality_message?: string;
+  file_size?: number;
+  file_valid?: boolean;
+  download_url?: string;
 }
 
 // Theme is now a simple string type: 'light' | 'dark'

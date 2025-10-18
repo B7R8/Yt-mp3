@@ -57,8 +57,15 @@ router.post('/check-url', async (req: Request, res: Response) => {
     // Check if video is already being processed
     const videoId = activeService['extractVideoId'](url);
     if (videoId) {
-      const existingJob = await activeService.getJobStatus(videoId);
-      if (existingJob && existingJob.status === 'processing') {
+      // Check for existing processing jobs for this video
+      const { query } = require('../config/database');
+      const existingJobs = await query(
+        'SELECT id, status FROM jobs WHERE video_id = $1 AND status IN ($2, $3) AND expires_at > CURRENT_TIMESTAMP ORDER BY created_at DESC LIMIT 1',
+        [videoId, 'pending', 'processing']
+      );
+      
+      if (existingJobs.rows.length > 0) {
+        const existingJob = existingJobs.rows[0];
         return res.json({
           success: true,
           isBlacklisted: false,
@@ -164,6 +171,39 @@ router.get('/status/:id', statusRateLimit, validateJobId, async (req: Request, r
       response.download_url = job.download_url;
       response.download_filename = `${job.video_title || 'converted'}.mp3`;
       response.download_type = 'server'; // Indicates this is a server-processed file
+      
+      // Validate file before providing download URL
+      if (job.file_path) {
+        const fs = require('fs');
+        try {
+          if (fs.existsSync(job.file_path)) {
+            const stats = fs.statSync(job.file_path);
+            response.file_size = stats.size;
+            // More reasonable validation: file should be > 0 bytes and < 1GB
+            response.file_valid = stats.size > 0 && stats.size < 1073741824; // 1GB limit
+            
+            if (!response.file_valid) {
+              if (stats.size <= 0) {
+                logger.warn(`⚠️ File validation failed for job ${req.params.id}: file is empty (${stats.size} bytes)`);
+              } else if (stats.size >= 1073741824) {
+                logger.warn(`⚠️ File validation failed for job ${req.params.id}: file too large (${stats.size} bytes)`);
+              }
+            } else {
+              logger.info(`✅ File validation passed for job ${req.params.id}: ${stats.size} bytes`);
+            }
+          } else {
+            response.file_valid = false;
+            logger.warn(`⚠️ File not found for completed job ${req.params.id}: ${job.file_path}`);
+          }
+        } catch (error) {
+          response.file_valid = false;
+          logger.error(`❌ File validation error for job ${req.params.id}:`, error);
+        }
+      } else {
+        // No file path available - mark as invalid
+        response.file_valid = false;
+        logger.warn(`⚠️ No file path available for completed job ${req.params.id}`);
+      }
     }
 
     // Add ffmpeg logs if requested by admin (you can add admin check here)
@@ -220,7 +260,7 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
       });
     }
 
-    // Check if file exists
+    // Check if file exists and validate it
     const fs = require('fs');
     if (!fs.existsSync(job.file_path)) {
       logger.error(`❌ File does not exist: ${job.file_path}`);
@@ -230,8 +270,27 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
       });
     }
 
+    // Validate file size and integrity
+    const stats = fs.statSync(job.file_path);
+    if (stats.size <= 0) {
+      logger.error(`❌ File is empty: ${job.file_path}, size: ${stats.size}`);
+      return res.status(400).json({
+        success: false,
+        message: 'File appears to be empty. Please try converting again.'
+      });
+    }
+
+    // Validate file size (should be reasonable for an MP3 - between 1 byte and 1GB)
+    if (stats.size >= 1073741824) { // 1GB limit
+      logger.error(`❌ File too large: ${job.file_path}, size: ${stats.size} bytes`);
+      return res.status(400).json({
+        success: false,
+        message: 'File appears to be too large. Please try converting again.'
+      });
+    }
+
     const filename = `${job.video_title || 'converted'}.mp3`;
-    logger.info(`🎵 Starting download for: ${filename}`);
+    logger.info(`🎵 Starting download for: ${filename} (${stats.size} bytes)`);
 
     // Set proper download headers
     res.setHeader('Content-Type', 'audio/mpeg');
