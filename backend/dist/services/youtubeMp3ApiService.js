@@ -241,7 +241,8 @@ class YouTubeMp3ApiService {
                         success: true,
                         downloadUrl: downloadResult.downloadUrl, // Return the validated API download URL
                         title: title,
-                        duration: 0 // Duration not available from this API
+                        duration: 0, // Duration not available from this API
+                        filesize: downloadResult.filesize || 0 // File size from API response
                     };
                 }
                 // If this API key failed, try the next one
@@ -430,10 +431,12 @@ class YouTubeMp3ApiService {
                         // Handle different response formats from the API
                         if ((data.status === 'ok' || data.status === 'success') && (data.link || data.download_url || data.url)) {
                             const downloadUrl = data.link || data.download_url || data.url;
+                            const filesize = data.filesize || data.file_size || 0;
                             logger_1.default.info(`Download URL found for ${videoId}: ${downloadUrl}`);
                             resolve({
                                 success: true,
-                                downloadUrl: downloadUrl
+                                downloadUrl: downloadUrl,
+                                filesize: filesize
                             });
                         }
                         else {

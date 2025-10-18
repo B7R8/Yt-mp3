@@ -13,6 +13,7 @@ export interface ConversionResult {
     error?: string;
     title?: string;
     duration?: number;
+    filesize?: number;
 }
 export declare class YouTubeMp3ApiService {
     private readonly apiKeys;

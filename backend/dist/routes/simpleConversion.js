@@ -164,7 +164,7 @@ router.get('/download/:id', validation_1.validateJobId, async (req, res) => {
         }
         const filename = job.mp3_filename || 'converted.mp3';
         // Priority 1: Serve local file if available
-        if (job.processed_path) {
+        if (job.processed_path && !job.processed_path.startsWith('http')) {
             logger_1.default.info(`🎵 Starting download for local file: ${filename}`);
             logger_1.default.info(`📁 Local file path: ${job.processed_path}`);
             // Set proper download headers with RFC 5987 encoding for international characters
@@ -179,8 +179,8 @@ router.get('/download/:id', validation_1.validateJobId, async (req, res) => {
             const fs = require('fs');
             const path = require('path');
             try {
-                // Resolve the path relative to the backend directory
-                const filePath = path.resolve(__dirname, '../../', job.processed_path);
+                // Use the processed_path directly (it's the server file path)
+                const filePath = job.processed_path;
                 // Check if file exists and get its size
                 const stats = await fs.promises.stat(filePath);
                 if (stats.size === 0) {

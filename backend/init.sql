@@ -13,6 +13,10 @@ CREATE TABLE IF NOT EXISTS conversions (
     quality_message TEXT,
     direct_download_url TEXT,
     processed_path TEXT,
+    quality VARCHAR(20) DEFAULT '192k',
+    trim_start FLOAT,
+    trim_duration FLOAT,
+    file_size BIGINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -31,6 +35,10 @@ CREATE TABLE IF NOT EXISTS blacklist (
 CREATE INDEX IF NOT EXISTS idx_conversions_status ON conversions(status);
 CREATE INDEX IF NOT EXISTS idx_conversions_created_at ON conversions(created_at);
 CREATE INDEX IF NOT EXISTS idx_conversions_youtube_url ON conversions(youtube_url);
+CREATE INDEX IF NOT EXISTS idx_conversions_quality ON conversions(quality);
+CREATE INDEX IF NOT EXISTS idx_conversions_trim_start ON conversions(trim_start) WHERE trim_start IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_conversions_trim_duration ON conversions(trim_duration) WHERE trim_duration IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_conversions_file_size ON conversions(file_size) WHERE file_size IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_blacklist_type ON blacklist(type);
 CREATE INDEX IF NOT EXISTS idx_blacklist_value ON blacklist(value);
 

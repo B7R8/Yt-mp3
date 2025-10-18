@@ -1,4 +1,4 @@
-import { ConversionJob, ConversionRequest } from '../types';
+import { ConversionJob, ConversionRequest } from './conversionService';
 import { VideoInfo } from './youtubeMp3ApiService';
 export declare class SimpleConversionService {
     private downloadsDir;
@@ -6,48 +6,70 @@ export declare class SimpleConversionService {
     constructor();
     private ensureDownloadsDir;
     /**
-     * Extract video ID from YouTube URL - Enhanced to support all formats
+     * Extract video ID from various YouTube URL formats
      */
     private extractVideoId;
     /**
      * Check if URL is blacklisted
      */
-    private checkBlacklist;
+    private isBlacklisted;
     /**
-     * Create a new conversion job
+     * Validate YouTube URL
      */
-    createJob(request: ConversionRequest): Promise<string>;
-    /**
-     * Process conversion using YouTube MP3 API
-     */
-    private processConversion;
-    /**
-     * Get job status
-     */
-    getJobStatus(jobId: string): Promise<ConversionJob | null>;
-    /**
-     * Update job status
-     */
-    private updateJobStatus;
-    /**
-     * Get job file path
-     */
-    getJobFilePath(jobId: string): Promise<string | null>;
+    private validateUrl;
     /**
      * Get video information
      */
     getVideoInfo(url: string): Promise<VideoInfo>;
     /**
-     * Refresh download URL for an existing job
+     * Convert video to MP3
      */
-    refreshDownloadUrl(jobId: string): Promise<string | null>;
+    convertToMp3(request: ConversionRequest): Promise<ConversionJob>;
     /**
-     * Cleanup old files (20 minutes = 1/3 hour)
+     * Process the conversion
+     */
+    private processConversion;
+    /**
+     * Download file immediately from URL (for URLs that expire quickly)
+     */
+    private downloadFileImmediately;
+    /**
+     * Convert technical errors to user-friendly messages
+     */
+    private getUserFriendlyErrorMessage;
+    /**
+     * Generate filename from video title
+     */
+    private generateFilename;
+    /**
+     * Get conversion job status
+     */
+    getJobStatus(jobId: string): Promise<ConversionJob | null>;
+    /**
+     * Get all jobs for a user
+     */
+    getUserJobs(userId: string, limit?: number): Promise<ConversionJob[]>;
+    /**
+     * Clean up old files
      */
     cleanupOldFiles(): Promise<void>;
     /**
-     * Download file from external URL to local path
+     * Get conversion statistics
      */
-    private downloadFileToLocal;
+    getStats(): Promise<{
+        total: number;
+        completed: number;
+        failed: number;
+        pending: number;
+        processing: number;
+    }>;
+    /**
+     * Create a new conversion job
+     */
+    createJob(request: ConversionRequest): Promise<string>;
+    /**
+     * Refresh download URL for a job
+     */
+    refreshDownloadUrl(jobId: string): Promise<string | null>;
 }
 //# sourceMappingURL=simpleConversionService.d.ts.map
