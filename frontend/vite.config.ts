@@ -16,6 +16,10 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        hmr: {
+          port: 3000,
+          host: 'localhost',
+        },
         proxy: {
           '/api': {
             target: process.env.NODE_ENV === 'production' ? 'http://backend:3001' : 'http://localhost:3001',

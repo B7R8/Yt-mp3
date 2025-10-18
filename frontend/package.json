@@ -5,10 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:clean": "node scripts/dev-clean.js && npm install && npm run dev",
     "build": "vite build",
     "build:optimized": "node scripts/build-optimized.js",
     "preview": "vite preview",
-    "analyze": "npm run build && npx vite-bundle-analyzer dist/assets/*.js"
+    "analyze": "npm run build && npx vite-bundle-analyzer dist/assets/*.js",
+    "clean": "node scripts/dev-clean.js",
+    "tailwind:build": "tailwindcss -i ./src/styles/main.css -o ./dist/output.css --minify",
+    "tailwind:watch": "tailwindcss -i ./src/styles/main.css -o ./dist/output.css --watch",
+    "lint:css": "stylelint \"src/**/*.css\" --fix",
+    "lint:css:check": "stylelint \"src/**/*.css\""
   },
   "dependencies": {
     "@tanstack/react-query": "^5.0.0",
@@ -19,10 +25,16 @@
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.0.0",
     "@types/node": "^22.14.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.21",
     "cssnano": "^7.1.1",
     "postcss": "^8.5.6",
+    "stylelint": "^16.25.0",
+    "stylelint-config-standard": "^39.0.1",
+    "stylelint-scss": "^6.12.1",
+    "tailwindcss": "^3.4.18",
     "terser": "^5.44.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"

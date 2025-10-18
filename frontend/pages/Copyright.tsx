@@ -1,6 +1,11 @@
 import React from 'react';
+import { Page } from '../App';
 
-const Copyright: React.FC = () => {
+interface CopyrightProps {
+  navigateTo: (page: Page) => void;
+}
+
+const Copyright: React.FC<CopyrightProps> = ({ navigateTo }) => {
   return (
     <div className="max-w-4xl mx-auto py-8">
       <div className="text-center mb-12">

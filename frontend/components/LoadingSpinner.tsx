@@ -19,7 +19,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ className = 'w-6 h-6', 
   return (
     <div className={`relative ${sizeClasses}`}>
       <span className="loader"></span>
-      <style jsx>{`
+      <style>{`
         .loader {
           width: 100%;
           height: 100%;

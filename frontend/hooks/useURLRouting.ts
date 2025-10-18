@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 
+type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation' | 'not-found';
+
 interface UseURLRoutingProps {
-  setPage: (page: string) => void;
+  setPage: (page: Page) => void;
 }
 
 export const useURLRouting = ({ setPage }: UseURLRoutingProps) => {
@@ -12,7 +14,7 @@ export const useURLRouting = ({ setPage }: UseURLRoutingProps) => {
       const hash = window.location.hash;
       
       // Map URLs to pages
-      const urlToPageMap: Record<string, string> = {
+      const urlToPageMap: Record<string, Page> = {
         '/': 'home',
         '/home': 'home',
         '/faqs': 'faqs',
@@ -79,7 +81,7 @@ export const useURLRouting = ({ setPage }: UseURLRoutingProps) => {
 };
 
 // Helper function to update URL without page reload
-export const updateURL = (page: string) => {
+export const updateURL = (page: Page) => {
   const pageToUrlMap: Record<string, string> = {
     'home': '/',
     'faqs': '/faqs',

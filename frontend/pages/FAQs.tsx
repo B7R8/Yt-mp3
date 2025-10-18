@@ -1,5 +1,10 @@
 import React from 'react';
 import AccordionItem from '../components/AccordionItem';
+import { Page } from '../App';
+
+interface FAQsProps {
+  navigateTo: (page: Page) => void;
+}
 
 const faqData = [
     {
@@ -60,7 +65,7 @@ const faqData = [
     }
 ];
 
-const FAQs: React.FC = () => {
+const FAQs: React.FC<FAQsProps> = ({ navigateTo }) => {
   return (
     <div className="max-w-4xl mx-auto py-8">
       <div className="text-center mb-12">

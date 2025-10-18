@@ -23,7 +23,7 @@ import CryptoDonation from './pages/CryptoDonation';
 import SupportLinks from './components/SupportLinks';
 import { queryClient } from './utils/queryClient';
 
-export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation';
+export type Page = 'home' | 'faqs' | 'changelog' | 'contact' | 'copyright' | 'terms' | 'privacy' | 'coming-soon' | 'support-us' | 'crypto-donation' | 'not-found';
 
 function App() {
   const [toast, setToast] = useState<ToastData | null>(null);

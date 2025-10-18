@@ -1,6 +1,11 @@
 import React from 'react';
+import { Page } from '../App';
 
-const Terms: React.FC = () => {
+interface TermsProps {
+  navigateTo: (page: Page) => void;
+}
+
+const Terms: React.FC<TermsProps> = ({ navigateTo }) => {
   return (
     <div className="max-w-4xl mx-auto py-8">
       <div className="text-center mb-12">

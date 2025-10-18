@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { PlusCircleIcon } from '../components/icons/PlusCircleIcon';
 import { SparklesIcon } from '../components/icons/SparklesIcon';
 import { ChevronDownIcon } from '../components/icons/ChevronDownIcon';
+import { Page } from '../App';
+
+interface ChangelogProps {
+  navigateTo: (page: Page) => void;
+}
 
 const changelogData = [
     {
@@ -66,7 +71,7 @@ const ChangelogVersionItem: React.FC<{ version: typeof changelogData[0] }> = ({ 
     );
 };
 
-const Changelog: React.FC = () => {
+const Changelog: React.FC<ChangelogProps> = ({ navigateTo }) => {
   return (
     <div className="max-w-4xl mx-auto py-8">
       <div className="text-center mb-12">

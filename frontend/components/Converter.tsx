@@ -270,7 +270,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               </div>
               
               {/* Custom CSS for particle animations */}
-              <style jsx>{`
+              <style>{`
                 @keyframes particle1 {
                   0% { transform: translateX(0) translateY(-50%); opacity: 0; }
                   50% { opacity: 1; }

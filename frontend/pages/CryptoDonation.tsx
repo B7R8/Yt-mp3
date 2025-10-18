@@ -4,9 +4,10 @@ import { loadWalletData, WalletData, getWalletAddress } from '../crypto/walletSe
 import { loadSecureWalletConfig, getSecureWalletAddress } from '../crypto/secureWalletLoader';
 import { secureCopyToClipboard } from '../crypto/secureWalletApi';
 import QRCodeModal from '../crypto/QRCodeModal';
+import { Page } from '../App';
 
 interface CryptoDonationProps {
-  navigateTo?: (page: string) => void;
+  navigateTo: (page: Page) => void;
 }
 
 const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
@@ -162,25 +163,25 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
   const currentNetwork = currentWallet?.networks[selectedNetwork];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#1a1a1a] py-4">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#1a1a1a] py-2">
+      <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Cryptocurrency Donations
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400">
+          <p className="text-base text-gray-600 dark:text-gray-400">
             Support us with your favorite cryptocurrency
           </p>
         </div>
 
         {/* Back Button */}
-        <div className="mb-8">
+        <div className="mb-6">
           <button
             onClick={() => navigateTo?.('support-us')}
-            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm sm:text-base"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back to Support Options
@@ -188,9 +189,9 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
         </div>
 
         {/* Crypto Selection */}
-        <div className="mb-10">
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-6">Select Cryptocurrency</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Select Cryptocurrency</h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {Object.keys(walletData).map((key) => (
               <button
                 key={key}
@@ -201,7 +202,7 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
                     setSelectedNetwork(networks[0]);
                   }
                 }}
-                className={`p-5 sm:p-6 rounded-xl border-2 transition-all duration-200 ${
+                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
                   selectedCrypto === key
                     ? key === 'bitcoin' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' :
                       key === 'usdt' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' :
@@ -209,18 +210,18 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
                       key === 'bnb' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' :
                       key === 'solana' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' :
                       'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                    : key === 'bitcoin' ? 'border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600' :
-                      key === 'usdt' ? 'border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600' :
-                      key === 'ethereum' ? 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600' :
-                      key === 'bnb' ? 'border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600' :
-                      key === 'solana' ? 'border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600' :
-                      'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                    : key === 'bitcoin' ? 'border-gray-100 dark:border-gray-600 hover:border-orange-300 dark:hover:border-orange-600' :
+                      key === 'usdt' ? 'border-gray-100 dark:border-gray-600 hover:border-green-300 dark:hover:border-green-600' :
+                      key === 'ethereum' ? 'border-gray-100 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600' :
+                      key === 'bnb' ? 'border-gray-100 dark:border-gray-600 hover:border-yellow-300 dark:hover:border-yellow-600' :
+                      key === 'solana' ? 'border-gray-100 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600' :
+                      'border-gray-100 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
-                <div className={`w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 rounded-full bg-gradient-to-r ${getCryptoColors(key)} flex items-center justify-center text-white ${key === 'bnb' ? 'items-center justify-center' : ''}`}>
+                <div className={`w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-r ${getCryptoColors(key)} flex items-center justify-center text-white ${key === 'bnb' ? 'items-center justify-center' : ''}`}>
                   {getCryptoIcon(key)}
                 </div>
-                <p className={`text-base sm:text-lg font-medium text-gray-900 dark:text-white ${key === 'bnb' ? 'leading-tight' : ''}`}>
+                <p className={`text-sm font-medium text-gray-900 dark:text-white ${key === 'bnb' ? 'leading-tight' : ''}`}>
                   {walletData[key]?.name || key}
                 </p>
               </button>
@@ -230,14 +231,14 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
 
         {/* Network Selection */}
         {currentWallet && (
-          <div className="mb-10">
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-6">Select Network</h2>
-            <div className="flex flex-wrap gap-4">
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Select Network</h2>
+            <div className="flex flex-wrap gap-3">
               {Object.keys(currentWallet.networks).map((networkKey) => (
                 <button
                   key={networkKey}
                   onClick={() => setSelectedNetwork(networkKey)}
-                  className={`px-4 py-3 rounded-lg border-2 transition-all duration-200 text-base ${
+                  className={`px-3 py-2 rounded-lg border-2 transition-all duration-200 text-sm ${
                     selectedNetwork === networkKey
                       ? selectedCrypto === 'bitcoin' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300' :
                         selectedCrypto === 'usdt' ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' :
@@ -245,12 +246,12 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
                         selectedCrypto === 'bnb' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300' :
                         selectedCrypto === 'solana' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300' :
                         'border-orange-500 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
-                      : selectedCrypto === 'bitcoin' ? 'border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 text-gray-700 dark:text-gray-300' :
-                        selectedCrypto === 'usdt' ? 'border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 text-gray-700 dark:text-gray-300' :
-                        selectedCrypto === 'ethereum' ? 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 text-gray-700 dark:text-gray-300' :
-                        selectedCrypto === 'bnb' ? 'border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600 text-gray-700 dark:text-gray-300' :
-                        selectedCrypto === 'solana' ? 'border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 text-gray-700 dark:text-gray-300' :
-                        'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300'
+                      : selectedCrypto === 'bitcoin' ? 'border-gray-100 dark:border-gray-600 hover:border-orange-300 dark:hover:border-orange-600 text-gray-700 dark:text-gray-300' :
+                        selectedCrypto === 'usdt' ? 'border-gray-100 dark:border-gray-600 hover:border-green-300 dark:hover:border-green-600 text-gray-700 dark:text-gray-300' :
+                        selectedCrypto === 'ethereum' ? 'border-gray-100 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 text-gray-700 dark:text-gray-300' :
+                        selectedCrypto === 'bnb' ? 'border-gray-100 dark:border-gray-600 hover:border-yellow-300 dark:hover:border-yellow-600 text-gray-700 dark:text-gray-300' :
+                        selectedCrypto === 'solana' ? 'border-gray-100 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600 text-gray-700 dark:text-gray-300' :
+                        'border-gray-100 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300'
                   }`}
                 >
                   {currentWallet.networks[networkKey].name}
@@ -262,9 +263,9 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
 
         {/* Wallet Address */}
         {currentAddress && currentNetwork && (
-          <div className="bg-white dark:bg-[#2d2d2d] rounded-xl p-6 sm:p-8 shadow-lg">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-[#2d2d2d] rounded-xl p-6 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {currentNetwork.symbol} Wallet Address
               </h3>
               <button
@@ -277,16 +278,16 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
               </button>
             </div>
             
-            <div className="bg-gray-50 dark:bg-[#3a3a3a] rounded-lg p-4 sm:p-5 mb-6">
-              <p className="text-sm sm:text-base text-gray-900 dark:text-white break-all font-mono">
+            <div className="bg-gray-50 dark:bg-[#3a3a3a] rounded-lg p-4 mb-4">
+              <p className="text-sm text-gray-900 dark:text-white break-all font-mono">
                 {currentAddress}
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="flex gap-3">
               <button
                 onClick={() => copyToClipboard(currentAddress, `${selectedCrypto}-${selectedNetwork}`)}
-                className={`px-5 py-3 rounded-lg text-base font-medium transition-colors duration-200 ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                   copiedAddress === `${selectedCrypto}-${selectedNetwork}`
                     ? 'bg-green-500 text-white'
                     : selectedCrypto === 'bitcoin' ? 'bg-orange-600 hover:bg-orange-700 text-white' :
@@ -316,7 +317,7 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
               
               <button
                 onClick={() => setIsQRModalOpen(true)}
-                className="px-5 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-base font-medium transition-colors"
+                className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
               >
                 <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -328,18 +329,18 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
         )}
 
         {/* Binance User ID */}
-        <div className="mt-10 bg-white dark:bg-[#2d2d2d] rounded-xl p-6 sm:p-8 shadow-lg">
-          <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-6">
+        <div className="mt-8 bg-white dark:bg-[#2d2d2d] rounded-xl p-6 shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Binance User ID
           </h3>
-          <div className="bg-gray-50 dark:bg-[#3a3a3a] rounded-lg p-4 sm:p-5 mb-6">
-            <p className="text-sm sm:text-base text-gray-900 dark:text-white font-mono">
+          <div className="bg-gray-50 dark:bg-[#3a3a3a] rounded-lg p-4 mb-4">
+            <p className="text-sm text-gray-900 dark:text-white font-mono">
               {secureConfig?.binance?.userId || 'Binance ID not configured'}
             </p>
           </div>
           <button
             onClick={() => copyToClipboard(secureConfig?.binance?.userId || '', 'binance')}
-            className={`px-5 py-3 rounded-lg text-base font-medium transition-colors duration-200 ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
               copiedAddress === 'binance'
                 ? 'bg-green-500 text-white'
                 : 'bg-yellow-500 hover:bg-yellow-600 text-white'
@@ -364,10 +365,10 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
         </div>
 
         {/* Thank You Message */}
-        <div className="mt-10 text-center">
-          <div className="inline-flex items-center gap-3 text-gray-600 dark:text-gray-400">
-            <HeartIcon className="w-6 h-6 text-red-500" />
-            <span className="text-base sm:text-lg">Thank you for your support!</span>
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <HeartIcon className="w-5 h-5 text-red-500" />
+            <span className="text-sm">Thank you for your support!</span>
           </div>
         </div>
       </div>

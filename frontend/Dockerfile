@@ -10,6 +10,8 @@ COPY tsconfig.json ./
 COPY vite.config.ts ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
+COPY .stylelintrc.json ./
+COPY css-custom-data.json ./
 
 # Install dependencies
 RUN npm ci --frozen-lockfile && npm cache clean --force
@@ -19,7 +21,8 @@ COPY . .
 
 # Build the application with performance optimizations and cleanup
 RUN npm run build && \
-    rm -rf src/ node_modules/ package*.json tsconfig.json vite.config.ts tailwind.config.js postcss.config.js
+    npm run lint:css:check && \
+    rm -rf src/ node_modules/ package*.json tsconfig.json vite.config.ts tailwind.config.js postcss.config.js .stylelintrc.json css-custom-data.json
 
 # Production stage with Nginx
 FROM nginx:alpine AS production

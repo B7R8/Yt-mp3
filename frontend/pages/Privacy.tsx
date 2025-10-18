@@ -1,6 +1,11 @@
 import React from 'react';
+import { Page } from '../App';
 
-const Privacy: React.FC = () => {
+interface PrivacyProps {
+  navigateTo: (page: Page) => void;
+}
+
+const Privacy: React.FC<PrivacyProps> = ({ navigateTo }) => {
   return (
     <div className="max-w-4xl mx-auto py-8">
       <div className="text-center mb-12">

@@ -1,7 +1,7 @@
 -- PostgreSQL initialization script for YouTube-to-MP3 Converter
 -- This script creates the necessary tables and indexes
 
--- Create conversions table (legacy table for backward compatibility)
+-- Create conversions table
 CREATE TABLE IF NOT EXISTS conversions (
     id VARCHAR(255) PRIMARY KEY,
     youtube_url TEXT NOT NULL,
@@ -26,58 +26,6 @@ CREATE TABLE IF NOT EXISTS blacklist (
     created_by VARCHAR(100) DEFAULT 'admin'
 );
 
--- Create main jobs table for conversion jobs
-CREATE TABLE IF NOT EXISTS jobs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    video_id VARCHAR(50) NOT NULL,
-    youtube_url TEXT NOT NULL,
-    video_title TEXT,
-    user_id VARCHAR(255), -- Optional user identification
-    status VARCHAR(50) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'cancelled')),
-    quality VARCHAR(10) DEFAULT '128k',
-    trim_start FLOAT DEFAULT NULL,
-    trim_duration FLOAT DEFAULT NULL,
-    file_path TEXT, -- Path to processed file on server
-    file_size BIGINT,
-    duration FLOAT,
-    ffmpeg_logs TEXT, -- Store ffmpeg processing logs
-    error_message TEXT,
-    download_url TEXT, -- Direct download URL
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '24 hours')
-);
-
--- Create processed_files table for tracking server files
-CREATE TABLE IF NOT EXISTS processed_files (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    job_id UUID REFERENCES jobs(id) ON DELETE CASCADE,
-    file_path TEXT NOT NULL,
-    file_size BIGINT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP NOT NULL
-);
-
--- Create user_requests table for tracking user activity
-CREATE TABLE IF NOT EXISTS user_requests (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id VARCHAR(255),
-    ip_address INET,
-    video_id VARCHAR(50),
-    job_id UUID REFERENCES jobs(id) ON DELETE SET NULL,
-    request_type VARCHAR(50) NOT NULL, -- 'convert', 'download', 'status'
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Create video_mutex table to prevent duplicate processing
-CREATE TABLE IF NOT EXISTS video_mutex (
-    video_id VARCHAR(50) PRIMARY KEY,
-    job_id UUID REFERENCES jobs(id) ON DELETE CASCADE,
-    locked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP + INTERVAL '30 minutes')
-);
-
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_conversions_status ON conversions(status);
 CREATE INDEX IF NOT EXISTS idx_conversions_created_at ON conversions(created_at);
@@ -85,28 +33,7 @@ CREATE INDEX IF NOT EXISTS idx_conversions_youtube_url ON conversions(youtube_ur
 CREATE INDEX IF NOT EXISTS idx_blacklist_type ON blacklist(type);
 CREATE INDEX IF NOT EXISTS idx_blacklist_value ON blacklist(value);
 
--- Jobs table indexes
-CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
-CREATE INDEX IF NOT EXISTS idx_jobs_video_id ON jobs(video_id);
-CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at);
-CREATE INDEX IF NOT EXISTS idx_jobs_expires_at ON jobs(expires_at);
-CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id);
-
--- Processed files indexes
-CREATE INDEX IF NOT EXISTS idx_processed_files_job_id ON processed_files(job_id);
-CREATE INDEX IF NOT EXISTS idx_processed_files_expires_at ON processed_files(expires_at);
-CREATE INDEX IF NOT EXISTS idx_processed_files_file_path ON processed_files(file_path);
-
--- User requests indexes
-CREATE INDEX IF NOT EXISTS idx_user_requests_user_id ON user_requests(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_requests_ip_address ON user_requests(ip_address);
-CREATE INDEX IF NOT EXISTS idx_user_requests_video_id ON user_requests(video_id);
-CREATE INDEX IF NOT EXISTS idx_user_requests_created_at ON user_requests(created_at);
-
--- Video mutex indexes
-CREATE INDEX IF NOT EXISTS idx_video_mutex_expires_at ON video_mutex(expires_at);
-
--- Create updated_at trigger function
+-- Create updated_at trigger for conversions table
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -115,24 +42,52 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers for updated_at
 CREATE TRIGGER update_conversions_updated_at 
     BEFORE UPDATE ON conversions 
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 
+-- Create updated_at trigger for blacklist table
 CREATE TRIGGER update_blacklist_updated_at 
     BEFORE UPDATE ON blacklist 
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 
+-- Add direct_download_url column if it doesn't exist (for existing databases)
+ALTER TABLE conversions ADD COLUMN IF NOT EXISTS direct_download_url TEXT;
+
+-- Create jobs table for audio processing
+CREATE TABLE IF NOT EXISTS jobs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    source_url TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'ready', 'failed', 'deleted')),
+    direct_download_url TEXT,
+    processed_path TEXT,
+    file_size BIGINT,
+    duration FLOAT,
+    bitrate INT,
+    action TEXT CHECK (action IN ('trim', 'reencode', 'none')),
+    trim_start FLOAT,
+    trim_duration FLOAT,
+    download_token TEXT UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    error_message TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for jobs table
+CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at);
+CREATE INDEX IF NOT EXISTS idx_jobs_expires_at ON jobs(expires_at);
+CREATE INDEX IF NOT EXISTS idx_jobs_download_token ON jobs(download_token);
+CREATE INDEX IF NOT EXISTS idx_jobs_source_url ON jobs(source_url);
+
+-- Create updated_at trigger for jobs table
 CREATE TRIGGER update_jobs_updated_at 
     BEFORE UPDATE ON jobs 
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
-
--- Add direct_download_url column if it doesn't exist (for existing databases)
-ALTER TABLE conversions ADD COLUMN IF NOT EXISTS direct_download_url TEXT;
 
 -- Create user if it doesn't exist
 DO $$

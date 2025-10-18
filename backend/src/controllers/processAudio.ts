@@ -326,31 +326,15 @@ async function processAudioJob(job: JobData): Promise<void> {
 }
 
 /**
- * Cleanup expired jobs (called by cron) - Legacy function for processAudio
+ * Cleanup expired jobs (called by cron)
  */
 export async function cleanupExpiredJobs(): Promise<void> {
   try {
-    // Check if jobs table exists before attempting cleanup
-    const { query } = await import('../config/database');
-    
-    try {
-      // Test if jobs table exists
-      await query('SELECT 1 FROM jobs LIMIT 1');
-      
-      // If table exists, proceed with cleanup
-      const cleanedCount = await mediaService.cleanupExpiredJobs();
-      if (cleanedCount > 0) {
-        logger.info(`Legacy cleanup completed: ${cleanedCount} expired jobs removed`);
-      }
-    } catch (tableError: any) {
-      // If table doesn't exist, skip cleanup gracefully
-      if (tableError.code === '42P01' || tableError.message?.includes('does not exist')) {
-        logger.info('Legacy jobs table does not exist, skipping cleanup');
-        return;
-      }
-      throw tableError; // Re-throw if it's a different error
+    const cleanedCount = await mediaService.cleanupExpiredJobs();
+    if (cleanedCount > 0) {
+      logger.info(`Cleanup completed: ${cleanedCount} expired jobs removed`);
     }
   } catch (error) {
-    logger.error('Legacy cleanup expired jobs failed:', error);
+    logger.error('Cleanup expired jobs failed:', error);
   }
 }

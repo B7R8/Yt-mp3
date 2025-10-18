@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from './context/ThemeContext';
 import ErrorBoundary from './components/ErrorBoundary';
-import './src/styles/main.css';
+import './src/index.css';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

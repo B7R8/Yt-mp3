@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useOptimizedConverter } from '../hooks/useOptimizedConverter';
-import { LoadingSpinner } from './LoadingSpinner';
-import { Toast } from './Toast';
-import { SelectQualityModal } from './SelectQualityModal';
-import { TrimAudioModal } from './TrimAudioModal';
-import { Tooltip } from './Tooltip';
+import LoadingSpinner from './LoadingSpinner';
+import Toast from './Toast';
+import SelectQualityModal from './SelectQualityModal';
+import TrimAudioModal from './TrimAudioModal';
+import Tooltip from './Tooltip';
+import { Quality } from '../types';
 
 interface OptimizedConverterProps {
   showToast: (message: string, type: 'success' | 'error' | 'info') => void;
@@ -16,7 +17,7 @@ export const OptimizedConverter: React.FC<OptimizedConverterProps> = ({
   autoDownload
 }) => {
   const [url, setUrl] = useState('');
-  const [quality, setQuality] = useState('192k');
+  const [quality, setQuality] = useState<Quality>('192K');
   const [trimEnabled, setTrimEnabled] = useState(false);
   const [trimStart, setTrimStart] = useState('');
   const [trimEnd, setTrimEnd] = useState('');
@@ -55,16 +56,16 @@ export const OptimizedConverter: React.FC<OptimizedConverterProps> = ({
   }, [canStartConversion, handleSubmit, url, quality, trimEnabled, trimStart, trimEnd]);
 
   // Handle quality selection
-  const handleQualitySelect = useCallback((selectedQuality: string) => {
+  const handleQualitySelect = useCallback((selectedQuality: Quality) => {
     setQuality(selectedQuality);
     setShowQualityModal(false);
   }, []);
 
   // Handle trim settings
-  const handleTrimSettings = useCallback((start: string, end: string) => {
-    setTrimStart(start);
-    setTrimEnd(end);
-    setTrimEnabled(start !== '' && end !== '');
+  const handleTrimSettings = useCallback((enabled: boolean, startTime: string, endTime: string) => {
+    setTrimStart(startTime);
+    setTrimEnd(endTime);
+    setTrimEnabled(enabled);
     setShowTrimModal(false);
   }, []);
 
@@ -174,7 +175,7 @@ export const OptimizedConverter: React.FC<OptimizedConverterProps> = ({
             aria-label={`Select audio quality, current: ${quality}`}
           >
             Quality: {quality}
-            <Tooltip content="Select audio quality">
+            <Tooltip text="Select audio quality">
               <span className="info-icon">ℹ️</span>
             </Tooltip>
           </button>
@@ -187,7 +188,7 @@ export const OptimizedConverter: React.FC<OptimizedConverterProps> = ({
             aria-label={trimEnabled ? `Trim audio from ${trimStart} to ${trimEnd}` : 'Set audio trim settings'}
           >
             {trimEnabled ? `Trim: ${trimStart} - ${trimEnd}` : 'No Trim'}
-            <Tooltip content="Set start and end times for audio trimming">
+            <Tooltip text="Set start and end times for audio trimming">
               <span className="info-icon">✂️</span>
             </Tooltip>
           </button>
@@ -263,17 +264,19 @@ export const OptimizedConverter: React.FC<OptimizedConverterProps> = ({
       {/* Modals */}
       {showQualityModal && (
         <SelectQualityModal
+          isOpen={showQualityModal}
           currentQuality={quality}
-          onSelect={handleQualitySelect}
+          onSave={handleQualitySelect}
           onClose={() => setShowQualityModal(false)}
         />
       )}
 
       {showTrimModal && (
         <TrimAudioModal
-          currentStart={trimStart}
-          currentEnd={trimEnd}
-          maxDuration={videoInfo?.duration || 0}
+          isOpen={showTrimModal}
+          initialStart={trimStart}
+          initialEnd={trimEnd}
+          videoDuration={videoInfo?.duration || 0}
           onSave={handleTrimSettings}
           onClose={() => setShowTrimModal(false)}
         />

@@ -5,13 +5,12 @@ import dotenv from 'dotenv';
 import path from 'path';
 import cron from 'node-cron';
 
-import conversionRoutes from './routes/conversion';
+import simpleConversionRoutes from './routes/simpleConversion';
 import healthRoutes from './routes/health';
 import secureWalletRoutes from './routes/secureWallet';
 import contactRoutes from './routes/contact';
 import processAudioRoutes from './routes/processAudio';
-import { conversionService } from './services/conversionService';
-import { fallbackConversionService } from './services/fallbackConversionService';
+import { SimpleConversionService } from './services/simpleConversionService';
 import { cleanupExpiredJobs } from './controllers/processAudio';
 import logger from './config/logger';
 import { initializeDatabase } from './config/database';
@@ -30,7 +29,7 @@ app.use(helmet({
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? 'http://saveytb.com' : true),
+  origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? 'https://saveytb.com' : true),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'Cache-Control', 'X-Streaming-Request']
@@ -62,7 +61,7 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api', healthRoutes);
-app.use('/api', conversionRoutes);
+app.use('/api', simpleConversionRoutes);
 app.use('/api', contactRoutes);
 app.use('/api', processAudioRoutes);
 app.use('/api/secure-wallet', secureWalletRoutes);
@@ -99,46 +98,24 @@ async function startServer() {
     await initializeDatabase();
     logger.info('Database initialized successfully');
     
-    // Check if yt-dlp is available
-    const { spawn } = require('child_process');
-    const checkYtDlp = () => {
-      return new Promise((resolve) => {
-        const ytdlp = spawn('yt-dlp', ['--version']);
-        ytdlp.on('close', (code: number) => {
-          resolve(code === 0);
-        });
-        ytdlp.on('error', () => {
-          resolve(false);
-        });
-      });
-    };
-
-    const ytDlpAvailable = await checkYtDlp();
-    const activeService = ytDlpAvailable ? conversionService : fallbackConversionService;
-    
-    if (ytDlpAvailable) {
-      logger.info('✅ yt-dlp is available - using full conversion service');
-    } else {
-      logger.warn('⚠️ yt-dlp not available - using fallback service (mock processing)');
-    }
-
-    // Start cleanup cron job (every 10 minutes to clean expired files and jobs)
+    // Start cleanup cron job (every 10 minutes to clean files older than 20 minutes)
+    const conversionService = new SimpleConversionService();
     cron.schedule('*/10 * * * *', () => {
-      logger.info('Running cleanup job for expired files and jobs...');
-      activeService.cleanupOldFiles().catch(error => {
+      logger.info('Running cleanup job for files older than 20 minutes...');
+      conversionService.cleanupOldFiles().catch(error => {
         logger.error('Cleanup job failed:', error);
       });
     });
     logger.info('Cleanup cron job scheduled (every 10 minutes)');
 
-    // Start audio processing cleanup cron job (every 5 minutes) - only for legacy processAudio
+    // Start audio processing cleanup cron job (every 5 minutes)
     cron.schedule('*/5 * * * *', () => {
-      logger.info('Running legacy audio processing cleanup job...');
+      logger.info('Running audio processing cleanup job...');
       cleanupExpiredJobs().catch(error => {
-        logger.error('Legacy audio processing cleanup job failed:', error);
+        logger.error('Audio processing cleanup job failed:', error);
       });
     });
-    logger.info('Legacy audio processing cleanup cron job scheduled (every 5 minutes)');
+    logger.info('Audio processing cleanup cron job scheduled (every 5 minutes)');
 
     // Start server
     const server = app.listen(PORT, '0.0.0.0', () => {

@@ -2,8 +2,14 @@ import React, { useState } from 'react';
 import { EnvelopeIcon } from '../components/icons/EnvelopeIcon';
 import { ClockIcon } from '../components/icons/ClockIcon';
 import { LifebuoyIcon } from '../components/icons/LifebuoyIcon';
+import { Page } from '../App';
 
-const Contact: React.FC = () => {
+interface ContactProps {
+  navigateTo: (page: Page) => void;
+  showToast: (message: string, type: 'success' | 'error' | 'info') => void;
+}
+
+const Contact: React.FC<ContactProps> = ({ navigateTo, showToast }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('General Inquiry');
@@ -11,7 +17,7 @@ const Contact: React.FC = () => {
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [showToastState, setShowToastState] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = () => {
@@ -111,8 +117,8 @@ const Contact: React.FC = () => {
       
       if (response.ok && data.success) {
         setSubmitted(true);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 5000);
+        setShowToastState(true);
+        setTimeout(() => setShowToastState(false), 5000);
         
         // Reset form
         setName('');
@@ -125,7 +131,7 @@ const Contact: React.FC = () => {
       }
     } catch (error) {
       console.error('Contact form error:', error);
-      setShowToast(true);
+      setShowToastState(true);
       // You could add error state handling here
     } finally {
       setIsSubmitting(false);
@@ -239,7 +245,7 @@ const Contact: React.FC = () => {
         </div>
       )}
 
-      {showToast && (
+      {showToastState && (
         <div className="fixed bottom-4 right-4 z-50">
           <div className="flex items-center gap-2 rounded-lg bg-green-600 text-white shadow-lg px-4 py-3 text-sm">
             <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.364 7.364a1 1 0 01-1.414 0L3.293 10.5a1 1 0 111.414-1.414l3.05 3.05 6.657-6.657a1 1 0 011.293-.186z" clipRule="evenodd"/></svg>

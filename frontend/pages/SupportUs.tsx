@@ -1,8 +1,9 @@
 import React from 'react';
 import HeartIcon from '../components/icons/HeartIcon';
+import { Page } from '../App';
 
 interface SupportUsProps {
-  navigateTo?: (page: string) => void;
+  navigateTo: (page: Page) => void;
 }
 
 const SupportUs: React.FC<SupportUsProps> = ({ navigateTo }) => {

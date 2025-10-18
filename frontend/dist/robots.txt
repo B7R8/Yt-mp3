@@ -2,16 +2,9 @@ User-agent: *
 Allow: /
 
 # Disallow admin and private areas
-Disallow: /admin/
 Disallow: /api/
 Disallow: /temp/
 Disallow: /logs/
 
 # Sitemap
 Sitemap: https://saveytb.com/sitemap.xml
-
-# Crawl-delay for respectful crawling
-Crawl-delay: 1
-
-# Additional directives for better SEO
-Host: https://saveytb.com

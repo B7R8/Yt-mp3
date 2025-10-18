@@ -1,6 +1,6 @@
 /* System fonts for maximum performance - no external font loading */
 @font-face {
-  font-family: 'Inter';
+  font-family: Inter;
   font-style: normal;
   font-weight: 300 700;
   font-display: swap;

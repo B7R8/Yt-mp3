@@ -8,18 +8,18 @@ interface HowToProps {
 
 const HowToSection: React.FC<HowToProps> = ({ navigateTo }) => {
   return (
-    <section id="how-to" className="pt-8 sm:pt-12 md:pt-16 pb-4 sm:pb-6 md:pb-8 text-gray-700 dark:text-gray-300">
-      <div className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto space-y-4 sm:space-y-6 md:space-y-8 px-2 sm:px-3 md:px-4">
+    <section id="how-to" className="pt-12 sm:pt-12 md:pt-16 pb-8 sm:pb-6 md:pb-8 text-gray-700 dark:text-gray-300">
+      <div className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto space-y-6 sm:space-y-6 md:space-y-8 px-6 sm:px-3 md:px-4">
         <div className="text-center">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3">YouTube to MP3 Converter</h2>
-          <p className="text-sm leading-relaxed">
+          <h2 className="text-xl sm:text-xl font-bold text-gray-900 dark:text-white mb-4">YouTube to MP3 Converter</h2>
+          <p className="text-base leading-relaxed">
             Convert any YouTube video to MP3 in a few seconds with SaveYTB - the best free YouTube to MP3 converter. SaveYTB is completely ad-free with no annoying pop-ups or third-party scripts. Our YouTube to MP3 downloader features auto-download, audio trimming, quality selection (64kbps to 320kbps), and works on any device without software installation. Convert YouTube to MP3, YouTube video to MP3, YT to MP3, and YouTube MP3 downloads with our advanced features. Download YT MP3 files instantly with our YouTube to MP3 converter - all completely free!
           </p>
         </div>
 
         <div>
-          <h2 className="text-lg sm:text-xl font-bold text-center text-gray-900 dark:text-white mb-4">How to Convert YouTube to MP3</h2>
-          <ol className="list-decimal list-inside space-y-3 text-sm">
+          <h2 className="text-xl sm:text-xl font-bold text-center text-gray-900 dark:text-white mb-6">How to Convert YouTube to MP3</h2>
+          <ol className="list-decimal list-inside space-y-4 text-base">
             <li>
               <strong className="font-semibold text-gray-800 dark:text-gray-200">Find YouTube video:</strong> Go to YouTube, open the video you want to convert, and copy the URL from the address bar. On mobile? Tap "Share" on the video and then hit "Copy Link." It works for YouTube Shorts too.
             </li>

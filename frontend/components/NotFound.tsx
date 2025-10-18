@@ -1,7 +1,8 @@
 import React from 'react';
+import { Page } from '../App';
 
 interface NotFoundProps {
-  navigateTo?: (page: string) => void;
+  navigateTo?: (page: Page) => void;
 }
 
 const NotFound: React.FC<NotFoundProps> = ({ navigateTo }) => {

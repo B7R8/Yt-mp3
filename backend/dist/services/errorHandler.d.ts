@@ -1,53 +1,52 @@
 export interface ErrorContext {
-    jobId?: string;
-    videoId?: string;
-    userId?: string;
-    userIp?: string;
-    operation?: string;
-    additionalData?: any;
+    [key: string]: any;
 }
 export declare class ErrorHandler {
     /**
-     * Get user-friendly error message
+     * Log user-facing errors
      */
-    static getUserFriendlyError(error: any): string;
+    static logUserError(error: Error, errorCode: string, context?: ErrorContext): void;
     /**
-     * Log technical error with context
+     * Handle database errors
      */
-    static logTechnicalError(error: any, operation: string, context?: ErrorContext): void;
+    static handleDatabaseError(error: Error, operation: string, context?: ErrorContext): void;
     /**
-     * Handle conversion errors with proper fallbacks
+     * Handle file system errors
      */
-    static handleConversionError(error: any, jobId: string, videoId: string, operation: string): Promise<{
-        shouldRetry: boolean;
-        retryDelay?: number;
-        fallbackAction?: string;
-    }>;
+    static handleFileSystemError(error: Error, operation: string, filePath?: string, context?: ErrorContext): void;
     /**
-     * Create standardized error response
+     * Handle external API errors
      */
-    static createErrorResponse(statusCode: number, userMessage: string, technicalError?: any, context?: ErrorContext): {
+    static handleApiError(error: Error, apiName: string, endpoint?: string, context?: ErrorContext): void;
+    /**
+     * Handle validation errors
+     */
+    static handleValidationError(error: Error, field?: string, value?: any, context?: ErrorContext): void;
+    /**
+     * Handle conversion errors
+     */
+    static handleConversionError(error: Error, jobId?: string, videoId?: string, context?: ErrorContext): void;
+    /**
+     * Get user-friendly error messages
+     */
+    static getUserFriendlyError(error: unknown): string;
+    /**
+     * Log technical errors with context (updated to handle unknown error type)
+     */
+    static logTechnicalError(error: unknown, errorCode: string, context?: ErrorContext): void;
+    /**
+     * Create a standardized error response with status code
+     */
+    static createErrorResponse(statusCode: number, userMessage: string, error: unknown, context?: ErrorContext): {
         statusCode: number;
-        response: any;
+        response: {
+            success: boolean;
+            error: {
+                code: string;
+                message: string;
+                timestamp: string;
+            };
+        };
     };
-    /**
-     * Handle API failures with fallback strategies
-     */
-    static handleApiFailure(primaryError: any, fallbackAction: string, context: ErrorContext): Promise<{
-        success: boolean;
-        data?: any;
-        error?: string;
-    }>;
-    /**
-     * Validate and sanitize error messages for logging
-     */
-    static sanitizeErrorMessage(error: any): string;
-    /**
-     * Get error severity level
-     */
-    static getErrorSeverity(error: any): 'low' | 'medium' | 'high' | 'critical';
 }
-export declare const getUserFriendlyError: typeof ErrorHandler.getUserFriendlyError;
-export declare const logTechnicalError: typeof ErrorHandler.logTechnicalError;
-export declare const sendErrorResponse: (res: any, statusCode: number, userMessage: string, technicalError?: any, context?: ErrorContext) => void;
 //# sourceMappingURL=errorHandler.d.ts.map
