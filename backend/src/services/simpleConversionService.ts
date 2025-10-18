@@ -204,11 +204,16 @@ export class SimpleConversionService {
       const filename = this.generateFilename(conversionResult.title || 'Unknown', job.quality || 'high');
       const filePath = path.join(this.downloadsDir, filename);
 
-      // Store the download URL directly (URLs expire quickly, so we'll stream from API)
+      // Download file immediately while URL is still valid (URLs expire in seconds)
       if (conversionResult.downloadUrl) {
-        logger.info(`🔗 Storing download URL for streaming: ${conversionResult.downloadUrl}`);
+        logger.info(`📥 Downloading file immediately from: ${conversionResult.downloadUrl}`);
+        await this.downloadFileImmediately(conversionResult.downloadUrl, filePath);
         
-        // Update job with download URL for streaming (no local file storage)
+        // Get file size
+        const stats = await fs.stat(filePath);
+        const fileSize = stats.size;
+        
+        // Update job with local file path
         await query(
           `UPDATE conversions SET 
             status = $1, 
@@ -220,8 +225,8 @@ export class SimpleConversionService {
           [
             'completed',
             filename,
-            conversionResult.downloadUrl, // Store the API download URL
-            conversionResult.filesize || 0, // Use filesize from API response
+            filePath, // Store the local file path
+            fileSize,
             new Date(),
             job.id
           ]
@@ -246,7 +251,57 @@ export class SimpleConversionService {
     }
   }
 
-
+  /**
+   * Download file immediately from URL (for URLs that expire quickly)
+   */
+  private async downloadFileImmediately(url: string, filePath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const https = require('https');
+      const file = require('fs').createWriteStream(filePath);
+      
+      logger.info(`📥 Downloading file immediately from: ${url}`);
+      
+      const request = https.get(url, (response: any) => {
+        if (response.statusCode === 200) {
+          let downloadedBytes = 0;
+          
+          response.on('data', (chunk: Buffer) => {
+            downloadedBytes += chunk.length;
+          });
+          
+          response.pipe(file);
+          
+          file.on('finish', () => {
+            file.close();
+            logger.info(`✅ File downloaded successfully: ${filePath} (${downloadedBytes} bytes)`);
+            resolve();
+          });
+          
+          file.on('error', (error: Error) => {
+            logger.error(`❌ File write error: ${error.message}`);
+            fs.unlink(filePath).catch(() => {}); // Clean up on error
+            reject(error);
+          });
+        } else if (response.statusCode === 404) {
+          logger.error(`❌ Download URL expired (404): ${url}`);
+          reject(new Error('Download URL has expired. Please try again.'));
+        } else {
+          logger.error(`❌ Download failed with status: ${response.statusCode}`);
+          reject(new Error(`Download failed with status: ${response.statusCode}`));
+        }
+      });
+      
+      request.on('error', (error: Error) => {
+        logger.error(`❌ Download request error: ${error.message}`);
+        reject(error);
+      });
+      
+      request.setTimeout(30000, () => {
+        request.destroy();
+        reject(new Error('Download timeout - URL may have expired'));
+      });
+    });
+  }
 
   /**
    * Convert technical errors to user-friendly messages

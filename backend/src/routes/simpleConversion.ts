@@ -181,10 +181,10 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
     
     const filename = job.mp3_filename || 'converted.mp3';
     
-    // Stream directly from API URL (stored in processed_path)
-    if (job.processed_path && job.processed_path.startsWith('http')) {
-      logger.info(`🎵 Starting download from API URL: ${filename}`);
-      logger.info(`🔗 API URL: ${job.processed_path}`);
+    // Priority 1: Serve local file if available
+    if (job.processed_path && !job.processed_path.startsWith('http')) {
+      logger.info(`🎵 Starting download for local file: ${filename}`);
+      logger.info(`📁 Local file path: ${job.processed_path}`);
 
       // Set proper download headers with RFC 5987 encoding for international characters
       res.setHeader('Content-Type', 'audio/mpeg');
@@ -196,95 +196,54 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
       res.setHeader('X-Frame-Options', 'DENY');
       res.setHeader('X-XSS-Protection', '1; mode=block');
 
+      const fs = require('fs');
+      const path = require('path');
+      
       try {
-        const https = require('https');
-        const url = require('url');
+        // Use the processed_path directly (it's already the full path)
+        const filePath = job.processed_path;
         
-        // Parse the API URL
-        const parsedUrl = url.parse(job.processed_path);
+        // Check if file exists and get its size
+        const stats = await fs.promises.stat(filePath);
         
-        // Make request to API with proper headers
-        const options = {
-          hostname: parsedUrl.hostname,
-          port: parsedUrl.port || 443,
-          path: parsedUrl.path,
-          method: 'GET',
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'audio/mpeg, audio/*, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'identity', // Don't compress to avoid issues
-            'Connection': 'keep-alive',
-            'Cache-Control': 'no-cache'
-          }
-        };
+        if (stats.size === 0) {
+          logger.error(`❌ File is empty: ${filePath}, size: ${stats.size}`);
+          return res.status(500).json({
+            success: false,
+            message: 'File is empty or corrupted'
+          });
+        }
+
+        if (stats.size > 1073741824) { // 1GB limit
+          logger.error(`❌ File too large: ${filePath}, size: ${stats.size} bytes`);
+          return res.status(500).json({
+            success: false,
+            message: 'File is too large'
+          });
+        }
+
+        // Set content length for proper download progress
+        res.setHeader('Content-Length', stats.size);
         
-        const apiRequest = https.request(options, (apiResponse: any) => {
-          if (apiResponse.statusCode === 200) {
-            // Set content length if available
-            if (apiResponse.headers['content-length']) {
-              res.setHeader('Content-Length', apiResponse.headers['content-length']);
-            }
-            
-            // Stream the API response directly to the client
-            apiResponse.pipe(res);
-            
-            apiResponse.on('error', (error: Error) => {
-              logger.error(`❌ Error streaming from API: ${error.message}`);
-              if (!res.headersSent) {
-                res.status(500).json({
-                  success: false,
-                  message: 'Error downloading from source'
-                });
-              }
-            });
-            
-            logger.info(`✅ Successfully streaming from API URL`);
-          } else if (apiResponse.statusCode === 404) {
-            logger.error(`❌ API URL expired (404): ${job.processed_path}`);
-            if (!res.headersSent) {
-              res.status(410).json({
-                success: false,
-                message: 'Download link has expired. Please try converting again.'
-              });
-            }
-          } else {
-            logger.error(`❌ API returned status ${apiResponse.statusCode}: ${job.processed_path}`);
-            if (!res.headersSent) {
-              res.status(500).json({
-                success: false,
-                message: 'Error downloading from source'
-              });
-            }
-          }
-        });
+        // Stream the local file
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.pipe(res);
         
-        apiRequest.on('error', (error: Error) => {
-          logger.error(`❌ Error making API request: ${error.message}`);
+        fileStream.on('error', (error: Error) => {
+          logger.error(`❌ Error streaming local file: ${error.message}`);
           if (!res.headersSent) {
             res.status(500).json({
               success: false,
-              message: 'Error connecting to download source'
+              message: 'Error reading file'
             });
           }
         });
-        
-        apiRequest.setTimeout(30000, () => {
-          logger.error(`❌ API request timeout: ${job.processed_path}`);
-          apiRequest.destroy();
-          if (!res.headersSent) {
-            res.status(408).json({
-              success: false,
-              message: 'Download timeout. Please try again.'
-            });
-          }
-        });
-        
-        apiRequest.end();
+
+        logger.info(`✅ Successfully streaming local file: ${filePath}`);
         return;
         
       } catch (error) {
-        logger.error(`❌ Error streaming from API: ${error}`);
+        logger.error(`❌ Error accessing local file: ${error}`);
         // Fall through to try direct download URL
       }
     }
