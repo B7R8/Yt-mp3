@@ -223,12 +223,14 @@ export class SimpleConversionService {
         `UPDATE conversions SET 
           status = $1, 
           mp3_filename = $2, 
-          file_size = $3, 
-          updated_at = $4
-        WHERE id = $5`,
+          processed_path = $3,
+          file_size = $4, 
+          updated_at = $5
+        WHERE id = $6`,
         [
           'completed',
           filename,
+          filePath,
           fileSize,
           new Date(),
           job.id
