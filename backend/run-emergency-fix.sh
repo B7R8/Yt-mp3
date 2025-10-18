@@ -12,3 +12,4 @@ echo "🔄 Restarting backend..."
 docker-compose restart backend
 
 echo "🎉 All done! Backend should be working now."
+

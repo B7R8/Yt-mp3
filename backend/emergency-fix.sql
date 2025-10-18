@@ -71,3 +71,4 @@ END $$;
 
 -- Show success message
 SELECT 'Emergency database fix completed successfully!' as status;
+

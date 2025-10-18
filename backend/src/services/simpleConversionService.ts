@@ -190,14 +190,7 @@ export class SimpleConversionService {
         ['processing', new Date(), job.id]
       );
 
-      // Get video info
-      const videoInfo = await this.apiService.getVideoInfo(job.youtube_url);
-      
-      // Generate filename
-      const filename = this.generateFilename(videoInfo.title, job.quality || 'high');
-      const filePath = path.join(this.downloadsDir, filename);
-
-      // Convert video to MP3 (this gets the download URL)
+      // Convert video to MP3 (this gets both download URL and video title)
       const conversionResult = await this.apiService.convertToMp3(
         job.youtube_url,
         job.quality || 'high'
@@ -207,9 +200,14 @@ export class SimpleConversionService {
         throw new Error(conversionResult.error || 'Conversion failed');
       }
 
-      // Download the file from the URL
+      // Generate filename using title from conversion result
+      const filename = this.generateFilename(conversionResult.title || 'Unknown', job.quality || 'high');
+      const filePath = path.join(this.downloadsDir, filename);
+
+      // Download the file immediately from the URL (URLs expire in seconds)
       if (conversionResult.downloadUrl) {
-        await this.downloadFile(conversionResult.downloadUrl, filePath);
+        logger.info(`📥 Downloading file immediately from: ${conversionResult.downloadUrl}`);
+        await this.downloadFileImmediately(conversionResult.downloadUrl, filePath);
       } else {
         throw new Error('No download URL received from conversion service');
       }
@@ -253,23 +251,30 @@ export class SimpleConversionService {
     }
   }
 
+
   /**
-   * Download file from URL to local path
+   * Download file immediately from URL to local path (handles URL expiration)
    */
-  private async downloadFile(url: string, filePath: string): Promise<void> {
+  private async downloadFileImmediately(url: string, filePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const https = require('https');
       const file = require('fs').createWriteStream(filePath);
       
-      logger.info(`📥 Downloading file from: ${url}`);
+      logger.info(`📥 Downloading file immediately from: ${url}`);
       
       const request = https.get(url, (response: any) => {
         if (response.statusCode === 200) {
+          let downloadedBytes = 0;
+          
+          response.on('data', (chunk: Buffer) => {
+            downloadedBytes += chunk.length;
+          });
+          
           response.pipe(file);
           
           file.on('finish', () => {
             file.close();
-            logger.info(`✅ File downloaded successfully: ${filePath}`);
+            logger.info(`✅ File downloaded successfully: ${filePath} (${downloadedBytes} bytes)`);
             resolve();
           });
           
@@ -278,6 +283,9 @@ export class SimpleConversionService {
             fs.unlink(filePath).catch(() => {}); // Clean up on error
             reject(error);
           });
+        } else if (response.statusCode === 404) {
+          logger.error(`❌ Download URL expired (404): ${url}`);
+          reject(new Error('Download URL has expired. Please try again.'));
         } else {
           logger.error(`❌ Download failed with status: ${response.statusCode}`);
           reject(new Error(`Download failed with status: ${response.statusCode}`));
@@ -289,11 +297,19 @@ export class SimpleConversionService {
         reject(error);
       });
       
-      request.setTimeout(60000, () => {
+      // Shorter timeout since URLs expire quickly
+      request.setTimeout(30000, () => {
         request.destroy();
-        reject(new Error('Download timeout'));
+        reject(new Error('Download timeout - URL may have expired'));
       });
     });
+  }
+
+  /**
+   * Download file from URL to local path (legacy method)
+   */
+  private async downloadFile(url: string, filePath: string): Promise<void> {
+    return this.downloadFileImmediately(url, filePath);
   }
 
   /**
@@ -423,11 +439,11 @@ export class SimpleConversionService {
 
       for (const job of expiredJobs) {
         if (job.mp3_filename) {
-          const filePath = path.join(this.downloadsDir, job.mp3_filename);
-          try {
+    const filePath = path.join(this.downloadsDir, job.mp3_filename);
+    try {
             await fs.unlink(filePath);
             logger.info(`🗑️ Deleted expired file: ${filePath}`);
-          } catch (error) {
+    } catch (error) {
             logger.warn(`Failed to delete file ${filePath}:`, error);
           }
         }
@@ -489,7 +505,7 @@ export class SimpleConversionService {
       
       const job = await this.convertToMp3(request);
       return job.id;
-    } catch (error) {
+          } catch (error) {
       logger.error(`❌ Failed to create job: ${error}`);
       throw new Error(this.getUserFriendlyErrorMessage(error as Error));
     }

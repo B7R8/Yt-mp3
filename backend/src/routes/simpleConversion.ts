@@ -200,8 +200,8 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
       const path = require('path');
       
       try {
-        // Resolve the path relative to the backend directory
-        const filePath = path.resolve(__dirname, '../../', job.processed_path);
+        // Use the processed_path directly (it's already the full path)
+        const filePath = job.processed_path;
         
         // Check if file exists and get its size
         const stats = await fs.promises.stat(filePath);
