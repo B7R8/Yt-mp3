@@ -115,6 +115,7 @@ services:
     volumes:
       - ./nginx/nginx-simple.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl
+      - ./frontend/dist:/usr/share/nginx/html/dist
     depends_on:
       frontend:
         condition: service_healthy
