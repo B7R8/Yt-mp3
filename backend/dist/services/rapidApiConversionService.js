@@ -13,6 +13,7 @@ class RapidApiConversionService {
         this.rapidApiService = new youtubeMp3ApiService_1.YouTubeMp3ApiService();
         this.maxConcurrentJobs = parseInt(process.env.MAX_CONCURRENT_JOBS || '5');
         this.processingJobs = new Map();
+        this.isPostgreSQL = process.env.NODE_ENV === 'production' || process.env.DB_TYPE === 'postgres';
     }
     /**
      * Extract video ID from YouTube URL
@@ -98,9 +99,12 @@ class RapidApiConversionService {
             // Get video information first
             const videoInfo = await this.getVideoInfo(videoId);
             // Create new job in database
+            const expiresAt = this.isPostgreSQL
+                ? "CURRENT_TIMESTAMP + INTERVAL '7 days'"
+                : "datetime('now', '+7 days')";
             const result = await (0, database_1.query)(`INSERT INTO videos (
           video_id, title, status, quality, user_ip, requested_at, expires_at
-        ) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, datetime('now', '+7 days'))`, [
+        ) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, ${expiresAt})`, [
                 videoId,
                 videoInfo.title,
                 'pending',
@@ -268,13 +272,19 @@ class RapidApiConversionService {
         try {
             logger_1.default.info('🧹 Starting cleanup of expired videos');
             // Clean up completed videos older than 7 days
+            const completedCondition = this.isPostgreSQL
+                ? "completed_at < CURRENT_TIMESTAMP - INTERVAL '7 days'"
+                : "completed_at < datetime('now', '-7 days')";
             const completedResult = await (0, database_1.query)(`DELETE FROM videos 
          WHERE status = 'done' 
-         AND completed_at < datetime('now', '-7 days')`);
+         AND ${completedCondition}`);
             // Clean up failed jobs older than 1 day
+            const failedCondition = this.isPostgreSQL
+                ? "requested_at < CURRENT_TIMESTAMP - INTERVAL '1 day'"
+                : "requested_at < datetime('now', '-1 day')";
             const failedResult = await (0, database_1.query)(`DELETE FROM videos 
          WHERE status = 'failed' 
-         AND requested_at < datetime('now', '-1 day')`);
+         AND ${failedCondition}`);
             const deletedCount = (completedResult.rowCount || 0) + (failedResult.rowCount || 0);
             logger_1.default.info(`✅ Cleanup completed. Deleted ${deletedCount} expired videos.`);
         }

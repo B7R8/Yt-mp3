@@ -44,6 +44,7 @@ export declare class RapidApiConversionService implements IConversionService {
     private rapidApiService;
     maxConcurrentJobs: number;
     private processingJobs;
+    private isPostgreSQL;
     constructor();
     /**
      * Extract video ID from YouTube URL
