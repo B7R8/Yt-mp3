@@ -1,8 +1,11 @@
+// Load environment variables FIRST, before any other imports
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
-import path from 'path';
 import cron from 'node-cron';
 
 import simpleConversionRoutes from './routes/simpleConversion';
@@ -14,9 +17,6 @@ import { SimpleConversionService } from './services/simpleConversionService';
 import { cleanupExpiredJobs } from './controllers/processAudio';
 import logger from './config/logger';
 import { initializeDatabase } from './config/database';
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 app.set('trust proxy', 1);

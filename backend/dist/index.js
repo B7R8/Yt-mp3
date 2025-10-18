@@ -3,10 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// Load environment variables FIRST, before any other imports
+const dotenv_1 = __importDefault(require("dotenv"));
+const path_1 = __importDefault(require("path"));
+dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../.env') });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const node_cron_1 = __importDefault(require("node-cron"));
 const simpleConversion_1 = __importDefault(require("./routes/simpleConversion"));
 const health_1 = __importDefault(require("./routes/health"));
@@ -17,8 +20,6 @@ const simpleConversionService_1 = require("./services/simpleConversionService");
 const processAudio_2 = require("./controllers/processAudio");
 const logger_1 = __importDefault(require("./config/logger"));
 const database_1 = require("./config/database");
-// Load environment variables
-dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.set('trust proxy', 1);
 const PORT = parseInt(process.env.PORT || '3001', 10);

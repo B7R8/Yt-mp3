@@ -261,7 +261,7 @@ class FallbackConversionService {
                 throw new Error('Job not found');
             }
             job = result[0];
-            videoId = job.video_id;
+            videoId = this.extractVideoId(job.youtube_url) || '';
             logger_1.default.info(`🚀 Starting fallback processing for job ${jobId}, video ${videoId}`, {
                 jobId,
                 videoId,
@@ -294,7 +294,7 @@ class FallbackConversionService {
                 trimDuration: job.trim_duration,
                 outputPath
             });
-            const processResult = await this.processAudio(downloadedPath, outputPath, job.quality, job.trim_start, job.trim_duration);
+            const processResult = await this.processAudio(downloadedPath, outputPath, job.quality || '192k', job.trim_start, job.trim_duration);
             logger_1.default.info(`✅ Mock audio processing completed for job ${jobId}`, {
                 jobId,
                 videoId,

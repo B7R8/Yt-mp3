@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import logger from './logger';
 
 // Use SQLite for local development, PostgreSQL for production
-const useSQLite = process.env.NODE_ENV !== 'production' && !process.env.DB_HOST;
+const useSQLite = process.env.NODE_ENV !== 'production';
 
 let db: any;
 let sqliteQuery: any;

@@ -10,7 +10,7 @@ exports.ensureDirectDownloadUrlColumn = ensureDirectDownloadUrlColumn;
 const pg_1 = require("pg");
 const logger_1 = __importDefault(require("./logger"));
 // Use SQLite for local development, PostgreSQL for production
-const useSQLite = process.env.NODE_ENV !== 'production' && !process.env.DB_HOST;
+const useSQLite = process.env.NODE_ENV !== 'production';
 let db;
 let sqliteQuery;
 let getRow;

@@ -31,9 +31,10 @@ class YouTubeMp3ApiService {
                 keys.push(key);
             }
         }
-        // Fallback to default key if no keys found
+        // No fallback key - must have at least one API key in environment
         if (keys.length === 0) {
-            keys.push('546e353d67msha411dc0cd0b0b7dp153e93jsn651c16a2c85b');
+            logger_1.default.error('❌ No API keys found in environment variables. Please set RAPIDAPI_KEY in your .env file.');
+            throw new Error('No API keys configured. Please set RAPIDAPI_KEY in your .env file.');
         }
         logger_1.default.info(`Loaded ${keys.length} API key(s) for fallback system`);
         return keys;

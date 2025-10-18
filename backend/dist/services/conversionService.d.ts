@@ -8,23 +8,23 @@ export interface ConversionRequest {
 }
 export interface ConversionJob {
     id: string;
-    video_id: string;
     youtube_url: string;
     video_title?: string;
-    user_id?: string;
     status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
-    quality: string;
+    progress?: number;
+    mp3_filename?: string;
+    error_message?: string;
+    quality_message?: string;
+    direct_download_url?: string;
+    quality?: string;
     trim_start?: number;
     trim_duration?: number;
-    file_path?: string;
     file_size?: number;
     duration?: number;
     ffmpeg_logs?: string;
-    error_message?: string;
-    download_url?: string;
     created_at: Date;
     updated_at: Date;
-    expires_at: Date;
+    expires_at?: Date;
 }
 export interface VideoInfo {
     title: string;

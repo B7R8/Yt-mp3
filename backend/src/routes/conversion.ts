@@ -60,8 +60,8 @@ router.post('/check-url', async (req: Request, res: Response) => {
       // Check for existing processing jobs for this video
       const { query } = require('../config/database');
       const existingJobs = await query(
-        'SELECT id, status FROM jobs WHERE video_id = $1 AND status IN ($2, $3) AND expires_at > CURRENT_TIMESTAMP ORDER BY created_at DESC LIMIT 1',
-        [videoId, 'pending', 'processing']
+        'SELECT id, status FROM conversions WHERE youtube_url LIKE $1 AND status IN ($2, $3) ORDER BY created_at DESC LIMIT 1',
+        [`%${videoId}%`, 'pending', 'processing']
       );
       
       if (existingJobs.rows.length > 0) {
@@ -167,43 +167,14 @@ router.get('/status/:id', statusRateLimit, validateJobId, async (req: Request, r
     };
 
     // Add download URL if conversion is completed
-    if (job.status === 'completed' && job.download_url) {
-      response.download_url = job.download_url;
+    if (job.status === 'completed' && job.direct_download_url) {
+      response.download_url = job.direct_download_url;
       response.download_filename = `${job.video_title || 'converted'}.mp3`;
-      response.download_type = 'server'; // Indicates this is a server-processed file
+      response.download_type = 'direct'; // Indicates this is a direct download
       
-      // Validate file before providing download URL
-      if (job.file_path) {
-        const fs = require('fs');
-        try {
-          if (fs.existsSync(job.file_path)) {
-            const stats = fs.statSync(job.file_path);
-            response.file_size = stats.size;
-            // More reasonable validation: file should be > 0 bytes and < 1GB
-            response.file_valid = stats.size > 0 && stats.size < 1073741824; // 1GB limit
-            
-            if (!response.file_valid) {
-              if (stats.size <= 0) {
-                logger.warn(`⚠️ File validation failed for job ${req.params.id}: file is empty (${stats.size} bytes)`);
-              } else if (stats.size >= 1073741824) {
-                logger.warn(`⚠️ File validation failed for job ${req.params.id}: file too large (${stats.size} bytes)`);
-              }
-            } else {
-              logger.info(`✅ File validation passed for job ${req.params.id}: ${stats.size} bytes`);
-            }
-          } else {
-            response.file_valid = false;
-            logger.warn(`⚠️ File not found for completed job ${req.params.id}: ${job.file_path}`);
-          }
-        } catch (error) {
-          response.file_valid = false;
-          logger.error(`❌ File validation error for job ${req.params.id}:`, error);
-        }
-      } else {
-        // No file path available - mark as invalid
-        response.file_valid = false;
-        logger.warn(`⚠️ No file path available for completed job ${req.params.id}`);
-      }
+      // For direct download URLs, we don't need file validation
+      response.file_valid = true;
+      response.file_size = 0; // Unknown for external URLs
     }
 
     // Add ffmpeg logs if requested by admin (you can add admin check here)
@@ -252,74 +223,117 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
       });
     }
     
-    if (!job.file_path) {
-      logger.error(`❌ File path not found for job: ${jobId}`);
-      return res.status(404).json({
-        success: false,
-        message: 'Processed file not found'
-      });
-    }
+    // Check if we have a direct download URL (external API)
+    if (job.direct_download_url) {
+      const originalFilename = job.video_title || 'converted';
+      const safeFilename = originalFilename.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_');
+      const filename = `${safeFilename}.mp3`;
+      logger.info(`🎵 Starting download for: ${filename}`);
+      logger.info(`🔗 Direct download URL: ${job.direct_download_url}`);
 
-    // Check if file exists and validate it
-    const fs = require('fs');
-    if (!fs.existsSync(job.file_path)) {
-      logger.error(`❌ File does not exist: ${job.file_path}`);
-      return res.status(404).json({
-        success: false,
-        message: 'File not found on server'
-      });
-    }
+      // Set proper download headers with RFC 5987 encoding for international characters
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('X-XSS-Protection', '1; mode=block');
 
-    // Validate file size and integrity
-    const stats = fs.statSync(job.file_path);
-    if (stats.size <= 0) {
-      logger.error(`❌ File is empty: ${job.file_path}, size: ${stats.size}`);
-      return res.status(400).json({
-        success: false,
-        message: 'File appears to be empty. Please try converting again.'
-      });
-    }
+      // Stream the file from the external URL
+      const https = require('https');
+      const http = require('http');
+      const url = require('url');
+      
+      const parsedUrl = url.parse(job.direct_download_url);
+      const isHttps = parsedUrl.protocol === 'https:';
+      const client = isHttps ? https : http;
+      
+      const options = {
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port || (isHttps ? 443 : 80),
+        path: parsedUrl.path,
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      };
 
-    // Validate file size (should be reasonable for an MP3 - between 1 byte and 1GB)
-    if (stats.size >= 1073741824) { // 1GB limit
-      logger.error(`❌ File too large: ${job.file_path}, size: ${stats.size} bytes`);
-      return res.status(400).json({
-        success: false,
-        message: 'File appears to be too large. Please try converting again.'
-      });
-    }
+      const proxyReq = client.request(options, (proxyRes: any) => {
+        logger.info(`📡 Proxy response status: ${proxyRes.statusCode} for job: ${jobId}`);
+        
+        if (proxyRes.statusCode === 404) {
+          logger.error(`❌ Download URL expired (404) for job: ${jobId} - attempting to refresh`);
+          // Mark job as failed and let the frontend handle refresh
+          if (!res.headersSent) {
+            res.status(410).json({
+              success: false,
+              message: 'Download URL expired. Please try converting again.',
+              expired: true
+            });
+          }
+          return;
+        }
+        
+        if (proxyRes.statusCode !== 200) {
+          logger.error(`❌ Download failed with status: ${proxyRes.statusCode} for job: ${jobId}`);
+          if (!res.headersSent) {
+            res.status(500).json({
+              success: false,
+              message: 'Download failed. Please try again.'
+            });
+          }
+          return;
+        }
 
-    const filename = `${job.video_title || 'converted'}.mp3`;
-    logger.info(`🎵 Starting download for: ${filename} (${stats.size} bytes)`);
+        // Set content type from response if available
+        if (proxyRes.headers['content-type']) {
+          res.setHeader('Content-Type', proxyRes.headers['content-type']);
+        }
 
-    // Set proper download headers
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
+        // Set content length if available
+        if (proxyRes.headers['content-length']) {
+          res.setHeader('Content-Length', proxyRes.headers['content-length']);
+        }
 
-    // Stream the file
-    const fileStream = fs.createReadStream(job.file_path);
-    
-    fileStream.on('end', () => {
-      logger.info(`✅ Download completed successfully for job: ${jobId}`);
-    });
-
-    fileStream.on('error', (error: any) => {
-      logger.error(`❌ File stream error for job ${jobId}:`, error);
-      if (!res.headersSent) {
-        res.status(500).json({
-          success: false,
-          message: 'Error reading file'
+        proxyRes.on('end', () => {
+          logger.info(`✅ Download completed successfully for job: ${jobId}`);
         });
-      }
-    });
 
-    fileStream.pipe(res);
+        proxyRes.on('error', (error: any) => {
+          logger.error(`❌ Proxy response error for job ${jobId}:`, error);
+          if (!res.headersSent) {
+            res.status(500).json({
+              success: false,
+              message: 'Download stream error'
+            });
+          }
+        });
+
+        proxyRes.pipe(res);
+      });
+
+      proxyReq.on('error', (error: any) => {
+        logger.error(`❌ Proxy request error for job ${jobId}:`, error);
+        if (!res.headersSent) {
+          res.status(500).json({
+            success: false,
+            message: 'Download request failed'
+          });
+        }
+      });
+
+      proxyReq.end();
+      return;
+    }
+
+    // No download URL available
+    logger.error(`❌ No download URL found for job: ${jobId}`);
+    return res.status(404).json({
+      success: false,
+      message: 'Download not available'
+    });
     
   } catch (error) {
     const userMessage = ErrorHandler.getUserFriendlyError(error);

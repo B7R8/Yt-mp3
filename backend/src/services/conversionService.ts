@@ -17,23 +17,23 @@ export interface ConversionRequest {
 
 export interface ConversionJob {
   id: string;
-  video_id: string;
   youtube_url: string;
   video_title?: string;
-  user_id?: string;
   status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
-  quality: string;
+  progress?: number;
+  mp3_filename?: string;
+  error_message?: string;
+  quality_message?: string;
+  direct_download_url?: string;
+  quality?: string;
   trim_start?: number;
   trim_duration?: number;
-  file_path?: string;
   file_size?: number;
   duration?: number;
   ffmpeg_logs?: string;
-  error_message?: string;
-  download_url?: string;
   created_at: Date;
   updated_at: Date;
-  expires_at: Date;
+  expires_at?: Date;
 }
 
 export interface VideoInfo {
@@ -479,7 +479,7 @@ export class ConversionService implements IConversionService {
         throw new Error('Job not found');
       }
       job = result.rows[0];
-      videoId = job.video_id;
+      videoId = this.extractVideoId(job.youtube_url) || '';
 
       logger.info(`🚀 Starting processing for job ${jobId}, video ${videoId}`, {
         jobId,
@@ -520,7 +520,7 @@ export class ConversionService implements IConversionService {
       const processResult = await this.processAudio(
         downloadedPath,
         outputPath,
-        job.quality,
+        job.quality || '192k',
         job.trim_start,
         job.trim_duration
       );

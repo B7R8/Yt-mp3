@@ -321,7 +321,7 @@ export class FallbackConversionService implements IConversionService {
         throw new Error('Job not found');
       }
       job = result[0];
-      videoId = job.video_id;
+      videoId = this.extractVideoId(job.youtube_url) || '';
 
       logger.info(`🚀 Starting fallback processing for job ${jobId}, video ${videoId}`, {
         jobId,
@@ -362,7 +362,7 @@ export class FallbackConversionService implements IConversionService {
       const processResult = await this.processAudio(
         downloadedPath,
         outputPath,
-        job.quality,
+        job.quality || '192k',
         job.trim_start,
         job.trim_duration
       );

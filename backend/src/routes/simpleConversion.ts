@@ -1,4 +1,6 @@
 import express, { Request, Response } from 'express';
+import dotenv from 'dotenv';
+import path from 'path';
 import { SimpleConversionService } from '../services/simpleConversionService';
 import { validateConversionRequest, validateJobId } from '../middleware/validation';
 import { conversionRateLimit, statusRateLimit } from '../middleware/rateLimiter';
@@ -7,12 +9,23 @@ import { getUserFriendlyError, logTechnicalError, sendErrorResponse } from '../u
 import crypto from 'crypto';
 import { optimizedDb } from '../config/optimizedDatabase';
 
+// Load environment variables
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
 const router = express.Router();
-const conversionService = new SimpleConversionService();
+let conversionService: SimpleConversionService | null = null;
+
+// Lazy initialization of conversion service
+function getConversionService(): SimpleConversionService {
+  if (!conversionService) {
+    conversionService = new SimpleConversionService();
+  }
+  return conversionService;
+}
 
 // Helper method to refresh download URL
 async function refreshDownloadUrl(jobId: string): Promise<string | null> {
-  return await conversionService.refreshDownloadUrl(jobId);
+  return await getConversionService().refreshDownloadUrl(jobId);
 }
 
 // POST /api/check-url - URL validation with blacklist check
@@ -69,7 +82,7 @@ router.post('/check-url', async (req: Request, res: Response) => {
 // POST /api/convert - Create conversion job
 router.post('/convert', conversionRateLimit, validateConversionRequest, async (req: Request, res: Response) => {
   try {
-    const jobId = await conversionService.createJob(req.body);
+    const jobId = await getConversionService().createJob(req.body);
     
     logger.info(`New conversion job created: ${jobId} for URL: ${req.body.url}`);
     
@@ -89,7 +102,7 @@ router.post('/convert', conversionRateLimit, validateConversionRequest, async (r
 // GET /api/status/:id - Get job status
 router.get('/status/:id', statusRateLimit, validateJobId, async (req: Request, res: Response) => {
   try {
-    const job = await conversionService.getJobStatus(req.params.id);
+    const job = await getConversionService().getJobStatus(req.params.id);
     
     if (!job) {
       return res.status(404).json({
@@ -135,7 +148,7 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
     const jobId = req.params.id;
     logger.info(`🎵 Download request for job: ${jobId}`);
     
-    const job = await conversionService.getJobStatus(jobId);
+    const job = await getConversionService().getJobStatus(jobId);
     if (!job) {
       logger.warn(`❌ Job not found: ${jobId}`);
       return res.status(404).json({
@@ -296,7 +309,7 @@ router.get('/video-info', statusRateLimit, async (req: Request, res: Response) =
     }
 
     // Get video info using the new API service
-    const videoInfo = await conversionService.getVideoInfo(url);
+    const videoInfo = await getConversionService().getVideoInfo(url);
     
     // Set proper UTF-8 headers for Unicode support
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -385,7 +398,7 @@ router.get('/debug/files', async (req: Request, res: Response) => {
 router.post('/cleanup', async (req: Request, res: Response) => {
   try {
     logger.info('Manual cleanup triggered');
-    await conversionService.cleanupOldFiles();
+    await getConversionService().cleanupOldFiles();
     
     res.json({
       success: true,
@@ -406,7 +419,7 @@ router.post('/refresh-download/:id', validateJobId, async (req: Request, res: Re
     const jobId = req.params.id;
     logger.info(`Manual download URL refresh triggered for job: ${jobId}`);
     
-    const newUrl = await conversionService.refreshDownloadUrl(jobId);
+    const newUrl = await getConversionService().refreshDownloadUrl(jobId);
     
     if (newUrl) {
       res.json({
@@ -431,7 +444,7 @@ router.post('/refresh-download/:id', validateJobId, async (req: Request, res: Re
 router.get('/direct-download/:id', validateJobId, async (req: Request, res: Response) => {
   try {
     const jobId = req.params.id;
-    const job = await conversionService.getJobStatus(jobId);
+    const job = await getConversionService().getJobStatus(jobId);
     
     if (!job) {
       return res.status(404).json({
@@ -471,7 +484,7 @@ router.get('/direct-download/:id', validateJobId, async (req: Request, res: Resp
 router.get('/test-download/:id', validateJobId, async (req: Request, res: Response) => {
   try {
     const jobId = req.params.id;
-    const job = await conversionService.getJobStatus(jobId);
+    const job = await getConversionService().getJobStatus(jobId);
     
     if (!job) {
       return res.status(404).json({
@@ -585,7 +598,7 @@ router.post('/batch-convert', conversionRateLimit, async (req: Request, res: Res
     // Process URLs in parallel
     const promises = urls.map(async (url: string) => {
       try {
-        const jobId = await conversionService.createJob({
+        const jobId = await getConversionService().createJob({
           url,
           quality: quality || '192k'
         });
