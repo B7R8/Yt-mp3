@@ -181,10 +181,10 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
     
     const filename = job.mp3_filename || 'converted.mp3';
     
-    // Priority 1: Serve local file if available
+    // Priority 1: Serve server file if available
     if (job.processed_path && !job.processed_path.startsWith('http')) {
-      logger.info(`🎵 Starting download for local file: ${filename}`);
-      logger.info(`📁 Local file path: ${job.processed_path}`);
+      logger.info(`🎵 Starting download for server file: ${filename}`);
+      logger.info(`📁 Server file path: ${job.processed_path}`);
 
       // Set proper download headers with RFC 5987 encoding for international characters
       res.setHeader('Content-Type', 'audio/mpeg');
@@ -200,7 +200,7 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
       const path = require('path');
       
       try {
-        // Use the processed_path directly (it's already the full path)
+        // Use the processed_path directly (it's the server file path)
         const filePath = job.processed_path;
         
         // Check if file exists and get its size
@@ -225,12 +225,12 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
         // Set content length for proper download progress
         res.setHeader('Content-Length', stats.size);
         
-        // Stream the local file
+        // Stream the server file
         const fileStream = fs.createReadStream(filePath);
         fileStream.pipe(res);
         
         fileStream.on('error', (error: Error) => {
-          logger.error(`❌ Error streaming local file: ${error.message}`);
+          logger.error(`❌ Error streaming server file: ${error.message}`);
           if (!res.headersSent) {
             res.status(500).json({
               success: false,
@@ -239,11 +239,11 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
           }
         });
 
-        logger.info(`✅ Successfully streaming local file: ${filePath}`);
+        logger.info(`✅ Successfully streaming server file: ${filePath}`);
         return;
         
       } catch (error) {
-        logger.error(`❌ Error accessing local file: ${error}`);
+        logger.error(`❌ Error accessing server file: ${error}`);
         // Fall through to try direct download URL
       }
     }
