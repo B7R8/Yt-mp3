@@ -419,12 +419,25 @@ export class MediaService {
    */
   async cleanupExpiredJobs(): Promise<number> {
     try {
+      // Check if processed_path column exists first
+      const columnCheck = await query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'jobs' AND column_name = 'processed_path'
+      `);
+
+      if (columnCheck.rows.length === 0) {
+        logger.warn('processed_path column does not exist in jobs table, skipping file cleanup');
+        return 0;
+      }
+
       // Find expired jobs
       const result = await query(`
         SELECT id, processed_path 
         FROM jobs 
         WHERE expires_at < CURRENT_TIMESTAMP 
         AND status != 'deleted'
+        AND processed_path IS NOT NULL
       `);
 
       let cleanedCount = 0;

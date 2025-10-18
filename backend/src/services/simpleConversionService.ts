@@ -417,7 +417,7 @@ export class SimpleConversionService {
           const filePath = path.join(this.downloadsDir, row.mp3_filename);
           
           try {
-            await fs.unlink(filePath);
+            await fs.promises.unlink(filePath);
             logger.info(`Deleted old file: ${filePath}`);
           } catch (error) {
             logger.warn(`Failed to delete file ${filePath}:`, error);
@@ -478,7 +478,7 @@ export class SimpleConversionService {
         
         if (res.statusCode !== 200) {
           file.close();
-          require('fs').unlink(filePath).catch(() => {}); // Clean up on error
+          require('fs').promises.unlink(filePath).catch(() => {}); // Clean up on error
           reject(new Error(`Download failed with status: ${res.statusCode}`));
           return;
         }
@@ -493,7 +493,7 @@ export class SimpleConversionService {
 
         file.on('error', (error: Error) => {
           logger.error(`File write error: ${error.message}`);
-          require('fs').unlink(filePath).catch(() => {}); // Clean up on error
+          require('fs').promises.unlink(filePath).catch(() => {}); // Clean up on error
           reject(error);
         });
       });
