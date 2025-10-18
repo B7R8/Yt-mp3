@@ -16,20 +16,23 @@ const dbAll = promisify(db.all.bind(db)) as (sql: string, params?: any[]) => Pro
 // Initialize database tables
 export async function initializeDatabase() {
   try {
-    // Create conversions table with correct schema
+    // Create videos table for RapidAPI-only system
     await dbRun(`
-      CREATE TABLE IF NOT EXISTS conversions (
-        id VARCHAR(255) PRIMARY KEY,
-        youtube_url TEXT NOT NULL,
-        video_title TEXT,
-        status VARCHAR(50) NOT NULL DEFAULT 'pending',
+      CREATE TABLE IF NOT EXISTS videos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        video_id TEXT UNIQUE NOT NULL,
+        title TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
         progress INTEGER DEFAULT 0,
-        mp3_filename TEXT,
+        download_url TEXT,
+        requested_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        completed_at DATETIME NULL,
         error_message TEXT,
-        quality_message TEXT,
-        direct_download_url TEXT,
-        processed_path TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        quality TEXT DEFAULT '128k',
+        file_size INTEGER DEFAULT 0,
+        duration INTEGER DEFAULT 0,
+        user_ip TEXT,
+        expires_at DATETIME,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -46,52 +49,13 @@ export async function initializeDatabase() {
       )
     `);
 
-    // Add direct_download_url column if it doesn't exist
-    await ensureDirectDownloadUrlColumn();
-    
-    // Add processed_path column if it doesn't exist
-    await ensureProcessedPathColumn();
-
-    console.log('SQLite database initialized successfully');
+    console.log('SQLite database initialized successfully with RapidAPI schema');
   } catch (error) {
     console.error('SQLite database initialization error:', error);
     throw error;
   }
 }
 
-// Ensure direct_download_url column exists
-export async function ensureDirectDownloadUrlColumn() {
-  try {
-    await dbRun(`
-      ALTER TABLE conversions 
-      ADD COLUMN direct_download_url TEXT;
-    `);
-    console.log('🗃️ Database schema updated successfully (direct_download_url added)');
-  } catch (error: any) {
-    if (error.message.includes('duplicate column name') || error.message.includes('already exists')) {
-      console.log('Column direct_download_url already exists');
-    } else {
-      console.log('Column might already exist:', error.message);
-    }
-  }
-}
-
-// Ensure processed_path column exists
-export async function ensureProcessedPathColumn() {
-  try {
-    await dbRun(`
-      ALTER TABLE conversions 
-      ADD COLUMN processed_path TEXT;
-    `);
-    console.log('🗃️ Database schema updated successfully (processed_path added)');
-  } catch (error: any) {
-    if (error.message.includes('duplicate column name') || error.message.includes('already exists')) {
-      console.log('Column processed_path already exists');
-    } else {
-      console.log('Column might already exist:', error.message);
-    }
-  }
-}
 
 // Database query helper function
 export async function query(text: string, params: unknown[] = []) {

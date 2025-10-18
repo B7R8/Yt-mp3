@@ -11,13 +11,13 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const node_cron_1 = __importDefault(require("node-cron"));
-const simpleConversion_1 = __importDefault(require("./routes/simpleConversion"));
+const conversion_1 = __importDefault(require("./routes/conversion"));
 const health_1 = __importDefault(require("./routes/health"));
 const secureWallet_1 = __importDefault(require("./routes/secureWallet"));
 const contact_1 = __importDefault(require("./routes/contact"));
 const processAudio_1 = __importDefault(require("./routes/processAudio"));
-const simpleConversionService_1 = require("./services/simpleConversionService");
 const processAudio_2 = require("./controllers/processAudio");
+const rapidApiConversionService_1 = require("./services/rapidApiConversionService");
 const logger_1 = __importDefault(require("./config/logger"));
 const database_1 = require("./config/database");
 const app = (0, express_1.default)();
@@ -55,8 +55,8 @@ app.use((req, res, next) => {
     next();
 });
 // Routes
+app.use('/api', conversion_1.default);
 app.use('/api', health_1.default);
-app.use('/api', simpleConversion_1.default);
 app.use('/api', contact_1.default);
 app.use('/api', processAudio_1.default);
 app.use('/api/secure-wallet', secureWallet_1.default);
@@ -86,11 +86,10 @@ async function startServer() {
         logger_1.default.info(`Environment variables: NODE_ENV=${process.env.NODE_ENV}, DB_HOST=${process.env.DB_HOST}, PORT=${process.env.PORT}`);
         await (0, database_1.initializeDatabase)();
         logger_1.default.info('Database initialized successfully');
-        // Start cleanup cron job (every 10 minutes to clean files older than 20 minutes)
-        const conversionService = new simpleConversionService_1.SimpleConversionService();
+        // Start cleanup cron job (every 10 minutes to clean expired videos)
         node_cron_1.default.schedule('*/10 * * * *', () => {
-            logger_1.default.info('Running cleanup job for files older than 20 minutes...');
-            conversionService.cleanupOldFiles().catch(error => {
+            logger_1.default.info('Running cleanup job for expired videos...');
+            rapidApiConversionService_1.rapidApiConversionService.cleanupOldFiles().catch((error) => {
                 logger_1.default.error('Cleanup job failed:', error);
             });
         });

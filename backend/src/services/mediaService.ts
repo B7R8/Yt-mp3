@@ -419,55 +419,10 @@ export class MediaService {
    */
   async cleanupExpiredJobs(): Promise<number> {
     try {
-      // Check if processed_path column exists first
-      const columnCheck = await query(`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'jobs' AND column_name = 'processed_path'
-      `);
-
-      if (columnCheck.rows.length === 0) {
-        logger.warn('processed_path column does not exist in jobs table, skipping file cleanup');
-        return 0;
-      }
-
-      // Find expired jobs
-      const result = await query(`
-        SELECT id, processed_path 
-        FROM jobs 
-        WHERE expires_at < CURRENT_TIMESTAMP 
-        AND status != 'deleted'
-        AND processed_path IS NOT NULL
-      `);
-
-      let cleanedCount = 0;
-
-      for (const job of result.rows) {
-        try {
-          // Delete file if it exists
-          if (job.processed_path && fs.existsSync(job.processed_path)) {
-            fs.unlinkSync(job.processed_path);
-            logger.info(`Cleaned up expired file: ${job.processed_path}`);
-          }
-
-          // Update job status
-          await query(`
-            UPDATE jobs 
-            SET status = 'deleted', processed_path = NULL, updated_at = CURRENT_TIMESTAMP
-            WHERE id = $1
-          `, [job.id]);
-
-          cleanedCount++;
-        } catch (error) {
-          logger.error(`Failed to cleanup job ${job.id}:`, error);
-        }
-      }
-
-      if (cleanedCount > 0) {
-        logger.info(`Cleaned up ${cleanedCount} expired jobs`);
-      }
-
-      return cleanedCount;
+      // For RapidAPI-only system, we don't have local files to clean up
+      // Just return 0 to indicate no cleanup needed
+      logger.info('RapidAPI-only system: No local files to clean up');
+      return 0;
     } catch (error) {
       logger.error('Failed to cleanup expired jobs:', error);
       return 0;

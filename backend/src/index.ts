@@ -8,13 +8,13 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cron from 'node-cron';
 
-import simpleConversionRoutes from './routes/simpleConversion';
+import conversionRoutes from './routes/conversion';
 import healthRoutes from './routes/health';
 import secureWalletRoutes from './routes/secureWallet';
 import contactRoutes from './routes/contact';
 import processAudioRoutes from './routes/processAudio';
-import { SimpleConversionService } from './services/simpleConversionService';
 import { cleanupExpiredJobs } from './controllers/processAudio';
+import { rapidApiConversionService } from './services/rapidApiConversionService';
 import logger from './config/logger';
 import { initializeDatabase } from './config/database';
 
@@ -60,8 +60,8 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.use('/api', conversionRoutes);
 app.use('/api', healthRoutes);
-app.use('/api', simpleConversionRoutes);
 app.use('/api', contactRoutes);
 app.use('/api', processAudioRoutes);
 app.use('/api/secure-wallet', secureWalletRoutes);
@@ -98,11 +98,10 @@ async function startServer() {
     await initializeDatabase();
     logger.info('Database initialized successfully');
     
-    // Start cleanup cron job (every 10 minutes to clean files older than 20 minutes)
-    const conversionService = new SimpleConversionService();
+    // Start cleanup cron job (every 10 minutes to clean expired videos)
     cron.schedule('*/10 * * * *', () => {
-      logger.info('Running cleanup job for files older than 20 minutes...');
-      conversionService.cleanupOldFiles().catch(error => {
+      logger.info('Running cleanup job for expired videos...');
+      rapidApiConversionService.cleanupOldFiles().catch((error: any) => {
         logger.error('Cleanup job failed:', error);
       });
     });

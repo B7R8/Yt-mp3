@@ -299,6 +299,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
             </div>
           );
         case JobStatus.COMPLETED:
+        case 'done':
           return (
             <div className="text-center">
               <h2 className="text-sm font-semibold mb-2 break-words overflow-wrap-anywhere hyphens-auto video-title" title={job.title}>{job.title}</h2>

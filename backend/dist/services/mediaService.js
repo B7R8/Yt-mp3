@@ -345,48 +345,10 @@ class MediaService {
      */
     async cleanupExpiredJobs() {
         try {
-            // Check if processed_path column exists first
-            const columnCheck = await (0, database_1.query)(`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'jobs' AND column_name = 'processed_path'
-      `);
-            if (columnCheck.rows.length === 0) {
-                logger_1.default.warn('processed_path column does not exist in jobs table, skipping file cleanup');
-                return 0;
-            }
-            // Find expired jobs
-            const result = await (0, database_1.query)(`
-        SELECT id, processed_path 
-        FROM jobs 
-        WHERE expires_at < CURRENT_TIMESTAMP 
-        AND status != 'deleted'
-        AND processed_path IS NOT NULL
-      `);
-            let cleanedCount = 0;
-            for (const job of result.rows) {
-                try {
-                    // Delete file if it exists
-                    if (job.processed_path && fs_1.default.existsSync(job.processed_path)) {
-                        fs_1.default.unlinkSync(job.processed_path);
-                        logger_1.default.info(`Cleaned up expired file: ${job.processed_path}`);
-                    }
-                    // Update job status
-                    await (0, database_1.query)(`
-            UPDATE jobs 
-            SET status = 'deleted', processed_path = NULL, updated_at = CURRENT_TIMESTAMP
-            WHERE id = $1
-          `, [job.id]);
-                    cleanedCount++;
-                }
-                catch (error) {
-                    logger_1.default.error(`Failed to cleanup job ${job.id}:`, error);
-                }
-            }
-            if (cleanedCount > 0) {
-                logger_1.default.info(`Cleaned up ${cleanedCount} expired jobs`);
-            }
-            return cleanedCount;
+            // For RapidAPI-only system, we don't have local files to clean up
+            // Just return 0 to indicate no cleanup needed
+            logger_1.default.info('RapidAPI-only system: No local files to clean up');
+            return 0;
         }
         catch (error) {
             logger_1.default.error('Failed to cleanup expired jobs:', error);

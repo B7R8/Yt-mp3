@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Job, JobStatus } from '../types';
-import { startConversion, getJobStatus, checkUrl } from '../services/api';
+import { startConversion, getJobStatus, getVideoStatus, checkUrl } from '../services/api';
 import { sanitizeText, validateInput, logSecurityIncident, detectSuspiciousPatterns } from '../utils/securityUtils';
 
 interface UseConverterProps {
@@ -46,7 +46,7 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
     return null;
   }, []);
 
-  // Enhanced download method with file validation
+  // Enhanced download method with direct download links
   const downloadFile = useCallback(async (jobId: string, filename: string) => {
     try {
       console.log(`🎵 Starting download for: ${filename}`);
@@ -58,28 +58,20 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
       }
       
       const statusData = await statusResponse.json();
-      if (statusData.status !== 'completed' || !statusData.download_url) {
+      if (statusData.status !== 'done' || !statusData.download_url) {
         throw new Error('File not ready for download');
       }
       
-      // Validate file using backend validation
-      if (statusData.file_valid === false) {
-        throw new Error('File appears to be corrupted or empty. Please try converting again.');
-      }
-      
-      // Additional frontend validation
-      if (statusData.file_size && statusData.file_size <= 0) {
-        throw new Error('File appears to be empty');
-      }
-      
-      const downloadUrl = `/api/download/${jobId}`;
+      // Use direct download URL from RapidAPI
+      const downloadUrl = statusData.download_url;
       const sanitizedFilename = filename.replace(/[^a-zA-Z0-9\s\-_]/g, '').trim() || 'converted_audio';
       
-      // Create a hidden download link
+      // Create a hidden download link that points directly to the RapidAPI URL
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = `${sanitizedFilename}.mp3`;
       link.style.display = 'none';
+      link.target = '_blank'; // Open in new tab as fallback
       
       // Add to DOM, click, and remove
       document.body.appendChild(link);
@@ -218,9 +210,9 @@ export const useConverter = (showToast: (message: string, type: 'success' | 'err
       if (response.id) {
         setJob({
           id: response.id,
-          status: JobStatus.PENDING,
-          progress: 0,
-          title: undefined,
+          status: response.status as JobStatus,
+          progress: response.status === 'processing' ? 50 : 0,
+          title: response.title,
           url: url
         });
 

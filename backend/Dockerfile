@@ -32,20 +32,13 @@ RUN rm -rf src/ package*.json tsconfig.json
 # Production stage
 FROM node:18-alpine AS production
 
-# Install runtime dependencies including ffmpeg and yt-dlp
+# Install runtime dependencies (no ffmpeg or yt-dlp needed for RapidAPI-only mode)
 RUN apk add --no-cache \
     postgresql-client \
     curl \
     wget \
-    ffmpeg \
-    python3 \
-    py3-pip \
     bash \
-    && rm -rf /var/cache/apk/* /tmp/* \
-    && pip3 install --no-cache-dir --break-system-packages yt-dlp
-
-# Verify installations
-RUN yt-dlp --version && ffmpeg -version
+    && rm -rf /var/cache/apk/* /tmp/*
 
 # Create app user
 RUN addgroup -g 1001 -S nodejs && \

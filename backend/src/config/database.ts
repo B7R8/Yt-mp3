@@ -59,8 +59,6 @@ export async function initializeDatabase() {
   if (useSQLite) {
     // SQLite initialization is handled in sqliteDatabase.ts
     console.log('SQLite database will be initialized automatically');
-    await ensureDirectDownloadUrlColumn();
-    await ensureQualityColumns();
     return;
   }
 
@@ -84,8 +82,6 @@ export async function initializeDatabase() {
       console.log('PostgreSQL database tables will be created by init.sql');
     }
     
-    // Ensure quality columns exist
-    await ensureQualityColumns();
     
     console.log('PostgreSQL database initialized successfully');
   } catch (error) {
@@ -193,60 +189,6 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-// Ensure direct_download_url column exists for SQLite
-export async function ensureDirectDownloadUrlColumn() {
-  if (!useSQLite) return;
-  
-  try {
-    await sqliteQuery(`
-      ALTER TABLE conversions 
-      ADD COLUMN direct_download_url TEXT;
-    `);
-    console.log('🗃️ Database schema updated successfully (direct_download_url added)');
-  } catch (error: any) {
-    if (error.message.includes('duplicate column name') || error.message.includes('already exists')) {
-      console.log('Column direct_download_url already exists');
-    } else {
-      console.log('Column might already exist:', error.message);
-    }
-  }
-}
-
-// Ensure quality columns exist for both SQLite and PostgreSQL
-export async function ensureQualityColumns() {
-  const columns = [
-    { name: 'quality', type: 'VARCHAR(20)', default: "DEFAULT '192k'" },
-    { name: 'trim_start', type: useSQLite ? 'REAL' : 'FLOAT', default: '' },
-    { name: 'trim_duration', type: useSQLite ? 'REAL' : 'FLOAT', default: '' },
-    { name: 'file_size', type: useSQLite ? 'INTEGER' : 'BIGINT', default: '' }
-  ];
-
-  for (const column of columns) {
-    try {
-      if (useSQLite) {
-        await sqliteQuery(`
-          ALTER TABLE conversions 
-          ADD COLUMN ${column.name} ${column.type} ${column.default};
-        `);
-        console.log(`🗃️ Database schema updated successfully (${column.name} added)`);
-      } else {
-        await query(`
-          ALTER TABLE conversions 
-          ADD COLUMN IF NOT EXISTS ${column.name} ${column.type} ${column.default};
-        `);
-        console.log(`🗃️ Database schema updated successfully (${column.name} added)`);
-      }
-    } catch (error: any) {
-      if (error.message.includes('duplicate column name') || 
-          error.message.includes('already exists') ||
-          error.message.includes('column') && error.message.includes('already exists')) {
-        console.log(`Column ${column.name} already exists`);
-      } else {
-        console.log(`Column ${column.name} might already exist:`, error.message);
-      }
-    }
-  }
-}
 
 // Test connection on startup
 testConnection();

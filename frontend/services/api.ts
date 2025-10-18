@@ -55,7 +55,7 @@ export const startConversion = async (
   trimEnabled?: boolean,
   trimStart?: string,
   trimEnd?: string
-): Promise<{ id: string }> => {
+): Promise<{ id: string; status: string; title: string }> => {
   const requestBody: {
     url: string;
     quality?: string;
@@ -84,7 +84,11 @@ export const startConversion = async (
   });
   const data = await handleResponse(response);
   // Transform backend response to frontend format
-  return { id: data.jobId };
+  return { 
+    id: data.id, 
+    status: data.status,
+    title: data.title
+  };
 };
 
 export const getJobStatus = async (id: string): Promise<Job> => {
@@ -100,7 +104,7 @@ export const getJobStatus = async (id: string): Promise<Job> => {
   return {
     id: data.jobId,
     status: data.status as JobStatus, // Ensure proper type mapping
-    progress: data.status === 'completed' ? 100 : data.status === 'processing' ? 50 : 0,
+    progress: data.status === 'done' ? 100 : data.status === 'processing' ? 50 : 0,
     title: data.video_title,
     url: data.youtube_url || '', // Handle missing youtube_url
     error: data.error_message,
@@ -109,4 +113,21 @@ export const getJobStatus = async (id: string): Promise<Job> => {
     file_valid: data.file_valid,
     download_url: data.download_url
   };
+};
+
+export const getVideoStatus = async (videoId: string): Promise<{
+  success: boolean;
+  video_id: string;
+  status: string;
+  title: string;
+  progress: number;
+  download_url?: string;
+  error_message?: string;
+}> => {
+  const response = await fetch(`/api/status?video_id=${encodeURIComponent(videoId)}`, {
+    headers: {
+      'Accept': 'application/json; charset=utf-8',
+    },
+  });
+  return await handleResponse(response);
 };

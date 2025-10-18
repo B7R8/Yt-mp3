@@ -48,19 +48,13 @@ run_migrations() {
         # Run the init.sql script if tables don't exist
         log "🔧 Checking database schema..."
         
-        # Test if conversions table exists and has processed_path column
-        if ! PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -c "SELECT processed_path FROM conversions LIMIT 1;" >/dev/null 2>&1; then
-            log "📋 Running database migrations..."
+        # Test if videos table exists (new RapidAPI schema)
+        if ! PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -c "SELECT video_id FROM videos LIMIT 1;" >/dev/null 2>&1; then
+            log "📋 Running database migrations for RapidAPI schema..."
             
-            # Run the migration script
-            if [ -f "/app/scripts/migrate.js" ]; then
-                node /app/scripts/migrate.js
-                log "✅ Database migrations completed"
-            else
-                log "⚠️ Migration script not found, running init.sql..."
-                PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -f /app/migrations/init.sql
-                log "✅ Database schema initialized"
-            fi
+            # Run the new migration script
+            PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -f /app/migrations/004_create_videos_table_rapidapi.sql
+            log "✅ Database schema initialized for RapidAPI-only mode"
         else
             log "✅ Database schema already up to date"
         fi
@@ -99,30 +93,23 @@ verify_dependencies() {
         exit 1
     fi
     
-    # Check ffmpeg
-    if ! command -v ffmpeg >/dev/null 2>&1; then
-        log "❌ ffmpeg not found"
+    # Check RapidAPI key
+    if [ -z "${RAPIDAPI_KEY}" ]; then
+        log "❌ RAPIDAPI_KEY environment variable not set"
         exit 1
     fi
     
-    # Check yt-dlp
-    if ! command -v yt-dlp >/dev/null 2>&1; then
-        log "❌ yt-dlp not found"
-        exit 1
-    fi
-    
-    log "✅ All dependencies verified"
+    log "✅ All dependencies verified (RapidAPI-only mode)"
 }
 
 # Function to display system info
 display_system_info() {
     log "📊 System Information:"
     log "   Node.js: $(node --version)"
-    log "   ffmpeg: $(ffmpeg -version | head -n1)"
-    log "   yt-dlp: $(yt-dlp --version)"
     log "   Environment: ${NODE_ENV:-production}"
     log "   Database: ${DB_HOST:-SQLite}"
     log "   Port: ${PORT:-3001}"
+    log "   Mode: RapidAPI-only"
     log "   Downloads Dir: ${DOWNLOADS_DIR:-/app/downloads}"
     log "   Temp Dir: ${TEMP_DIR:-/app/temp}"
 }

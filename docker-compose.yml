@@ -55,8 +55,6 @@ services:
       - RAPIDAPI_KEY3=${RAPIDAPI_KEY3:-}
       - RAPIDAPI_KEY4=${RAPIDAPI_KEY4:-}
       - RAPIDAPI_KEY5=${RAPIDAPI_KEY5:-}
-      - YT_DLP_ENABLED=${YT_DLP_ENABLED:-true}
-      - FALLBACK_MODE=${FALLBACK_MODE:-false}
     volumes:
       - ./downloads:/app/downloads:rw
       - ./cache:/app/cache:rw

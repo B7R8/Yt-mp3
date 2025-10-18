@@ -1,35 +1,13 @@
 import express, { Request, Response } from 'express';
-import { conversionService, ConversionRequest, IConversionService } from '../services/conversionService';
-import { fallbackConversionService } from '../services/fallbackConversionService';
+import { rapidApiConversionService, ConversionRequest, IConversionService } from '../services/rapidApiConversionService';
 import { validateConversionRequest, validateJobId } from '../middleware/validation';
 import { conversionRateLimit, statusRateLimit } from '../middleware/rateLimiter';
 import logger from '../config/logger';
 import { ErrorHandler } from '../services/errorHandler';
 
-// Check which service to use
-const { spawn } = require('child_process');
-const checkYtDlp = () => {
-  return new Promise((resolve) => {
-    const ytdlp = spawn('yt-dlp', ['--version']);
-    ytdlp.on('close', (code: number) => {
-      resolve(code === 0);
-    });
-    ytdlp.on('error', () => {
-      resolve(false);
-    });
-  });
-};
-
-// Use appropriate service based on yt-dlp availability
-let activeService: IConversionService = conversionService;
-checkYtDlp().then((available) => {
-  if (!available) {
-    activeService = fallbackConversionService;
-    logger.warn('⚠️ Using fallback conversion service (yt-dlp not available)');
-  } else {
-    logger.info('✅ Using full conversion service (yt-dlp available)');
-  }
-});
+// Use RapidAPI-only service
+const activeService: IConversionService = rapidApiConversionService;
+logger.info('✅ Using RapidAPI-only conversion service');
 
 const router = express.Router();
 
@@ -60,18 +38,29 @@ router.post('/check-url', async (req: Request, res: Response) => {
       // Check for existing processing jobs for this video
       const { query } = require('../config/database');
       const existingJobs = await query(
-        'SELECT id, status FROM conversions WHERE youtube_url LIKE $1 AND status IN ($2, $3) ORDER BY created_at DESC LIMIT 1',
-        [`%${videoId}%`, 'pending', 'processing']
+        'SELECT id, status, download_url, completed_at FROM videos WHERE video_id = $1 ORDER BY requested_at DESC LIMIT 1',
+        [videoId]
       );
       
       if (existingJobs.rows.length > 0) {
         const existingJob = existingJobs.rows[0];
-        return res.json({
-          success: true,
-          isBlacklisted: false,
-          message: 'Video is already being processed',
-          existingJobId: existingJob.id
-        });
+        if (existingJob.status === 'processing') {
+          return res.json({
+            success: true,
+            isBlacklisted: false,
+            message: 'Video is already being processed',
+            existingJobId: existingJob.id
+          });
+        }
+        if (existingJob.status === 'done' && existingJob.download_url) {
+          return res.json({
+            success: true,
+            isBlacklisted: false,
+            message: 'Video already converted',
+            existingJobId: existingJob.id,
+            downloadUrl: existingJob.download_url
+          });
+        }
       }
     }
 
@@ -112,10 +101,14 @@ router.post('/convert', conversionRateLimit, validateConversionRequest, async (r
     
     logger.info(`✅ New conversion job created: ${jobId} for URL: ${request.url}`);
     
+    // Get the job details to return current status
+    const job = await activeService.getJobStatus(jobId);
+    
     res.status(202).json({
       success: true,
-      jobId,
-      status: 'pending',
+      id: jobId,
+      status: job?.status || 'pending',
+      title: job?.title || 'Fetching title...',
       message: 'Conversion job started successfully'
     });
   } catch (error) {
@@ -154,49 +147,35 @@ router.get('/status/:id', statusRateLimit, validateJobId, async (req: Request, r
       success: true,
       jobId: job.id,
       status: job.status,
-      video_title: job.video_title,
+      video_title: job.title,
       quality: job.quality,
-      trim_start: job.trim_start,
-      trim_duration: job.trim_duration,
       file_size: job.file_size,
       duration: job.duration,
       error_message: job.error_message,
-      created_at: job.created_at,
+      created_at: job.requested_at,
       updated_at: job.updated_at,
       expires_at: job.expires_at
     };
 
     // Add download URL if conversion is completed
-    logger.info(`🔍 [Job ${job.id}] Status check: status=${job.status}, processed_path=${job.processed_path}, direct_download_url=${job.direct_download_url}`);
+    logger.info(`🔍 [Job ${job.id}] Status check: status=${job.status}, download_url=${job.download_url}`);
     
-    if (job.status === 'completed') {
-      if (job.processed_path) {
-        // Local file available - preferred method
-        response.download_url = `/api/download/${job.id}`;
-        response.download_filename = `${job.video_title || 'converted'}.mp3`;
-        response.download_type = 'local'; // Indicates this is a local file
-        response.file_valid = true;
-        response.file_size = 0; // Will be determined during download
-        logger.info(`📁 [Job ${job.id}] Status: Local file available at ${job.processed_path}`);
-        logger.info(`🔗 [Job ${job.id}] Status Response: download_url=${response.download_url}, file_valid=${response.file_valid}`);
-      } else if (job.direct_download_url) {
-        // Fallback to external URL
-        response.download_url = job.direct_download_url;
-        response.download_filename = `${job.video_title || 'converted'}.mp3`;
+    if (job.status === 'done') {
+      if (job.download_url) {
+        // Direct download URL from RapidAPI
+        response.download_url = job.download_url;
+        response.download_filename = `${job.title || 'converted'}.mp3`;
         response.download_type = 'direct'; // Indicates this is a direct download
         response.file_valid = true;
-        response.file_size = 0; // Unknown for external URLs
-        logger.info(`🔗 [Job ${job.id}] Status: External download URL available`);
+        response.file_size = job.file_size || 0;
+        logger.info(`🔗 [Job ${job.id}] Status: Direct download URL available`);
         logger.info(`🔗 [Job ${job.id}] Status Response: download_url=${response.download_url}, file_valid=${response.file_valid}`);
       } else {
-        logger.warn(`⚠️ [Job ${job.id}] Status: Completed but no download URL available (processed_path: ${job.processed_path}, direct_download_url: ${job.direct_download_url})`);
+        logger.warn(`⚠️ [Job ${job.id}] Status: Completed but no download URL available`);
       }
     }
 
-    // Add ffmpeg logs if requested by admin (you can add admin check here)
-    if (req.query.includeLogs === 'true' && job.ffmpeg_logs) {
-      response.ffmpeg_logs = job.ffmpeg_logs;
-    }
+    // No ffmpeg logs in RapidAPI-only mode
 
     res.json(response);
   } catch (error) {
@@ -216,7 +195,7 @@ router.get('/status/:id', statusRateLimit, validateJobId, async (req: Request, r
   }
 });
 
-// GET /api/download/:id - Download processed file
+// GET /api/download/:id - Redirect to direct download URL
 router.get('/download/:id', validateJobId, async (req: Request, res: Response) => {
   try {
     const jobId = req.params.id;
@@ -231,7 +210,7 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
       });
     }
     
-    if (job.status !== 'completed') {
+    if (job.status !== 'done') {
       logger.warn(`⏳ Job not completed: ${jobId}, status: ${job.status}`);
       return res.status(400).json({
         success: false,
@@ -239,177 +218,19 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
       });
     }
     
-    // Check if we have a local file first (preferred)
-    if (job.processed_path) {
-    const filename = `${job.video_title || 'converted'}.mp3`;
-      logger.info(`🎵 Starting download for local file: ${filename}`);
-      logger.info(`📁 Local file path: ${job.processed_path}`);
-
-      // Set proper download headers with RFC 5987 encoding for international characters
-    res.setHeader('Content-Type', 'audio/mpeg');
-      res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-
-      try {
-        // Check if file exists and get its size
-        const fs = require('fs');
-        const stats = await fs.promises.stat(job.processed_path);
-        
-        if (stats.size === 0) {
-          logger.error(`❌ File is empty: ${job.processed_path}, size: ${stats.size}`);
-          return res.status(500).json({
-            success: false,
-            message: 'File is empty or corrupted'
-          });
-        }
-
-        if (stats.size > 1073741824) { // 1GB limit
-          logger.error(`❌ File too large: ${job.processed_path}, size: ${stats.size} bytes`);
-          return res.status(500).json({
-            success: false,
-            message: 'File is too large'
-          });
-        }
-
-        // Set content length for proper download progress
-        res.setHeader('Content-Length', stats.size);
-        
-        // Stream the local file
-        const fileStream = fs.createReadStream(job.processed_path);
-        fileStream.pipe(res);
-        
-        fileStream.on('error', (error: Error) => {
-          logger.error(`❌ Error streaming local file: ${error.message}`);
-      if (!res.headersSent) {
-        res.status(500).json({
-          success: false,
-          message: 'Error reading file'
-        });
-      }
-    });
-
-        logger.info(`✅ Successfully streaming local file: ${job.processed_path}`);
-        return;
-        
-      } catch (error) {
-        logger.error(`❌ Error accessing local file: ${error}`);
-        if (!res.headersSent) {
-          res.status(500).json({
-            success: false,
-            message: 'File not accessible'
-          });
-        }
-        return;
-      }
-    }
-    
-    // Fallback to direct download URL (external API) if no local file
-    if (job.direct_download_url) {
-      const originalFilename = job.video_title || 'converted';
-      const safeFilename = originalFilename.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_');
-      const filename = `${safeFilename}.mp3`;
-      logger.info(`🎵 Starting download for: ${filename}`);
-      logger.info(`🔗 Direct download URL: ${job.direct_download_url}`);
-
-      // Set proper download headers with RFC 5987 encoding for international characters
-      res.setHeader('Content-Type', 'audio/mpeg');
+    // Redirect to direct download URL from RapidAPI
+    if (job.download_url) {
+      const filename = `${job.title || 'converted'}.mp3`;
+      logger.info(`🔗 Redirecting to direct download URL: ${job.download_url}`);
+      
+      // Set proper download headers
       res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-      res.setHeader('X-Frame-Options', 'DENY');
-      res.setHeader('X-XSS-Protection', '1; mode=block');
-
-      // Stream the file from the external URL
-      const https = require('https');
-      const http = require('http');
-      const url = require('url');
       
-      const parsedUrl = url.parse(job.direct_download_url);
-      const isHttps = parsedUrl.protocol === 'https:';
-      const client = isHttps ? https : http;
-      
-      const options = {
-        hostname: parsedUrl.hostname,
-        port: parsedUrl.port || (isHttps ? 443 : 80),
-        path: parsedUrl.path,
-        method: 'GET',
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-      };
-
-      const proxyReq = client.request(options, (proxyRes: any) => {
-        logger.info(`📡 Proxy response status: ${proxyRes.statusCode} for job: ${jobId}`);
-        
-        if (proxyRes.statusCode === 404) {
-          logger.error(`❌ Download URL expired (404) for job: ${jobId} - attempting to refresh`);
-          // Mark job as failed and let the frontend handle refresh
-          if (!res.headersSent) {
-            res.status(410).json({
-              success: false,
-              message: 'Download URL expired. Please try converting again.',
-              expired: true
-            });
-          }
-          return;
-        }
-        
-        if (proxyRes.statusCode !== 200) {
-          logger.error(`❌ Download failed with status: ${proxyRes.statusCode} for job: ${jobId}`);
-          if (!res.headersSent) {
-            res.status(500).json({
-              success: false,
-              message: 'Download failed. Please try again.'
-            });
-          }
-          return;
-        }
-
-        // Set content type from response if available
-        if (proxyRes.headers['content-type']) {
-          res.setHeader('Content-Type', proxyRes.headers['content-type']);
-        }
-
-        // Set content length if available
-        if (proxyRes.headers['content-length']) {
-          res.setHeader('Content-Length', proxyRes.headers['content-length']);
-        }
-
-        proxyRes.on('end', () => {
-          logger.info(`✅ Download completed successfully for job: ${jobId}`);
-        });
-
-        proxyRes.on('error', (error: any) => {
-          logger.error(`❌ Proxy response error for job ${jobId}:`, error);
-          if (!res.headersSent) {
-            res.status(500).json({
-              success: false,
-              message: 'Download stream error'
-            });
-          }
-        });
-
-        proxyRes.pipe(res);
-      });
-
-      proxyReq.on('error', (error: any) => {
-        logger.error(`❌ Proxy request error for job ${jobId}:`, error);
-        if (!res.headersSent) {
-          res.status(500).json({
-            success: false,
-            message: 'Download request failed'
-          });
-        }
-      });
-
-      proxyReq.end();
+      // Redirect to the direct download URL
+      res.redirect(302, job.download_url);
       return;
     }
 
@@ -434,6 +255,70 @@ router.get('/download/:id', validateJobId, async (req: Request, res: Response) =
       operation: 'downloadFile'
     });
     res.status(statusCode).json(response);
+  }
+});
+
+// GET /api/status - Get status by video_id (for frontend polling)
+router.get('/status', statusRateLimit, async (req: Request, res: Response) => {
+  try {
+    const videoId = req.query.video_id as string;
+    
+    if (!videoId) {
+      return res.status(400).json({
+        success: false,
+        message: 'video_id parameter is required'
+      });
+    }
+
+    // Get the latest job for this video
+    const { query } = require('../config/database');
+    const result = await query(
+      'SELECT * FROM videos WHERE video_id = $1 ORDER BY requested_at DESC LIMIT 1',
+      [videoId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Video not found'
+      });
+    }
+
+    const job = result.rows[0];
+    
+    // Set proper UTF-8 headers for Unicode support
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Encoding', 'utf-8');
+    
+    const response: any = {
+      success: true,
+      video_id: job.video_id,
+      status: job.status,
+      title: job.title,
+      progress: job.progress || 0,
+      download_url: job.download_url,
+      error_message: job.error_message,
+      requested_at: job.requested_at,
+      completed_at: job.completed_at
+    };
+
+    res.json(response);
+  } catch (error) {
+    const userMessage = ErrorHandler.getUserFriendlyError(error);
+    ErrorHandler.logTechnicalError(error, 'GET_VIDEO_STATUS', {
+      videoId: req.query.video_id,
+      userIp: req.ip,
+      operation: 'getVideoStatus'
+    });
+    
+    if (!res.headersSent) {
+      const { statusCode, response } = ErrorHandler.createErrorResponse(500, userMessage, error, {
+        videoId: req.query.video_id,
+        userIp: req.ip,
+        operation: 'getVideoStatus'
+      });
+      res.status(statusCode).json(response);
+    }
   }
 });
 
