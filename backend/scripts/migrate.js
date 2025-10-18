@@ -33,13 +33,26 @@ async function runMigration() {
     const client = await pool.connect();
     console.log('✅ Database connection successful');
     
-    // Read migration file
-    const migrationPath = path.join(__dirname, '..', 'migrations', '001_create_jobs_table.sql');
-    const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
+    // Run all migrations in order
+    const migrations = [
+      '001_create_jobs_table.sql',
+      '002_add_processed_path_column.sql'
+    ];
     
-    // Execute migration
-    console.log('📝 Executing migration: 001_create_jobs_table.sql');
-    await client.query(migrationSQL);
+    for (const migrationFile of migrations) {
+      const migrationPath = path.join(__dirname, '..', 'migrations', migrationFile);
+      
+      if (fs.existsSync(migrationPath)) {
+        const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
+        
+        // Execute migration
+        console.log(`📝 Executing migration: ${migrationFile}`);
+        await client.query(migrationSQL);
+        console.log(`✅ Migration ${migrationFile} completed`);
+      } else {
+        console.log(`⚠️ Migration file not found: ${migrationFile}`);
+      }
+    }
     
     console.log('✅ Migration completed successfully');
     

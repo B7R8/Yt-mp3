@@ -63,9 +63,10 @@ RUN npm ci --only=production --frozen-lockfile && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Copy startup script and migrations
+# Copy startup script, migrations, and migration runner
 COPY start.sh /app/start.sh
 COPY migrations/ /app/migrations/
+COPY scripts/ /app/scripts/
 
 # Create necessary directories with proper permissions
 RUN mkdir -p downloads cache temp logs /tmp/app-media && \
@@ -76,6 +77,7 @@ RUN mkdir -p downloads cache temp logs /tmp/app-media && \
     chmod -R 755 /app/logs && \
     chmod -R 755 /tmp/app-media && \
     chmod -R 755 /app/migrations && \
+    chmod -R 755 /app/scripts && \
     chmod +x /app/start.sh
 
 # Switch to non-root user

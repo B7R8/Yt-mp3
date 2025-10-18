@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS conversions (
     error_message TEXT,
     quality_message TEXT,
     direct_download_url TEXT,
+    processed_path TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -55,6 +56,9 @@ CREATE TRIGGER update_blacklist_updated_at
 
 -- Add direct_download_url column if it doesn't exist (for existing databases)
 ALTER TABLE conversions ADD COLUMN IF NOT EXISTS direct_download_url TEXT;
+
+-- Add processed_path column if it doesn't exist (for existing databases)
+ALTER TABLE conversions ADD COLUMN IF NOT EXISTS processed_path TEXT;
 
 -- Create jobs table for audio processing
 CREATE TABLE IF NOT EXISTS jobs (

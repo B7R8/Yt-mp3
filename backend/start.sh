@@ -48,13 +48,21 @@ run_migrations() {
         # Run the init.sql script if tables don't exist
         log "🔧 Checking database schema..."
         
-        # Test if jobs table exists
-        if ! PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -c "SELECT 1 FROM jobs LIMIT 1;" >/dev/null 2>&1; then
-            log "📋 Initializing database schema..."
-            PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -f /app/migrations/init.sql
-            log "✅ Database schema initialized"
+        # Test if conversions table exists and has processed_path column
+        if ! PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -c "SELECT processed_path FROM conversions LIMIT 1;" >/dev/null 2>&1; then
+            log "📋 Running database migrations..."
+            
+            # Run the migration script
+            if [ -f "/app/scripts/migrate.js" ]; then
+                node /app/scripts/migrate.js
+                log "✅ Database migrations completed"
+            else
+                log "⚠️ Migration script not found, running init.sql..."
+                PGPASSWORD="${DB_PASSWORD:-postgres}" psql -h "${DB_HOST:-postgres}" -p "${DB_PORT:-5432}" -U "${DB_USER:-postgres}" -d "${DB_NAME:-youtube_converter}" -f /app/migrations/init.sql
+                log "✅ Database schema initialized"
+            fi
         else
-            log "✅ Database schema already exists"
+            log "✅ Database schema already up to date"
         fi
     else
         log "📊 Using SQLite database (development mode)"
