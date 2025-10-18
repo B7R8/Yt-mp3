@@ -25,17 +25,61 @@ export interface ConversionResult {
 }
 
 export class YouTubeMp3ApiService {
-  private readonly apiKey: string;
+  private readonly apiKeys: string[];
   private readonly apiHost: string;
   private readonly downloadsDir: string;
   private readonly alternativeApiHost: string;
+  private currentApiKeyIndex: number = 0;
 
   constructor() {
-    this.apiKey = process.env.RAPIDAPI_KEY || '546e353d67msha411dc0cd0b0b7dp153e93jsn651c16a2c85b';
+    // Load multiple API keys from environment variables
+    this.apiKeys = this.loadApiKeys();
     this.apiHost = 'youtube-mp36.p.rapidapi.com';
     this.alternativeApiHost = 'youtube-mp3-download1.p.rapidapi.com';
     this.downloadsDir = process.env.DOWNLOADS_DIR || './downloads';
     this.ensureDownloadsDir();
+  }
+
+  private loadApiKeys(): string[] {
+    const keys: string[] = [];
+    
+    // Load RAPIDAPI_KEY (required)
+    if (process.env.RAPIDAPI_KEY) {
+      keys.push(process.env.RAPIDAPI_KEY);
+    }
+    
+    // Load optional additional keys
+    for (let i = 2; i <= 5; i++) {
+      const key = process.env[`RAPIDAPI_KEY${i}`];
+      if (key) {
+        keys.push(key);
+      }
+    }
+    
+    // Fallback to default key if no keys found
+    if (keys.length === 0) {
+      keys.push('546e353d67msha411dc0cd0b0b7dp153e93jsn651c16a2c85b');
+    }
+    
+    logger.info(`Loaded ${keys.length} API key(s) for fallback system`);
+    return keys;
+  }
+
+  private getCurrentApiKey(): string {
+    return this.apiKeys[this.currentApiKeyIndex];
+  }
+
+  private switchToNextApiKey(): boolean {
+    if (this.currentApiKeyIndex < this.apiKeys.length - 1) {
+      this.currentApiKeyIndex++;
+      logger.warn(`Switching to API key ${this.currentApiKeyIndex + 1} of ${this.apiKeys.length}`);
+      return true;
+    }
+    return false;
+  }
+
+  private resetApiKeyIndex(): void {
+    this.currentApiKeyIndex = 0;
   }
 
   private async ensureDownloadsDir(): Promise<void> {
@@ -97,7 +141,7 @@ export class YouTubeMp3ApiService {
   }
 
   /**
-   * Get video information from YouTube MP3 API
+   * Get video information from YouTube MP3 API with fallback system
    */
   async getVideoInfo(url: string): Promise<VideoInfo> {
     const videoId = this.extractVideoId(url);
@@ -105,6 +149,30 @@ export class YouTubeMp3ApiService {
       throw new Error('Invalid YouTube URL - could not extract video ID');
     }
 
+    // Try all available API keys for video info
+    for (let attempt = 0; attempt < this.apiKeys.length; attempt++) {
+      try {
+        const result = await this.getVideoInfoWithCurrentKey(videoId);
+        if (result) {
+          return result;
+        }
+      } catch (error) {
+        logger.warn(`⚠️ API key ${this.currentApiKeyIndex + 1} failed for video info ${videoId}:`, error);
+      }
+
+      // Switch to next API key if available
+      if (!this.switchToNextApiKey()) {
+        break; // No more API keys to try
+      }
+    }
+
+    throw new Error(`All ${this.apiKeys.length} API keys failed to get video information`);
+  }
+
+  /**
+   * Get video information with current API key
+   */
+  private async getVideoInfoWithCurrentKey(videoId: string): Promise<VideoInfo> {
     return new Promise((resolve, reject) => {
       const options = {
         method: 'GET',
@@ -112,7 +180,7 @@ export class YouTubeMp3ApiService {
         port: null,
         path: `/dl?id=${videoId}`,
         headers: {
-          'x-rapidapi-key': this.apiKey,
+          'x-rapidapi-key': this.getCurrentApiKey(),
           'x-rapidapi-host': this.apiHost,
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
@@ -178,7 +246,7 @@ export class YouTubeMp3ApiService {
   }
 
   /**
-   * Convert YouTube video to MP3 using the API - Direct download approach
+   * Convert YouTube video to MP3 using the API - Direct download approach with fallback system
    */
   async convertToMp3(url: string, quality: string = '192k'): Promise<ConversionResult> {
     const videoId = this.extractVideoId(url);
@@ -192,55 +260,69 @@ export class YouTubeMp3ApiService {
 
     logger.info(`🎵 Starting MP3 conversion for video ID: ${videoId} with quality: ${quality}`);
 
-    try {
-      // Get download link directly from API with validation
-      logger.info(`🔗 Fetching download link from primary API for video: ${videoId}`);
-      let downloadResult = await this.getDownloadLinkWithValidation(videoId);
-      
-      // If primary API fails, try alternative API
-      if (!downloadResult.success || !downloadResult.downloadUrl) {
-        logger.warn(`⚠️ Primary API failed for ${videoId}, trying alternative API`);
-        downloadResult = await this.tryAlternativeApiWithValidation(videoId);
-      }
-      
-      if (!downloadResult.success || !downloadResult.downloadUrl) {
-        logger.error(`❌ All APIs failed for video ${videoId}: ${downloadResult.error}`);
-        return {
-          success: false,
-          error: downloadResult.error || 'Failed to get download link from all available APIs'
-        };
-      }
+    // Reset API key index for new conversion
+    this.resetApiKeyIndex();
 
-      logger.info(`✅ Valid download URL obtained for video ${videoId}: ${downloadResult.downloadUrl}`);
+    // Try all available API keys
+    for (let attempt = 0; attempt < this.apiKeys.length; attempt++) {
+      const currentKey = this.getCurrentApiKey();
+      logger.info(`🔑 Attempting conversion with API key ${this.currentApiKeyIndex + 1} of ${this.apiKeys.length}`);
 
-      // Get video info for title
-      let title = `YouTube Video ${videoId}`;
       try {
-        logger.info(`📝 Fetching video info for title: ${videoId}`);
-        const videoInfo = await this.getVideoInfo(url);
-        title = videoInfo.title;
-        logger.info(`📝 Video title: ${title}`);
+        // Get download link directly from API with validation
+        logger.info(`🔗 Fetching download link from primary API for video: ${videoId}`);
+        let downloadResult = await this.getDownloadLinkWithValidation(videoId);
+        
+        // If primary API fails, try alternative API
+        if (!downloadResult.success || !downloadResult.downloadUrl) {
+          logger.warn(`⚠️ Primary API failed for ${videoId}, trying alternative API`);
+          downloadResult = await this.tryAlternativeApiWithValidation(videoId);
+        }
+        
+        // If this API key worked, return success
+        if (downloadResult.success && downloadResult.downloadUrl) {
+          logger.info(`✅ Valid download URL obtained for video ${videoId} with API key ${this.currentApiKeyIndex + 1}: ${downloadResult.downloadUrl}`);
+
+          // Get video info for title
+          let title = `YouTube Video ${videoId}`;
+          try {
+            logger.info(`📝 Fetching video info for title: ${videoId}`);
+            const videoInfo = await this.getVideoInfo(url);
+            title = videoInfo.title;
+            logger.info(`📝 Video title: ${title}`);
+          } catch (error) {
+            logger.warn(`⚠️ Failed to get video info for ${videoId}, using default title:`, error);
+          }
+
+          logger.info(`🎵 Conversion completed successfully for ${videoId}: ${title}`);
+
+          return {
+            success: true,
+            downloadUrl: downloadResult.downloadUrl, // Return the validated API download URL
+            title: title,
+            duration: 0 // Duration not available from this API
+          };
+        }
+
+        // If this API key failed, try the next one
+        logger.warn(`⚠️ API key ${this.currentApiKeyIndex + 1} failed for video ${videoId}, trying next key...`);
+        
       } catch (error) {
-        logger.warn(`⚠️ Failed to get video info for ${videoId}, using default title:`, error);
+        logger.error(`❌ API key ${this.currentApiKeyIndex + 1} failed for video ${videoId}:`, error);
       }
 
-      logger.info(`🎵 Conversion completed successfully for ${videoId}: ${title}`);
-
-      return {
-        success: true,
-        downloadUrl: downloadResult.downloadUrl, // Return the validated API download URL
-        title: title,
-        duration: 0 // Duration not available from this API
-      };
-
-    } catch (error) {
-      logger.error(`❌ Conversion failed for video ${videoId}:`, error);
-      logTechnicalError(error, 'YouTube MP3 API Conversion');
-      return {
-        success: false,
-        error: getUserFriendlyError(error)
-      };
+      // Switch to next API key if available
+      if (!this.switchToNextApiKey()) {
+        break; // No more API keys to try
+      }
     }
+
+    // All API keys failed
+    logger.error(`❌ All ${this.apiKeys.length} API keys failed for video ${videoId}`);
+    return {
+      success: false,
+      error: `All ${this.apiKeys.length} API keys failed. Please try again later.`
+    };
   }
 
   /**
@@ -295,7 +377,7 @@ export class YouTubeMp3ApiService {
         port: null,
         path: `/dl?id=${videoId}`,
         headers: {
-          'x-rapidapi-key': this.apiKey,
+          'x-rapidapi-key': this.getCurrentApiKey(),
           'x-rapidapi-host': this.alternativeApiHost,
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
@@ -408,7 +490,7 @@ export class YouTubeMp3ApiService {
         port: null,
         path: `/dl?id=${videoId}`,
         headers: {
-          'x-rapidapi-key': this.apiKey,
+          'x-rapidapi-key': this.getCurrentApiKey(),
           'x-rapidapi-host': this.apiHost,
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }

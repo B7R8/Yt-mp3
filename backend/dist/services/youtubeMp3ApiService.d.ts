@@ -15,22 +15,31 @@ export interface ConversionResult {
     duration?: number;
 }
 export declare class YouTubeMp3ApiService {
-    private readonly apiKey;
+    private readonly apiKeys;
     private readonly apiHost;
     private readonly downloadsDir;
     private readonly alternativeApiHost;
+    private currentApiKeyIndex;
     constructor();
+    private loadApiKeys;
+    private getCurrentApiKey;
+    private switchToNextApiKey;
+    private resetApiKeyIndex;
     private ensureDownloadsDir;
     /**
      * Extract video ID from YouTube URL - Enhanced to support all formats
      */
     private extractVideoId;
     /**
-     * Get video information from YouTube MP3 API
+     * Get video information from YouTube MP3 API with fallback system
      */
     getVideoInfo(url: string): Promise<VideoInfo>;
     /**
-     * Convert YouTube video to MP3 using the API - Direct download approach
+     * Get video information with current API key
+     */
+    private getVideoInfoWithCurrentKey;
+    /**
+     * Convert YouTube video to MP3 using the API - Direct download approach with fallback system
      */
     convertToMp3(url: string, quality?: string): Promise<ConversionResult>;
     /**
