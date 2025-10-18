@@ -1,9 +1,9 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { ConversionJob, ConversionRequest } from '../types';
+import { ConversionJob, ConversionRequest } from './conversionService';
 import logger from '../config/logger';
-import { optimizedDb as db } from '../config/optimizedDatabase';
+import { query } from '../config/database';
 import { getUserFriendlyError, logTechnicalError } from '../utils/errorHandler';
 import { YouTubeMp3ApiService, VideoInfo } from './youtubeMp3ApiService';
 
@@ -20,43 +20,30 @@ export class SimpleConversionService {
   private async ensureDownloadsDir(): Promise<void> {
     try {
       await fs.mkdir(this.downloadsDir, { recursive: true });
+      logger.info(`📁 Downloads directory ensured: ${this.downloadsDir}`);
     } catch (error) {
-      logger.error('Failed to create downloads directory:', error);
+      logger.error(`❌ Failed to create downloads directory: ${error}`);
+      throw error;
     }
   }
 
   /**
-   * Extract video ID from YouTube URL - Enhanced to support all formats
+   * Extract video ID from various YouTube URL formats
    */
   private extractVideoId(url: string): string | null {
-    // Comprehensive patterns for all YouTube URL formats
     const patterns = [
-      // Standard watch URLs
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+      // Standard YouTube URLs
       /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
       
       // Short URLs
       /(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
       
-      // Embed URLs
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
-      
-      // Direct video URLs
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
-      
-      // Shorts URLs
-      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
-      
       // Mobile URLs
-      /(?:https?:\/\/)?m\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
       /(?:https?:\/\/)?m\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
       
-      // Music URLs
-      /(?:https?:\/\/)?(?:www\.)?music\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
-      /(?:https?:\/\/)?(?:www\.)?music\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
-      
       // Gaming URLs
-      /(?:https?:\/\/)?(?:www\.)?gaming\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
       /(?:https?:\/\/)?(?:www\.)?gaming\.youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/,
       
       // Just the video ID (11 characters)
@@ -78,50 +65,305 @@ export class SimpleConversionService {
   /**
    * Check if URL is blacklisted
    */
-  private async checkBlacklist(url: string): Promise<{ isBlacklisted: boolean; reason?: string; type?: string }> {
+  private isBlacklisted(url: string): boolean {
+    const blacklistedPatterns = [
+      /porn/i,
+      /adult/i,
+      /xxx/i,
+      /sex/i,
+      /nude/i,
+      /explicit/i
+    ];
+
+    return blacklistedPatterns.some(pattern => pattern.test(url));
+  }
+
+  /**
+   * Validate YouTube URL
+   */
+  private validateUrl(url: string): { isValid: boolean; error?: string } {
+    if (!url || typeof url !== 'string') {
+      return { isValid: false, error: 'URL is required' };
+    }
+
+    if (this.isBlacklisted(url)) {
+      return { isValid: false, error: 'Content not allowed' };
+    }
+
+    const videoId = this.extractVideoId(url);
+    if (!videoId) {
+      return { isValid: false, error: 'Invalid YouTube URL format' };
+    }
+
+    return { isValid: true };
+  }
+
+  /**
+   * Get video information
+   */
+  async getVideoInfo(url: string): Promise<VideoInfo> {
     try {
-      const database = await db;
+      logger.info(`🔍 Getting video info for: ${url}`);
       
-      const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-      const videoId = videoIdMatch ? videoIdMatch[1] : null;
-      
-      // Check for exact URL match
-      const { queryWithParams } = await import('../config/database');
-      const urlMatchResult = await queryWithParams(
-        'SELECT reason FROM blacklist WHERE type = $1 AND value = $2',
-        ['url', url]
-      );
-      const urlMatch = urlMatchResult.rows?.[0];
-      
-      if (urlMatch) {
-        return { 
-          isBlacklisted: true, 
-          reason: urlMatch.reason || 'This URL has been blocked by the content owner or administrator',
-          type: 'URL'
-        };
+      const validation = this.validateUrl(url);
+      if (!validation.isValid) {
+        throw new Error(validation.error);
       }
+
+      const videoInfo = await this.apiService.getVideoInfo(url);
+      logger.info(`✅ Video info retrieved: ${videoInfo.title}`);
       
-      // Check for video ID match
-      if (videoId) {
-        const videoIdMatchResult = await queryWithParams(
-          'SELECT reason FROM blacklist WHERE type = $1 AND value = $2',
-          ['video_id', videoId]
-        );
-        const videoIdMatch = videoIdMatchResult.rows?.[0];
-        
-        if (videoIdMatch) {
-          return { 
-            isBlacklisted: true, 
-            reason: videoIdMatch.reason || 'This video has been blocked by the content owner or administrator',
-            type: 'Video'
-          };
-        }
-      }
-      
-      return { isBlacklisted: false };
+      return videoInfo;
     } catch (error) {
-      logger.error('Error checking blacklist:', error);
-      return { isBlacklisted: false };
+      logger.error(`❌ Failed to get video info: ${error}`);
+      throw getUserFriendlyError(error);
+    }
+  }
+
+  /**
+   * Convert video to MP3
+   */
+  async convertToMp3(request: ConversionRequest): Promise<ConversionJob> {
+    try {
+      logger.info(`🎵 Starting conversion for: ${request.url}`);
+      
+      const validation = this.validateUrl(request.url);
+      if (!validation.isValid) {
+        throw new Error(validation.error);
+      }
+
+      const videoId = this.extractVideoId(request.url);
+      if (!videoId) {
+        throw new Error('Could not extract video ID from URL');
+      }
+
+      // Create conversion job
+      const jobId = uuidv4();
+      const job: ConversionJob = {
+        id: jobId,
+        youtube_url: request.url,
+        status: 'pending',
+        created_at: new Date(),
+        updated_at: new Date(),
+        quality: request.quality || 'high',
+        trim_start: request.trimStart || undefined,
+        trim_duration: request.trimDuration || undefined,
+        file_size: undefined
+      };
+
+      // Save job to database
+      await query(
+        `INSERT INTO conversions (
+          id, youtube_url, status, created_at, updated_at,
+          quality, trim_start, trim_duration
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          job.id, job.youtube_url, job.status, job.created_at, job.updated_at,
+          job.quality, job.trim_start, job.trim_duration
+        ]
+      );
+
+      // Start conversion process
+      this.processConversion(job).catch(error => {
+        logger.error(`❌ Conversion failed for job ${jobId}:`, error);
+      });
+
+      logger.info(`✅ Conversion job created: ${jobId}`);
+      return job;
+
+    } catch (error) {
+      logger.error(`❌ Failed to start conversion: ${error}`);
+      throw getUserFriendlyError(error);
+    }
+  }
+
+  /**
+   * Process the conversion
+   */
+  private async processConversion(job: ConversionJob): Promise<void> {
+    try {
+      logger.info(`🔄 Processing conversion job: ${job.id}`);
+
+      // Update job status to processing
+      await query(
+        'UPDATE conversions SET status = $1, updated_at = $2 WHERE id = $3',
+        ['processing', new Date(), job.id]
+      );
+
+      // Get video info
+      const videoInfo = await this.apiService.getVideoInfo(job.youtube_url);
+      
+      // Generate filename
+      const filename = this.generateFilename(videoInfo.title, job.quality || 'high');
+      const filePath = path.join(this.downloadsDir, filename);
+
+      // Convert video to MP3
+      const conversionResult = await this.apiService.convertToMp3(
+        job.youtube_url,
+        filePath
+      );
+
+      if (!conversionResult.success) {
+        throw new Error(conversionResult.error || 'Conversion failed');
+      }
+
+      // Get file size
+      const stats = await fs.stat(filePath);
+      const fileSize = stats.size;
+
+      // Update job with success
+      await query(
+        `UPDATE conversions SET 
+          status = $1, 
+          mp3_filename = $2, 
+          file_size = $3, 
+          updated_at = $4
+        WHERE id = $5`,
+        [
+          'completed',
+          filename,
+          fileSize,
+          new Date(),
+          job.id
+        ]
+      );
+
+      logger.info(`🎉 Conversion completed successfully: ${job.id}`);
+
+    } catch (error) {
+      logger.error(`❌ Conversion failed for job ${job.id}:`, error);
+      
+      // Update job with error
+      await query(
+        'UPDATE conversions SET status = $1, error_message = $2, updated_at = $3 WHERE id = $4',
+        ['failed', (error as Error).message, new Date(), job.id]
+      );
+    }
+  }
+
+  /**
+   * Generate filename from video title
+   */
+  private generateFilename(title: string, quality: string): string {
+    // Clean title for filename
+    const cleanTitle = title
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '_') // Replace spaces with underscores
+      .substring(0, 100); // Limit length
+
+    const timestamp = Date.now();
+    return `${cleanTitle}_${quality}_${timestamp}.mp3`;
+  }
+
+  /**
+   * Get conversion job status
+   */
+  async getJobStatus(jobId: string): Promise<ConversionJob | null> {
+    try {
+      const result = await query(
+        'SELECT * FROM conversions WHERE id = $1',
+        [jobId]
+      );
+
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      return result.rows[0] as ConversionJob;
+    } catch (error) {
+      logger.error(`❌ Failed to get job status: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all jobs for a user
+   */
+  async getUserJobs(userId: string, limit: number = 10): Promise<ConversionJob[]> {
+    try {
+      const result = await query(
+        'SELECT * FROM conversions WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2',
+        [userId, limit]
+      );
+
+      return result.rows as ConversionJob[];
+    } catch (error) {
+      logger.error(`❌ Failed to get user jobs: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Clean up old files
+   */
+  async cleanupOldFiles(): Promise<void> {
+    try {
+      logger.info('🧹 Starting cleanup of old files...');
+
+      // Get expired jobs
+      const result = await query(
+        'SELECT * FROM conversions WHERE created_at < NOW() - INTERVAL \'24 hours\' AND mp3_filename IS NOT NULL'
+      );
+
+      const expiredJobs = result.rows;
+      logger.info(`🗑️ Found ${expiredJobs.length} expired files to clean up`);
+
+      for (const job of expiredJobs) {
+        if (job.mp3_filename) {
+          const filePath = path.join(this.downloadsDir, job.mp3_filename);
+          try {
+            await fs.unlink(filePath);
+            logger.info(`🗑️ Deleted expired file: ${filePath}`);
+          } catch (error) {
+            logger.warn(`Failed to delete file ${filePath}:`, error);
+          }
+        }
+
+        // Update job to mark as cleaned
+        await query(
+          'UPDATE conversions SET mp3_filename = NULL, file_size = NULL WHERE id = $1',
+          [job.id]
+        );
+      }
+
+      logger.info('✅ Cleanup completed');
+    } catch (error) {
+      logger.error('❌ Cleanup failed:', error);
+    }
+  }
+
+  /**
+   * Get conversion statistics
+   */
+  async getStats(): Promise<{
+    total: number;
+    completed: number;
+    failed: number;
+    pending: number;
+    processing: number;
+  }> {
+    try {
+      const result = await query(`
+        SELECT 
+          COUNT(*) as total,
+          COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed,
+          COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed,
+          COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending,
+          COUNT(CASE WHEN status = 'processing' THEN 1 END) as processing
+        FROM conversions
+      `);
+
+      const stats = result.rows[0];
+      return {
+        total: parseInt(stats.total),
+        completed: parseInt(stats.completed),
+        failed: parseInt(stats.failed),
+        pending: parseInt(stats.pending),
+        processing: parseInt(stats.processing)
+      };
+    } catch (error) {
+      logger.error('❌ Failed to get stats:', error);
+      throw error;
     }
   }
 
@@ -129,387 +371,50 @@ export class SimpleConversionService {
    * Create a new conversion job
    */
   async createJob(request: ConversionRequest): Promise<string> {
-    const jobId = uuidv4();
-    const database = await db;
-
-    logger.info(`🎵 Creating new conversion job: ${jobId} for URL: ${request.url}`);
-
     try {
-      // Validate YouTube URL
-      if (!this.apiService.isValidYouTubeUrl(request.url)) {
-        logger.error(`❌ Invalid YouTube URL format: ${request.url}`);
-        throw new Error('Invalid YouTube URL format');
-      }
-
-      logger.info(`✅ YouTube URL validation passed for job: ${jobId}`);
-
-      // Check if URL is blacklisted
-      const blacklistResult = await this.checkBlacklist(request.url);
-      if (blacklistResult.isBlacklisted) {
-        logger.warn(`🚫 URL is blacklisted for job ${jobId}: ${blacklistResult.reason}`);
-        throw new Error(blacklistResult.reason || 'This content is not available for conversion');
-      }
-
-      logger.info(`✅ Blacklist check passed for job: ${jobId}`);
-
-      // Get video info for job creation
-      logger.info(`📝 Fetching video info for job: ${jobId}`);
-      const videoInfo = await this.apiService.getVideoInfo(request.url);
-      logger.info(`📝 Video title for job ${jobId}: ${videoInfo.title}`);
+      logger.info(`🎵 Creating conversion job for: ${request.url}`);
       
-      const { queryWithParams } = await import('../config/database');
-      await queryWithParams(
-        `INSERT INTO conversions (id, youtube_url, video_title, status, created_at, updated_at) 
-         VALUES ($1, $2, $3, 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-        [jobId, request.url, videoInfo.title]
-      );
-      
-      logger.info(`💾 Job ${jobId} created in database successfully`);
-      
-      // Start conversion process asynchronously
-      this.processConversion(jobId, request).catch(error => {
-        logger.error(`❌ Conversion failed for job ${jobId}:`, error);
-        this.updateJobStatus(jobId, 'failed', undefined, error.message);
-      });
-
-      logger.info(`🚀 Conversion process started for job: ${jobId}`);
-      return jobId;
+      const job = await this.convertToMp3(request);
+      return job.id;
     } catch (error) {
-      logger.error(`❌ Failed to create conversion job ${jobId}:`, error);
+      logger.error(`❌ Failed to create job: ${error}`);
       throw error;
     }
   }
 
   /**
-   * Process conversion using YouTube MP3 API
-   */
-  private async processConversion(jobId: string, request: ConversionRequest): Promise<void> {
-    try {
-      logger.info(`🔄 [Job ${jobId}] Updating status to processing`);
-      await this.updateJobStatus(jobId, 'processing');
-      
-      logger.info(`🎵 [Job ${jobId}] Starting conversion for URL: ${request.url}`);
-      logger.info(`🎵 [Job ${jobId}] Quality setting: ${request.quality || '192k'}`);
-      
-      // Convert using YouTube MP3 API - Direct download approach
-      const result = await this.apiService.convertToMp3(request.url, request.quality || '192k');
-      
-      if (!result.success) {
-        logger.error(`❌ [Job ${jobId}] API conversion failed: ${result.error}`);
-        throw new Error(result.error || 'Conversion failed');
-      }
-
-      // Generate filename from video ID for display purposes
-      const videoId = this.extractVideoId(request.url);
-      const filename = `${result.title || `video_${videoId}`}.mp3`;
-      
-      logger.info(`📁 [Job ${jobId}] Generated filename: ${filename}`);
-      logger.info(`🔗 [Job ${jobId}] Direct download URL: ${result.downloadUrl}`);
-      
-      // Download the file locally to the server's downloads folder
-      const localFilePath = path.join(this.downloadsDir, filename);
-      logger.info(`📥 [Job ${jobId}] Downloading file to local path: ${localFilePath}`);
-      
-      try {
-        if (result.downloadUrl) {
-          await this.downloadFileToLocal(result.downloadUrl, localFilePath);
-          logger.info(`✅ [Job ${jobId}] File downloaded successfully to: ${localFilePath}`);
-        } else {
-          throw new Error('No download URL available');
-        }
-        
-        // Store the local file path in the database
-        await this.updateJobStatus(jobId, 'completed', filename, undefined, undefined, undefined, localFilePath);
-        logger.info(`✅ [Job ${jobId}] Conversion completed successfully with local file`);
-      } catch (downloadError) {
-        logger.error(`❌ [Job ${jobId}] Failed to download file locally:`, downloadError);
-        // Fallback to direct download URL if local download fails
-        await this.updateJobStatus(jobId, 'completed', filename, undefined, undefined, result.downloadUrl);
-        logger.info(`⚠️ [Job ${jobId}] Fallback to direct download URL due to local download failure`);
-      }
-
-    } catch (error) {
-      logger.error(`❌ [Job ${jobId}] Conversion failed:`, error);
-      logTechnicalError(error, `Conversion Job ${jobId}`);
-      
-      let userFriendlyError = getUserFriendlyError(error);
-      
-      // Provide more specific error messages for common issues
-      if (error instanceof Error) {
-        if (error.message.includes('404')) {
-          userFriendlyError = 'This video could not be found. Please check the URL and try again.';
-          logger.warn(`🔍 [Job ${jobId}] Video not found (404 error)`);
-        } else if (error.message.includes('timeout')) {
-          userFriendlyError = 'The conversion timed out. Please try again.';
-          logger.warn(`⏰ [Job ${jobId}] Conversion timeout`);
-        } else if (error.message.includes('expired')) {
-          userFriendlyError = 'The download link has expired. Please try again.';
-          logger.warn(`⏰ [Job ${jobId}] Download link expired`);
-        } else if (error.message.includes('rate limit')) {
-          userFriendlyError = 'Too many requests. Please wait a moment and try again.';
-          logger.warn(`🚫 [Job ${jobId}] Rate limit exceeded`);
-        }
-      }
-      
-      logger.info(`📝 [Job ${jobId}] Updating status to failed with message: ${userFriendlyError}`);
-      await this.updateJobStatus(jobId, 'failed', undefined, userFriendlyError);
-    }
-  }
-
-  /**
-   * Get job status
-   */
-  async getJobStatus(jobId: string): Promise<ConversionJob | null> {
-    const database = await db;
-    
-    try {
-      const { queryWithParams } = await import('../config/database');
-      const result = await queryWithParams(
-        'SELECT * FROM conversions WHERE id = $1',
-        [jobId]
-      );
-      const jobData = result.rows?.[0];
-
-      if (!jobData) {
-        return null;
-      }
-
-      return {
-        id: jobData.id,
-        youtube_url: jobData.youtube_url,
-        video_title: jobData.video_title,
-        status: jobData.status,
-        progress: jobData.progress,
-        mp3_filename: jobData.mp3_filename,
-        error_message: jobData.error_message,
-        quality_message: jobData.quality_message,
-        direct_download_url: jobData.direct_download_url,
-        processed_path: jobData.processed_path, // Add missing processed_path field
-        created_at: new Date(jobData.created_at),
-        updated_at: new Date(jobData.updated_at)
-      };
-    } catch (error) {
-      logger.error('Failed to get job status:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Update job status
-   */
-  private async updateJobStatus(
-    jobId: string, 
-    status: string, 
-    mp3Filename?: string, 
-    errorMessage?: string,
-    qualityMessage?: string,
-    directDownloadUrl?: string,
-    localFilePath?: string
-  ): Promise<void> {
-    try {
-      // Use the unified query function that works with both SQLite and PostgreSQL
-      const { queryWithParams } = await import('../config/database');
-      
-      // Use database-agnostic query with proper parameter placeholders
-      await queryWithParams(
-        `UPDATE conversions 
-         SET status = $1, mp3_filename = $2, error_message = $3, quality_message = $4, direct_download_url = $5, processed_path = $6, updated_at = CURRENT_TIMESTAMP 
-         WHERE id = $7`,
-        [status, mp3Filename, errorMessage, qualityMessage, directDownloadUrl, localFilePath, jobId]
-      );
-      
-      logger.info(`📝 Updated job ${jobId} status to: ${status}${directDownloadUrl ? ' with download URL' : ''}${localFilePath ? ' with local file' : ''}`);
-    } catch (error) {
-      logger.error('Failed to update job status:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get job file path
-   */
-  async getJobFilePath(jobId: string): Promise<string | null> {
-    const job = await this.getJobStatus(jobId);
-    
-    if (!job || job.status !== 'completed' || !job.mp3_filename) {
-      return null;
-    }
-
-    const filePath = path.join(this.downloadsDir, job.mp3_filename);
-    
-    try {
-      await fs.access(filePath);
-      return filePath;
-    } catch (error) {
-      logger.error(`File not found for job ${jobId}:`, error);
-      return null;
-    }
-  }
-
-  /**
-   * Get video information
-   */
-  async getVideoInfo(url: string): Promise<VideoInfo> {
-    if (!this.apiService.isValidYouTubeUrl(url)) {
-      throw new Error('Invalid YouTube URL format');
-    }
-
-    return await this.apiService.getVideoInfo(url);
-  }
-
-  /**
-   * Refresh download URL for an existing job
+   * Refresh download URL for a job
    */
   async refreshDownloadUrl(jobId: string): Promise<string | null> {
     try {
-      const job = await this.getJobStatus(jobId);
-      if (!job || !job.youtube_url) {
-        logger.error(`❌ Cannot refresh download URL for job ${jobId}: job not found or no YouTube URL`);
-        return null;
-      }
-
-      if (job.status !== 'completed') {
-        logger.error(`❌ Cannot refresh download URL for job ${jobId}: job status is ${job.status}`);
-        return null;
-      }
-
       logger.info(`🔄 Refreshing download URL for job: ${jobId}`);
       
-      // Get a fresh download URL from the API
-      const result = await this.apiService.convertToMp3(job.youtube_url, '192k');
+      const job = await this.getJobStatus(jobId);
+      if (!job) {
+        logger.warn(`❌ Job not found: ${jobId}`);
+        return null;
+      }
+
+      if (job.status !== 'completed' || !job.mp3_filename) {
+        logger.warn(`❌ Job not completed or no file: ${jobId}`);
+        return null;
+      }
+
+      // Return the file path as download URL
+      const filePath = path.join(this.downloadsDir, job.mp3_filename);
       
-      if (result.success && result.downloadUrl) {
-        // Update the job with the new download URL
-        await this.updateJobStatus(jobId, 'completed', job.mp3_filename, undefined, undefined, result.downloadUrl);
-        logger.info(`✅ Successfully refreshed download URL for job: ${jobId}`);
-        return result.downloadUrl;
-      } else {
-        logger.error(`❌ Failed to get fresh download URL for job ${jobId}: ${result.error}`);
+      // Check if file exists
+      try {
+        await fs.access(filePath);
+        logger.info(`✅ Download URL refreshed for job: ${jobId}`);
+        return filePath;
+      } catch (error) {
+        logger.error(`❌ File not found: ${filePath}`);
         return null;
       }
     } catch (error) {
-      logger.error(`❌ Failed to refresh download URL for job ${jobId}:`, error);
+      logger.error(`❌ Failed to refresh download URL: ${error}`);
       return null;
     }
-  }
-
-  /**
-   * Cleanup old files (20 minutes = 1/3 hour)
-   */
-  async cleanupOldFiles(): Promise<void> {
-    const maxAgeMinutes = parseInt(process.env.MAX_FILE_AGE_MINUTES || '20');
-    const maxAgeMs = maxAgeMinutes * 60 * 1000;
-    const cutoffTime = new Date(Date.now() - maxAgeMs);
-
-    const database = await db;
-    
-    try {
-      const { queryWithParams } = await import('../config/database');
-      const result = await queryWithParams(
-        `SELECT id, mp3_filename FROM conversions 
-         WHERE status = 'completed' AND created_at < $1`,
-        [cutoffTime.toISOString()]
-      );
-      const rows = result.rows || [];
-
-      for (const row of rows) {
-        if (row.mp3_filename) {
-          const filePath = path.join(this.downloadsDir, row.mp3_filename);
-          
-          try {
-            await fs.promises.unlink(filePath);
-            logger.info(`Deleted old file: ${filePath}`);
-          } catch (error) {
-            logger.warn(`Failed to delete file ${filePath}:`, error);
-          }
-        }
-
-        await queryWithParams(
-          'UPDATE conversions SET status = $1 WHERE id = $2',
-          ['cleaned', row.id]
-        );
-      }
-
-      logger.info(`Cleanup completed. Processed ${rows.length} old jobs.`);
-    } catch (error) {
-      logger.error('Cleanup failed:', error);
-    }
-  }
-
-  /**
-   * Download file from external URL to local path
-   */
-  private async downloadFileToLocal(url: string, filePath: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const https = require('https');
-      const http = require('http');
-      const urlModule = require('url');
-      
-      const parsedUrl = urlModule.parse(url);
-      const isHttps = parsedUrl.protocol === 'https:';
-      const client = isHttps ? https : http;
-      
-      const file = require('fs').createWriteStream(filePath);
-      
-      const options = {
-        hostname: parsedUrl.hostname,
-        port: parsedUrl.port,
-        path: parsedUrl.path,
-        method: 'GET',
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': 'audio/mpeg, audio/*, */*',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Connection': 'keep-alive'
-        },
-        timeout: 60000 // 60 seconds timeout
-      };
-
-      const req = client.request(options, (res: any) => {
-        logger.info(`📡 Download response status: ${res.statusCode} for URL: ${url}`);
-        
-        if (res.statusCode === 404) {
-          file.close();
-          require('fs').unlink(filePath).catch(() => {}); // Clean up on error
-          reject(new Error(`Download failed with status: ${res.statusCode} - File not found. The download link may have expired.`));
-          return;
-        }
-        
-        if (res.statusCode !== 200) {
-          file.close();
-          require('fs').promises.unlink(filePath).catch(() => {}); // Clean up on error
-          reject(new Error(`Download failed with status: ${res.statusCode}`));
-          return;
-        }
-
-        res.pipe(file);
-
-        file.on('finish', () => {
-          file.close();
-          logger.info(`✅ File downloaded successfully: ${filePath}`);
-          resolve();
-        });
-
-        file.on('error', (error: Error) => {
-          logger.error(`File write error: ${error.message}`);
-          require('fs').promises.unlink(filePath).catch(() => {}); // Clean up on error
-          reject(error);
-        });
-      });
-
-      req.on('error', (error: Error) => {
-        logger.error(`Download request error: ${error.message}`);
-        reject(error);
-      });
-
-      req.on('timeout', () => {
-        logger.error(`Download timeout for URL: ${url}`);
-        req.destroy();
-        reject(new Error('Download timeout'));
-      });
-
-      req.end();
-    });
   }
 }
