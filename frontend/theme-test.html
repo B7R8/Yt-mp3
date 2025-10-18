@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Test</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --text-primary: #111827;
+            --bg-card: #ffffff;
+            --border-primary: #e5e7eb;
+        }
+        
+        .dark {
+            --bg-primary: #0f0f0f;
+            --text-primary: #f9fafb;
+            --bg-card: #1f2937;
+            --border-primary: #374151;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        button {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Theme Toggle Test</h1>
+    
+    <div class="card">
+        <h2>Current Theme: <span id="current-theme">light</span></h2>
+        <button onclick="toggleTheme()">Toggle Theme</button>
+        <button onclick="clearStorage()">Clear localStorage</button>
+    </div>
+    
+    <div class="card">
+        <h3>Test Content</h3>
+        <p>This is a test paragraph to see how the theme affects text and background colors.</p>
+        <p>All elements should change consistently when toggling between light and dark modes.</p>
+    </div>
+    
+    <div class="card">
+        <h3>localStorage Status</h3>
+        <p>Current theme in localStorage: <span id="storage-theme">light</span></p>
+        <p>Page will remember your theme preference after refresh!</p>
+    </div>
+
+    <script>
+        // Initialize theme
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+            updateDisplay();
+        }
+        
+        // Apply theme to DOM
+        function applyTheme(theme) {
+            document.documentElement.className = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+        
+        // Toggle theme
+        function toggleTheme() {
+            const currentTheme = document.documentElement.className;
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+            updateDisplay();
+        }
+        
+        // Update display
+        function updateDisplay() {
+            const currentTheme = document.documentElement.className;
+            document.getElementById('current-theme').textContent = currentTheme;
+            document.getElementById('storage-theme').textContent = localStorage.getItem('theme');
+        }
+        
+        // Clear localStorage
+        function clearStorage() {
+            localStorage.removeItem('theme');
+            applyTheme('light');
+            updateDisplay();
+        }
+        
+        // Initialize on load
+        initTheme();
+    </script>
+</body>
+</html>

@@ -470,29 +470,13 @@ class YouTubeMp3ApiService {
         });
     }
     /**
-     * Validate if a download URL is accessible
+     * Validate if a download URL is accessible - DISABLED for performance
      */
     async validateDownloadUrl(url) {
-        return new Promise((resolve) => {
-            const options = {
-                method: 'HEAD',
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Accept': 'audio/mpeg, audio/*, */*',
-                },
-                timeout: 10000
-            };
-            https_1.default.request(url, options, (response) => {
-                logger_1.default.info(`URL validation status: ${response.statusCode} for ${url}`);
-                resolve(response.statusCode === 200);
-            }).on('error', (error) => {
-                logger_1.default.warn(`URL validation failed: ${error.message}`);
-                resolve(false);
-            }).on('timeout', () => {
-                logger_1.default.warn(`URL validation timeout for ${url}`);
-                resolve(false);
-            }).end();
-        });
+        // URL validation disabled for better performance
+        // This was causing delays by making HEAD requests to validate each URL
+        logger_1.default.info(`URL validation skipped for performance: ${url}`);
+        return true;
     }
     /**
      * Download file from URL to local path with retry logic

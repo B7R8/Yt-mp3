@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Persistence Test</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --text-primary: #111827;
+            --bg-card: #ffffff;
+            --border-primary: #e5e7eb;
+        }
+        
+        .dark {
+            --bg-primary: #0f0f0f;
+            --text-primary: #f9fafb;
+            --bg-card: #1f2937;
+            --border-primary: #374151;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        button {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        button:hover {
+            opacity: 0.8;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .dark .success {
+            background-color: #064e3b;
+            color: #a7f3d0;
+            border: 1px solid #065f46;
+        }
+        
+        .info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        
+        .dark .info {
+            background-color: #1e3a8a;
+            color: #93c5fd;
+            border: 1px solid #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Theme Persistence Test</h1>
+    
+    <div class="card">
+        <h2>Current Status</h2>
+        <div class="status info">
+            <strong>Current Theme:</strong> <span id="current-theme">loading...</span><br>
+            <strong>localStorage:</strong> <span id="storage-theme">loading...</span><br>
+            <strong>DOM Class:</strong> <span id="dom-theme">loading...</span>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>Test Actions</h2>
+        <button onclick="toggleTheme()">🔄 Toggle Theme</button>
+        <button onclick="setLight()">☀️ Force Light Mode</button>
+        <button onclick="setDark()">🌙 Force Dark Mode</button>
+        <button onclick="clearStorage()">🗑️ Clear localStorage</button>
+        <button onclick="refreshPage()">🔄 Refresh Page</button>
+    </div>
+    
+    <div class="card">
+        <h2>Persistence Test</h2>
+        <div class="status success">
+            <strong>✅ Test Steps:</strong><br>
+            1. Click "Toggle Theme" to switch to dark mode<br>
+            2. Click "Refresh Page" - should stay in dark mode<br>
+            3. Click "Toggle Theme" to switch to light mode<br>
+            4. Click "Refresh Page" - should stay in light mode<br>
+            5. Close browser tab and reopen - should remember your choice!
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>Test Content</h2>
+        <p>This content should change colors when you toggle between light and dark modes.</p>
+        <p>All elements should maintain their theme after page refresh and browser restart.</p>
+        <p><strong>Expected behavior:</strong> Theme preference should persist across all sessions!</p>
+    </div>
+
+    <script>
+        // Initialize theme from localStorage
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+            updateDisplay();
+        }
+        
+        // Apply theme to DOM
+        function applyTheme(theme) {
+            document.documentElement.className = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+        
+        // Toggle theme
+        function toggleTheme() {
+            const currentTheme = document.documentElement.className;
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+            updateDisplay();
+        }
+        
+        // Set specific themes
+        function setLight() {
+            applyTheme('light');
+            updateDisplay();
+        }
+        
+        function setDark() {
+            applyTheme('dark');
+            updateDisplay();
+        }
+        
+        // Clear localStorage
+        function clearStorage() {
+            localStorage.removeItem('theme');
+            applyTheme('light');
+            updateDisplay();
+        }
+        
+        // Refresh page
+        function refreshPage() {
+            window.location.reload();
+        }
+        
+        // Update display
+        function updateDisplay() {
+            const currentTheme = document.documentElement.className;
+            const storageTheme = localStorage.getItem('theme');
+            const domTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            
+            document.getElementById('current-theme').textContent = currentTheme;
+            document.getElementById('storage-theme').textContent = storageTheme || 'none';
+            document.getElementById('dom-theme').textContent = domTheme;
+        }
+        
+        // Initialize on load
+        initTheme();
+        
+        // Log theme changes for debugging
+        console.log('Theme persistence test loaded');
+        console.log('Current theme:', document.documentElement.className);
+        console.log('localStorage theme:', localStorage.getItem('theme'));
+    </script>
+</body>
+</html>

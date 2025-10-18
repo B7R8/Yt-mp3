@@ -335,7 +335,7 @@ const CryptoDonation: React.FC<CryptoDonationProps> = ({ navigateTo }) => {
           </h3>
           <div className="bg-gray-50 dark:bg-[#3a3a3a] rounded-lg p-4 mb-4">
             <p className="text-sm text-gray-900 dark:text-white font-mono">
-              {secureConfig?.binance?.userId || 'Binance ID not configured'}
+              {secureConfig?.binance?.userId || '555991639'}
             </p>
           </div>
           <button

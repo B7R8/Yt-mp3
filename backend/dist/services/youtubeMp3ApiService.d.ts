@@ -59,7 +59,7 @@ export declare class YouTubeMp3ApiService {
      */
     private getDownloadLink;
     /**
-     * Validate if a download URL is accessible
+     * Validate if a download URL is accessible - DISABLED for performance
      */
     private validateDownloadUrl;
     /**

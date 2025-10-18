@@ -17,7 +17,7 @@ const Home: React.FC<HomeProps> = ({ showToast, navigateTo }) => {
           YouTube to MP3
         </h1>
         <p className="max-w-2xl mx-auto text-base sm:text-sm md:text-sm text-gray-600 dark:text-gray-300 mb-10 px-4 leading-relaxed">
-          ⭐ Free YouTube to MP3 converter - Download high-quality MP3 audio instantly. Convert YouTube to MP3, YT to MP3 without registration.
+          ⭐ Youtube to MP3 Converter (Ad-free)
         </p>
         <Converter showToast={showToast} />
       </section>

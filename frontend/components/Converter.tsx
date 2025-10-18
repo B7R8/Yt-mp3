@@ -312,7 +312,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
                   // Use the hidden anchor tag download method
                   downloadFile(job.id, job.title || 'converted');
                 }}
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-black rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-xs sm:text-sm w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-black rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors duration-300 text-sm sm:text-sm md:text-xs w-full sm:w-auto"
               >
                 <DownloadIcon className="w-5 h-5" />
                 Download MP3
@@ -320,7 +320,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               
               <button
                 onClick={() => window.open('https://ko-fi.com/saveytb', '_blank')}
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#41484B] transition-colors duration-300 text-xs sm:text-sm w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#41484B] transition-colors duration-300 text-sm sm:text-sm md:text-xs w-full sm:w-auto"
                 style={{ backgroundColor: '#ff5f5f' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#ff4a4a'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ff5f5f'}
@@ -331,7 +331,7 @@ const Converter: React.FC<ConverterProps> = ({ showToast }) => {
               
               <button 
                 onClick={resetConverter} 
-                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-gray-600 dark:bg-[#2d2d2d] rounded-lg shadow-md hover:bg-gray-700 dark:hover:bg-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-[#2d2d2d] transition-colors duration-300 text-xs sm:text-sm w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 font-semibold text-white bg-gray-600 dark:bg-[#2d2d2d] rounded-lg shadow-md hover:bg-gray-700 dark:hover:bg-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-[#2d2d2d] transition-colors duration-300 text-sm sm:text-sm md:text-xs w-full sm:w-auto"
               >
                 <AutorenewIcon className="w-5 h-5" />
                 Convert Next

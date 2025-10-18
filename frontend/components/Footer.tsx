@@ -49,10 +49,10 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
           <div className="text-center md:text-left">
             <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Quick Links</h4>
             <div className="space-y-2">
-              <button onClick={() => navigateTo('faqs')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors">FAQs</button>
-              <button onClick={() => navigateTo('contact')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors">Contact</button>
-              <button onClick={() => navigateTo('changelog')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors">Changelog</button>
-              <button onClick={() => navigateTo('support-us')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors">Support Us</button>
+              <button onClick={() => navigateTo('faqs')} className="block text-sm md:text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors py-1 md:py-0">FAQs</button>
+              <button onClick={() => navigateTo('contact')} className="block text-sm md:text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors py-1 md:py-0">Contact</button>
+              <button onClick={() => navigateTo('changelog')} className="block text-sm md:text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors py-1 md:py-0">Changelog</button>
+              <button onClick={() => navigateTo('support-us')} className="block text-sm md:text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors py-1 md:py-0">Support Us</button>
             </div>
           </div>
 
@@ -60,9 +60,9 @@ const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
           <div className="text-center md:text-left">
             <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Legal</h4>
             <div className="space-y-2">
-              <button onClick={() => navigateTo('terms')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors">Terms of Use</button>
-              <button onClick={() => navigateTo('privacy')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors">Privacy Policy</button>
-              <button onClick={() => navigateTo('copyright')} className="block text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors">Copyright</button>
+              <button onClick={() => navigateTo('terms')} className="block text-sm md:text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors py-1 md:py-0">Terms of Use</button>
+              <button onClick={() => navigateTo('privacy')} className="block text-sm md:text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors py-1 md:py-0">Privacy Policy</button>
+              <button onClick={() => navigateTo('copyright')} className="block text-sm md:text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors py-1 md:py-0">Copyright</button>
             </div>
           </div>
         </div>
